@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Configuration Files
+EspapMiddleware.ConsoleApp/App.config
+EspapMiddleware.WcfService/Web.config
+EspapMiddleware.WcfService/Web.Debug.config
+EspapMiddleware.WcfService/Web.Release.config
+
 # User-specific files
 *.rsuser
 *.suo
