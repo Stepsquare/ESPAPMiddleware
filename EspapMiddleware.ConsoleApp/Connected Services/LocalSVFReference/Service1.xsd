@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd4" namespace="urn:ElectronicInvoice.B2BClientOperations" />
+  <xs:element xmlns:q1="urn:ElectronicInvoice.B2BClientOperations" name="SetDocumentResultMCIn" nillable="true" type="q1:SetDocumentResultContract" />
+</xs:schema>

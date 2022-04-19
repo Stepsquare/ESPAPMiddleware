@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32106.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.DataLayer", "EspapMiddleware.DataLayer\EspapMiddleware.DataLayer.csproj", "{36D4172D-84E2-4661-82F5-6E2B2BD66C1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.ServiceLayer", "EspapMiddleware.ServiceLayer\EspapMiddleware.ServiceLayer.csproj", "{D075DF67-C40D-4F2F-94BA-A50A5291700B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.ConsoleApp", "EspapMiddleware.ConsoleApp\EspapMiddleware.ConsoleApp.csproj", "{1A67CDF9-BD2C-4F33-BD75-227B1DA87672}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B} = {E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.Shared", "EspapMiddleware.Shared\EspapMiddleware.Shared.csproj", "{6D3BC2F4-78BF-4BB5-9EE2-55748017191E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.WcfService", "EspapMiddleware.WcfService\EspapMiddleware.WcfService.csproj", "{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{36D4172D-84E2-4661-82F5-6E2B2BD66C1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36D4172D-84E2-4661-82F5-6E2B2BD66C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36D4172D-84E2-4661-82F5-6E2B2BD66C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36D4172D-84E2-4661-82F5-6E2B2BD66C1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D075DF67-C40D-4F2F-94BA-A50A5291700B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D075DF67-C40D-4F2F-94BA-A50A5291700B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D075DF67-C40D-4F2F-94BA-A50A5291700B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D075DF67-C40D-4F2F-94BA-A50A5291700B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A67CDF9-BD2C-4F33-BD75-227B1DA87672}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A67CDF9-BD2C-4F33-BD75-227B1DA87672}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A67CDF9-BD2C-4F33-BD75-227B1DA87672}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A67CDF9-BD2C-4F33-BD75-227B1DA87672}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D3BC2F4-78BF-4BB5-9EE2-55748017191E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D3BC2F4-78BF-4BB5-9EE2-55748017191E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D3BC2F4-78BF-4BB5-9EE2-55748017191E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3BC2F4-78BF-4BB5-9EE2-55748017191E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {10F74AA1-0BF2-4712-8B5E-54693F19710B}
+	EndGlobalSection
+EndGlobal

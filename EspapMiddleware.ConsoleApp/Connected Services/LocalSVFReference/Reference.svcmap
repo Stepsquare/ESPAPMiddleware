@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="bd2e443e-3c1c-4b15-aaf2-20c25fb5d6b0" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost/EspapMiddleware.WcfService/Service.svc?wsdl" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="Service.wsdl" MetadataType="Wsdl" ID="1f243df3-4fd6-4d64-93a7-db7524292ca3" SourceId="1" SourceUrl="http://localhost/EspapMiddleware.WcfService/Service.svc?wsdl" />
+    <MetadataFile FileName="Service.xsd" MetadataType="Schema" ID="140be1f0-8bdd-4044-b6bf-452118fb7fc2" SourceId="1" SourceUrl="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd0" />
+    <MetadataFile FileName="Service1.xsd" MetadataType="Schema" ID="077a5093-6868-415d-bb5f-66472b13036d" SourceId="1" SourceUrl="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd5" />
+    <MetadataFile FileName="Service2.xsd" MetadataType="Schema" ID="a62cac65-0b56-43ed-aa52-96a5cbb77d92" SourceId="1" SourceUrl="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd2" />
+    <MetadataFile FileName="Service3.xsd" MetadataType="Schema" ID="808c7275-b68f-48e6-9a6d-bbff55952fd9" SourceId="1" SourceUrl="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd1" />
+    <MetadataFile FileName="Service4.xsd" MetadataType="Schema" ID="e442b6d4-61a3-47aa-9dc8-c2c609fff3a2" SourceId="1" SourceUrl="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd3" />
+    <MetadataFile FileName="Service5.xsd" MetadataType="Schema" ID="e90c92bf-0ee5-4aa2-8ba9-a0e431056c2c" SourceId="1" SourceUrl="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd4" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

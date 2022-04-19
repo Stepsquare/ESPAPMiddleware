@@ -1,0 +1,1415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="urn:eSPap.Integration" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="FEAPServices" targetNamespace="urn:eSPap.Integration" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsp:Policy wsu:Id="WSHttpBinding_FEAPServices_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <http:BasicAuthentication xmlns:http="http://schemas.microsoft.com/ws/06/2004/policy/http" />
+        <sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <wsp:Policy>
+            <sp:TransportToken>
+              <wsp:Policy>
+                <sp:HttpsToken RequireClientCertificate="false" />
+              </wsp:Policy>
+            </sp:TransportToken>
+            <sp:AlgorithmSuite>
+              <wsp:Policy>
+                <sp:Basic256 />
+              </wsp:Policy>
+            </sp:AlgorithmSuite>
+            <sp:Layout>
+              <wsp:Policy>
+                <sp:Strict />
+              </wsp:Policy>
+            </sp:Layout>
+          </wsp:Policy>
+        </sp:TransportBinding>
+        <wsam:Addressing>
+          <wsp:Policy>
+            <wsam:AnonymousResponses />
+          </wsp:Policy>
+        </wsam:Addressing>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsdl:types>
+    <xs:schema xmlns:tns="urn:eSPap.Integration/Imports" targetNamespace="urn:eSPap.Integration/Imports" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:import namespace="urn:ElectronicInvoice.Objects.Documents.Operations" />
+      <xs:import namespace="urn:ElectronicInvoiceService" />
+      <xs:import namespace="http://schemas.datacontract.org/2004/07/eSPap.ElectronicInvoiceService.FaultContracts" />
+      <xs:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xs:import namespace="urn:B2BServices" />
+      <xs:import namespace="http://schemas.datacontract.org/2004/07/GeRAP.Common.Exception.SAPIntegration" />
+      <xs:import namespace="urn:eSPap.Integration.BTS.Operations" />
+      <xs:import namespace="urn:eSPap.Faults" />
+      <xs:import namespace="urn:ElectronicInvoice.Objects.Documents.Outbound" />
+      <xs:import namespace="urn:SAPIntegrationObjects.PurchaseOrder" />
+      <xs:import namespace="urn:SAPIntegrationObjects.CommitmentCollection" />
+      <xs:import namespace="urn:SAPIntegrationObjects.CommitmentInputCollection" />
+      <xs:import namespace="urn:SAPIntegrationObjects.MaterialCollection" />
+      <xs:import namespace="urn:SAPIntegrationObjects.Material" />
+      <xs:import namespace="urn:SAPIntegrationObjects.PaymentConditionCollection" />
+      <xs:import namespace="urn:SAPIntegrationObjects.PaymentCondition" />
+      <xs:import namespace="http://schemas.datacontract.org/2004/07/GeRAP.Services.GerfipSequenceProxyService.MessageObjects" />
+      <xs:import namespace="urn:eSPap.Services.GSE.ServiceContext" />
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:B2BServices" elementFormDefault="qualified" targetNamespace="urn:B2BServices" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:import namespace="urn:SAPIntegrationObjects.PurchaseOrder" />
+      <xs:import namespace="urn:SAPIntegrationObjects.CommitmentCollection" />
+      <xs:import namespace="urn:SAPIntegrationObjects.CommitmentInputCollection" />
+      <xs:import namespace="urn:SAPIntegrationObjects.MaterialCollection" />
+      <xs:import namespace="urn:SAPIntegrationObjects.PaymentConditionCollection" />
+      <xs:element name="CommitmentSearchMCIn">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="SupplierNIF" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="EntityNIF" nillable="true" type="xs:string" />
+            <xs:element xmlns:q10="urn:SAPIntegrationObjects.PurchaseOrder" minOccurs="0" name="PurchaseOrderNumbers" nillable="true" type="q10:SimplePurchaseOrderNumberCollection" />
+            <xs:element minOccurs="0" name="Contract" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="CommitmentNumber" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CommitmentSearchMCOut">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element xmlns:q11="urn:SAPIntegrationObjects.CommitmentCollection" minOccurs="0" name="Commitments" nillable="true" type="q11:CommitmentOutputCollection" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PurchaseOrderSearchMCIn">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="SupplierNIF" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="EntityNIF" nillable="true" type="xs:string" />
+            <xs:element xmlns:q12="urn:SAPIntegrationObjects.CommitmentInputCollection" minOccurs="0" name="CommitmentNumber" nillable="true" type="q12:CommitmentInputCollection" />
+            <xs:element minOccurs="0" name="Contract" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="PurchaseOrderNumber" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PurchaseOrderSearchMCOut">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element xmlns:q13="urn:SAPIntegrationObjects.PurchaseOrder" minOccurs="0" name="PurchaseOrders" nillable="true" type="q13:SimplePurchaseOrderCollection" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="MaterialListByPurchaseOrderMCIn">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="EntityNIF" nillable="true" type="xs:string" />
+            <xs:element xmlns:q14="urn:SAPIntegrationObjects.PurchaseOrder" minOccurs="0" name="PurchaseOrders" nillable="true" type="q14:SimplePurchaseOrderNumberCollection" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="MaterialListByPurchaseOrderMCOut">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element xmlns:q15="urn:SAPIntegrationObjects.MaterialCollection" minOccurs="0" name="Materials" nillable="true" type="q15:SimpleMaterialCollection" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PaymentConditionListMCIn">
+        <xs:complexType>
+          <xs:sequence />
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PaymentConditionListMCIOut">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element xmlns:q16="urn:SAPIntegrationObjects.PaymentConditionCollection" minOccurs="0" name="PaymentConditions" nillable="true" type="q16:PaymentConditionCollection" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:ElectronicInvoice.Objects.Documents.Operations" targetNamespace="urn:ElectronicInvoice.Objects.Documents.Operations" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="SetDocumentRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="uniqueId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="documentId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="referenceNumber" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="documentType" nillable="true" type="xs:int" />
+            <xs:element minOccurs="0" name="issueDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="supplierFiscalId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="customerFiscalId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="internalManagement" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="internalManagementSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="internalManagementUsername" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="internalManagementUsernameSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="comments" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="addAttachments" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" maxOccurs="unbounded" name="AddAttachment" nillable="true">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element minOccurs="0" name="MimeCode" nillable="true" type="xs:string" />
+                        <xs:element minOccurs="0" name="Base64Data" nillable="true" type="xs:string" />
+                        <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+                      </xs:sequence>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" name="reason" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="stateId" nillable="true" type="xs:int" />
+            <xs:element minOccurs="0" name="documentNumbers" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="xs:string" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" name="documentNumbersSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="logisticDocumentNumbers" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="xs:string" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" name="logisticDocumentNumbersSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="supplierCode" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="supplierCodeSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="paymentSupplierFiscalId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="paymentSupplierFiscalIdSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="purchaseOrder" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="purchaseOrderSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="commitment" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="commitmentSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="postingDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="postingDateSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="paymentIssuedReference" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="paymentIssuedReferenceSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="paymentIssuedDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="paymentIssuedDateSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="paymentReference" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="paymentReferenceSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="paymentAmountDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="paymentAmountDateSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="chargeType" nillable="true" type="xs:int" />
+            <xs:element minOccurs="0" name="chargeTypeSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="chargeAmount" nillable="true" type="xs:decimal" />
+            <xs:element minOccurs="0" name="chargeAmountSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="chargeDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="chargeDateSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="chargeRegistrationDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="chargeRegistrationDateSpecified" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="actionId" nillable="true" type="xs:int" />
+            <xs:element minOccurs="0" name="sender" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="to" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="cc" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="subject" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="withAttach" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="message" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="regularization" nillable="true" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetDocumentsInfoRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="1" name="correlationId" type="xs:string" />
+            <xs:element minOccurs="1" name="requestingEntityVAT" type="xs:string" />
+            <xs:element minOccurs="0" name="stateIds" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" maxOccurs="unbounded" name="int" type="xs:int" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" name="actionIds" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" maxOccurs="unbounded" name="int" type="xs:int" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" name="documentIds" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="xs:string" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" name="stateDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="creationDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="issueDate" nillable="true" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="issueYear" nillable="true" type="xs:int" />
+            <xs:element minOccurs="0" name="supplierNif" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="customerNif" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="paging" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" name="numRecordByPage" nillable="true" type="xs:int" />
+                  <xs:element minOccurs="0" name="pageNumber" nillable="true" type="xs:int" />
+                  <xs:element name="sortOrder" type="tns:SortOrder" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:simpleType name="SortOrder">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Asc" />
+          <xs:enumeration value="Desc" />
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="SetOperationResultMCIn">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="uniqueId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="documentId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="isASuccess" type="xs:boolean" />
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="messages" nillable="true" type="tns:message" />
+            <xs:element minOccurs="0" name="operationId" type="xs:int" />
+            <xs:element minOccurs="0" name="documentNumbers" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="xs:string" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" name="logisticDocumentNumbers" nillable="true">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="xs:string" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="message">
+        <xs:sequence>
+          <xs:element name="typeId" type="xs:int" />
+          <xs:element minOccurs="0" name="systemId" nillable="true">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:maxLength value="1000" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:element>
+          <xs:element minOccurs="0" name="code" nillable="true">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:maxLength value="1000" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:element>
+          <xs:element minOccurs="0" name="description" nillable="true">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:maxLength value="2000" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:ElectronicInvoice.Objects.Documents.Outbound" targetNamespace="urn:ElectronicInvoice.Objects.Documents.Outbound" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="SendElectronicInvoice">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="UBLInfo" nillable="true" type="tns:UBLInfo" />
+            <xs:element minOccurs="1" name="Header" nillable="true" type="tns:Header" />
+            <xs:element minOccurs="0" name="BrokerData" nillable="true" type="tns:BrokerData" />
+            <xs:element minOccurs="0" name="Notes" nillable="true" type="tns:NoteCollection" />
+            <xs:element minOccurs="0" name="InvoicePeriod" nillable="true" type="tns:Period" />
+            <xs:element minOccurs="0" name="ExchangeRateData" nillable="true" type="tns:ExchangeRate" />
+            <xs:element minOccurs="0" name="PaymentData" nillable="true" type="tns:PaymentData" />
+            <xs:element minOccurs="0" name="SupplierData" nillable="true" type="tns:SupplierData" />
+            <xs:element minOccurs="0" name="CustomerData" nillable="true" type="tns:CustomerData" />
+            <xs:element minOccurs="0" name="PayeeData" nillable="true" type="tns:PayeeData" />
+            <xs:element minOccurs="0" name="DeliveryLocations" nillable="true" type="tns:DeliveryLocationCollection" />
+            <xs:element minOccurs="0" name="AllowanceChargeList" nillable="true" type="tns:AllowanceChargeCollection" />
+            <xs:element minOccurs="0" name="InvoiceLines" nillable="true" type="tns:InvoiceLineCollection" />
+            <xs:element minOccurs="0" name="TaxTotal" nillable="true" type="tns:TaxTotal" />
+            <xs:element minOccurs="0" name="WithholdingTaxTotal" nillable="true" type="tns:WithHoldingTaxTotal" />
+            <xs:element minOccurs="0" name="LegalMonetaryTotals" nillable="true" type="tns:LegalMonetaryTotals" />
+            <xs:element minOccurs="0" name="Attachments" nillable="true" type="tns:AttachmentCollection" />
+            <xs:element minOccurs="0" name="BillingReferences" nillable="true" type="tns:BillingReferenceCollection" />
+            <xs:element minOccurs="0" name="ConsentDisclaimers" nillable="true" type="tns:ConsentDisclaimerCollection" />
+            <xs:element minOccurs="0" name="Signature" nillable="true" type="tns:Signature" />
+            <xs:element minOccurs="0" name="SignPdf" nillable="true" type="xs:boolean" />
+            <xs:element minOccurs="0" name="TaxRepresentativeData" nillable="true" type="tns:TaxRepresentativeData" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="UBLInfo">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="UUID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="UBLVersion" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CustomizationId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ProfileId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="DocumentTypeCode" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Header">
+        <xs:sequence>
+          <xs:element minOccurs="1" name="DocumentId" type="xs:string" />
+          <xs:element minOccurs="0" name="DocumentType" type="xs:string" />
+          <xs:element minOccurs="0" name="CompanyCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ResponsibilityCenter" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="RelatedDocumentId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="RelatedReferenceNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="LogisticsDocumentNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="DocumentNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CurrencyCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="IsCopy" nillable="true" type="xs:boolean" />
+          <xs:element minOccurs="0" name="IssueDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="DueDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="ReceptionDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="DocumentDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="PostingDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="LineCount" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="ApprovalProcessId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PurchaseOrderNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Contract" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FrameworkAgreement" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Commitment" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CommitmentEndDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="DiscrepancyDescription" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="DueDateOrg" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="FinancialCenter" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ATCertifiedProgram" nillable="true" type="tns:ATCertifiedProgram" />
+          <xs:element minOccurs="0" name="AdditionalItemPropertyCollection" nillable="true" type="tns:AdditionalItemPropertyCollection" />
+          <xs:element minOccurs="0" name="TaxPointDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="TaxCurrencyCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="SalesOrderNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="DespatchDocumentReferenceId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ReceiptDocumentReferenceId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ProjectReferenceId" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ATCertifiedProgram">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Number" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="HashCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="AdditionalItemPropertyCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="AdditionalItemProperty" nillable="true" type="tns:AdditionalItemProperty" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="AdditionalItemProperty">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="InvoiceLineId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Value" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="BrokerData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="InputType" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ReceivedDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="DestinationEmail" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="NoteCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Note" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Period">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="StartDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="EndDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="DescriptionCode" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ExchangeRate">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Rate" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="CurrencyCode" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PaymentData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="PaymentTerms" nillable="true" type="tns:PaymentTermsCollection" />
+          <xs:element minOccurs="0" name="PaymentMeans" nillable="true" type="tns:PaymentMeansCollection" />
+          <xs:element minOccurs="0" name="ATMPaymentsList" nillable="true" type="tns:ATMPaymentCollection" />
+          <xs:element minOccurs="0" name="DUCPayment" nillable="true" type="tns:DUCPayment" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PaymentTermsCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="PaymentTerms" nillable="true" type="tns:PaymentTerms" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PaymentTerms">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="TermsId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="TermsNote" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PaymentDueDate" nillable="true" type="xs:dateTime" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PaymentMeansCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="PaymentMeans" nillable="true" type="tns:PaymentMeans" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PaymentMeans">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Code" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PaymentChannel" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="BankIdentification" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="BankAccount" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PartnerBankCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PaymentDueDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="PrimaryAccountNumberID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="NetworkID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="HolderName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PaymentMandateId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PayerFinancialAccountId" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ATMPaymentCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="ATMPayment" nillable="true" type="tns:ATMPayment" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ATMPayment">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Entity" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Reference" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Amount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="DUCPayment">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Reference" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Amount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="OpticalLine" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="SupplierData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="SupplierCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FiscalId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Address" nillable="true" type="tns:Address" />
+          <xs:element minOccurs="0" name="Contact" nillable="true" type="tns:Contact" />
+          <xs:element minOccurs="0" name="CustomerAssignedAccountID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="TaxScheme" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CompanyId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CorporateStockAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="EndpointID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="RegistrationName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CompanyLegalForm" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Identifications" type="tns:Identification" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Address">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="StreetLine1" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="StreetLine2" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="City" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PostalZone" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Region" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CountryCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Line" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Contact">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Phone" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Email" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Identification">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Id" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="IdentificationId" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="CustomerData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FiscalId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Address" nillable="true" type="tns:Address" />
+          <xs:element minOccurs="0" name="Contact" nillable="true" type="tns:Contact" />
+          <xs:element minOccurs="0" name="TaxScheme" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="EndpointID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="RegistrationName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ConservatoryRegistration" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Identifications" type="tns:Identification" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PayeeData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FiscalId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="TaxScheme" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Address" nillable="true" type="tns:Address" />
+          <xs:element minOccurs="0" name="Contact" nillable="true" type="tns:Contact" />
+          <xs:element minOccurs="0" name="IdentificationId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="LegalEntityId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="FinancialAccounts" type="tns:FinancialAccount" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="FinancialAccount">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Id" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="AccountId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="DeliveryLocationCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="DeliveryLocation" nillable="true" type="tns:DeliveryLocation" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="DeliveryLocation">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="LocationId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Number" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Address" nillable="true" type="tns:Address" />
+          <xs:element minOccurs="0" name="DeliveryLocationType" nillable="true" type="tns:DeliveryLocationType" />
+          <xs:element minOccurs="0" name="ActualDeliveryDate" nillable="true" type="xs:dateTime" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="DeliveryLocationType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="DeliveryLocation">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">1</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+          <xs:enumeration value="PhysicalLocation">
+            <xs:annotation>
+              <xs:appinfo>
+                <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">2</EnumerationValue>
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:enumeration>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:complexType name="AllowanceChargeCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="AllowanceCharge" nillable="true" type="tns:AllowanceCharge" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="AllowanceCharge">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Reason" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Amount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxPercent" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="TaxScheme" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="BaseAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="MultiplierFactor" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="ActionIndicator" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ExemptionReason" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ExemptionReasonCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="AdditionalItems" nillable="true" type="tns:AdditionalItemPropertyCollection" />
+          <xs:element minOccurs="0" name="ChargeIndicator" nillable="true" type="xs:boolean" />
+          <xs:element minOccurs="0" name="ReasonCode" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="InvoiceLineCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="InvoiceLine" nillable="true" type="tns:InvoiceLine" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="InvoiceLine">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="SupllierLineId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Note" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Quantity" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="QuantityUnitCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ResponsabilityCenter" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="NetAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="InvoicePeriod" nillable="true" type="tns:Period" />
+          <xs:element minOccurs="0" name="PurchaseOrder" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PurchaseOrderItem" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Commitment" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CommitmentItem" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="IsGoods" nillable="true" type="xs:boolean" />
+          <xs:element minOccurs="0" name="HasServiceConfirmation" nillable="true" type="xs:boolean" />
+          <xs:element minOccurs="0" name="Item" nillable="true" type="tns:Item" />
+          <xs:element minOccurs="0" name="TaxTotal" nillable="true" type="tns:TaxTotal" />
+          <xs:element minOccurs="0" name="UnitPrice" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="BaseQuantity" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="UnitType" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CostCenter" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CostAggregator" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="GlAccount" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PayableAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="AllowanceChargeData" nillable="true" type="tns:AllowanceChargeCollection" />
+          <xs:element minOccurs="0" name="AssetData" nillable="true" type="tns:AssetCollection" />
+          <xs:element minOccurs="0" name="CostSharingData" nillable="true" type="tns:CostSharingCollection" />
+          <xs:element minOccurs="0" name="LineBillingReferences" nillable="true" type="tns:LineBillingReferenceCollection" />
+          <xs:element minOccurs="0" name="AdditionalItemPropertyCollection" nillable="true" type="tns:AdditionalItemPropertyCollection" />
+          <xs:element minOccurs="0" name="PriceAllowanceCharges" nillable="true" type="tns:PriceAllowanceChargeCollection" />
+          <xs:element minOccurs="0" name="AccountingCost" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="DocumentReferenceId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="OriginCountryCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CUTEData" nillable="true" type="tns:CUTEData" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Item">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="InternalItemId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="SupplierItemId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="StandardItemId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="StandardItemTypeCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CommodityCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CpvCode" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TaxTotal">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="TaxAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxSubTotals" nillable="true" type="tns:TaxSubTotalCollection" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TaxSubTotalCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="TaxSubTotal" nillable="true" type="tns:TaxSubTotal" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TaxSubTotal">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="BaseAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="TaxPercent" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxType" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ExemptionReason" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ExemptionReasonCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="TaxScheme" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="AssetCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Asset" nillable="true" type="tns:Asset" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Asset">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Number" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="SubNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Quantity" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="CostSharingCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="CostSharing" nillable="true" type="tns:CostSharing" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="CostSharing">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="ShareAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="CostCenter" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CostAggregator" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CostClass" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="LineBillingReferenceCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="LineBillingReference" nillable="true" type="tns:LineBillingReference" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="LineBillingReference">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="BillingReferenceId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="UblDocumentTypeCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ReferenceNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="LineId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Amount" nillable="true" type="xs:decimal" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PriceAllowanceChargeCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="PriceAllowanceCharge" nillable="true" type="tns:PriceAllowanceCharge" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PriceAllowanceCharge">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="ChargeIndicator" type="xs:boolean" />
+          <xs:element minOccurs="0" name="Amount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="BaseAmount" nillable="true" type="xs:decimal" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="CUTEData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="CatalogId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="SubId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Organic" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FundingSource" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="SalesOrder" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FinancialItem" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FinancialCenter" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Funds" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FunctionalArea" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="BudgetProgram" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="WithHoldingTaxTotal">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="RetainAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="WithholdingTaxSubTotals" nillable="true" type="tns:WithHoldingTaxSubTotalCollection" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="WithHoldingTaxSubTotalCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="WithHoldingTaxSubTotal" nillable="true" type="tns:WithHoldingTaxSubTotal" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="WithHoldingTaxSubTotal">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="BaseAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="RetainAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="Percent" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="Category" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Code" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="TaxAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxScheme" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CategoryInfo" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CodeInfo" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="LegalMonetaryTotals">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="LineExtensionAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxExclusiveAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="TaxInclusiveAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="AllowanceTotalAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="ChargeTotalAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="PayableRoundingAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="PrepaidAmount" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="PayableAmount" nillable="true" type="xs:decimal" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="AttachmentCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Attachment" nillable="true" type="tns:Attachment" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Attachment">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="AttachmentId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Type" nillable="true" type="xs:int" />
+          <xs:element minOccurs="0" name="MimeCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Uri" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Base64Data" nillable="true" type="xs:base64Binary" />
+          <xs:element minOccurs="0" name="TypeCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="BillingReferenceCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="BillingReference" nillable="true" type="tns:BillingReference" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="BillingReference">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="BillingReferenceId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="DocumentType" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="UblDocumentTypeCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ReferenceNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="IsCopy" nillable="true" type="xs:boolean" />
+          <xs:element minOccurs="0" name="IssueDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ValidityStartDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="ValidityEndDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="MimeCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Uri" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Base64Data" nillable="true" type="xs:base64Binary" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ConsentDisclaimerCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="ConsentDisclaimer" nillable="true" type="tns:ConsentDisclaimer" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ConsentDisclaimer">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="ConsentIndicator" nillable="true" type="xs:boolean" />
+          <xs:element minOccurs="0" name="Text" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Signature">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="ValidationID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ValidationDate" nillable="true" type="xs:dateTime" />
+          <xs:element minOccurs="0" name="ValidatorID" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="SignatureMethod" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="MimeCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Base64Data" nillable="true" type="xs:base64Binary" />
+          <xs:element minOccurs="0" name="Uri" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TaxRepresentativeData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="FiscalId" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="TaxScheme" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Address">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element minOccurs="0" name="StreetLine1" type="xs:string" />
+                <xs:element minOccurs="0" name="StreetLine2" type="xs:string" />
+                <xs:element minOccurs="0" name="City" type="xs:string" />
+                <xs:element minOccurs="0" name="PostalZone" type="xs:string" />
+                <xs:element minOccurs="0" name="Region" type="xs:string" />
+                <xs:element minOccurs="0" name="CountryCode" type="xs:string" />
+                <xs:element minOccurs="0" name="Line" nillable="true" type="xs:string" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:ElectronicInvoiceService" elementFormDefault="qualified" targetNamespace="urn:ElectronicInvoiceService" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="FindDocumentIdMCIn">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="ReferenceNumber" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="DocumentType" type="xs:int" />
+            <xs:element minOccurs="0" name="IssueDate" type="xs:dateTime" />
+            <xs:element minOccurs="0" name="SupplierFiscalId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="CustomerFiscalId" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="FindDocumentIdMCOut">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="Found" type="xs:boolean" />
+            <xs:element minOccurs="0" name="FEAPDocumentId" nillable="true" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+    <xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/eSPap.ElectronicInvoiceService.FaultContracts" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/eSPap.ElectronicInvoiceService.FaultContracts" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="ElectronicInvoiceFaultException" nillable="true" type="tns:ElectronicInvoiceFaultException" />
+      <xs:complexType name="ElectronicInvoiceFaultException">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Code" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CodeMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ExceptionName" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:eSPap.Faults" elementFormDefault="qualified" targetNamespace="urn:eSPap.Faults" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="ValidationError" nillable="true" type="tns:ValidationError" />
+      <xs:complexType name="ValidationError">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Errors" nillable="true" type="tns:ErrorCollection" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ErrorCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="Error" nillable="true" type="tns:Error" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Error">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="PropertyName" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Value" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="BehaviorError" nillable="true" type="tns:BehaviorError" />
+      <xs:complexType name="BehaviorError">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="InternalError" nillable="true" type="tns:InternalError" />
+      <xs:complexType name="InternalError">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:eSPap.Integration.BTS.Operations" elementFormDefault="qualified" targetNamespace="urn:eSPap.Integration.BTS.Operations" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:import namespace="http://schemas.datacontract.org/2004/07/GeRAP.Services.GerfipSequenceProxyService.MessageObjects" />
+      <xs:element name="ConfirmWebServiceResponseReceptionRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="CompanyCode" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="CorrelationId" nillable="true" type="xs:string" />
+            <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/GeRAP.Services.GerfipSequenceProxyService.MessageObjects" minOccurs="0" name="ServiceType" type="q5:WebServiceType" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ConfirmWebServiceResponseReceptionResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="Result" type="xs:boolean" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ConfirmMessageReceptionRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" name="uniqueId" nillable="true" type="xs:string" />
+            <xs:element minOccurs="0" name="invocationId" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+    <xsd:schema xmlns:svcctxPrefix="urn:eSPap.Services.GSE.ServiceContext" elementFormDefault="qualified" targetNamespace="urn:eSPap.Services.GSE.ServiceContext">
+      <xsd:element name="ServiceContextHeader">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element minOccurs="0" maxOccurs="1" name="User" type="xsd:string" />
+            <xsd:element minOccurs="0" maxOccurs="1" name="Entity" type="xsd:string" />
+            <xsd:element minOccurs="0" maxOccurs="1" name="Application" type="xsd:string" />
+            <xsd:element minOccurs="0" maxOccurs="1" name="Process" type="xsd:string" />
+            <xsd:element minOccurs="0" maxOccurs="1" name="Component" type="xsd:string" />
+            <xsd:element minOccurs="0" maxOccurs="1" name="ProcessId" type="xsd:string" />
+            <xsd:element minOccurs="0" maxOccurs="1" name="ProcessActivity" type="xsd:string" />
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+    <xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/GeRAP.Common.Exception.SAPIntegration" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/GeRAP.Common.Exception.SAPIntegration" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="SAPIntegrationFaultException" nillable="true" type="tns:SAPIntegrationFaultException" />
+      <xs:complexType name="SAPIntegrationFaultException">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Code" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CodeMessage" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="ExceptionName" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/GeRAP.Services.GerfipSequenceProxyService.MessageObjects" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/GeRAP.Services.GerfipSequenceProxyService.MessageObjects" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:simpleType name="WebServiceType">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="ILCR" />
+          <xs:enumeration value="IFCR" />
+          <xs:enumeration value="DMCliente" />
+          <xs:enumeration value="FEAP" />
+          <xs:enumeration value="FEAPSEND" />
+          <xs:enumeration value="SendDocument" />
+          <xs:enumeration value="SetDocument" />
+          <xs:enumeration value="SetDocumentResult" />
+          <xs:enumeration value="RequestOperation" />
+          <xs:enumeration value="SetOperationResult" />
+          <xs:enumeration value="GetDocumentsInfo" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:SAPIntegrationObjects.CommitmentCollection" elementFormDefault="qualified" targetNamespace="urn:SAPIntegrationObjects.CommitmentCollection" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:complexType name="CommitmentOutputCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="CommitmentNumber" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:SAPIntegrationObjects.CommitmentInputCollection" elementFormDefault="qualified" targetNamespace="urn:SAPIntegrationObjects.CommitmentInputCollection" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:complexType name="CommitmentInputCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="CommitmentNumber" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:SAPIntegrationObjects.Material" elementFormDefault="qualified" targetNamespace="urn:SAPIntegrationObjects.Material" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:complexType name="SimpleMaterial">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Code" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="Quantity" nillable="true" type="xs:decimal" />
+          <xs:element minOccurs="0" name="MeasureUnit" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:SAPIntegrationObjects.MaterialCollection" elementFormDefault="qualified" targetNamespace="urn:SAPIntegrationObjects.MaterialCollection" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:import namespace="urn:SAPIntegrationObjects.Material" />
+      <xs:complexType name="SimpleMaterialCollection">
+        <xs:sequence>
+          <xs:element xmlns:q1="urn:SAPIntegrationObjects.Material" minOccurs="0" maxOccurs="unbounded" name="SimpleMaterial" nillable="true" type="q1:SimpleMaterial" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:SAPIntegrationObjects.PaymentCondition" elementFormDefault="qualified" targetNamespace="urn:SAPIntegrationObjects.PaymentCondition" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:complexType name="PaymentCondition">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="Code" nillable="true" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/" EmitDefaultValue="false" />
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <DefaultValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/" EmitDefaultValue="false" />
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:SAPIntegrationObjects.PaymentConditionCollection" elementFormDefault="qualified" targetNamespace="urn:SAPIntegrationObjects.PaymentConditionCollection" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:import namespace="urn:SAPIntegrationObjects.PaymentCondition" />
+      <xs:complexType name="PaymentConditionCollection">
+        <xs:sequence>
+          <xs:element xmlns:q1="urn:SAPIntegrationObjects.PaymentCondition" minOccurs="0" maxOccurs="unbounded" name="PaymentCondition" nillable="true" type="q1:PaymentCondition" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="urn:SAPIntegrationObjects.PurchaseOrder" elementFormDefault="qualified" targetNamespace="urn:SAPIntegrationObjects.PurchaseOrder" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:complexType name="SimplePurchaseOrderNumberCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="PurchaseOrder" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="SimplePurchaseOrderCollection">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded" name="PurchaseOrder" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
+    <xs:schema xmlns:tns="http://schemas.microsoft.com/2003/10/Serialization/" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="anyType" nillable="true" type="xs:anyType" />
+      <xs:element name="anyURI" nillable="true" type="xs:anyURI" />
+      <xs:element name="base64Binary" nillable="true" type="xs:base64Binary" />
+      <xs:element name="boolean" nillable="true" type="xs:boolean" />
+      <xs:element name="byte" nillable="true" type="xs:byte" />
+      <xs:element name="dateTime" nillable="true" type="xs:dateTime" />
+      <xs:element name="decimal" nillable="true" type="xs:decimal" />
+      <xs:element name="double" nillable="true" type="xs:double" />
+      <xs:element name="float" nillable="true" type="xs:float" />
+      <xs:element name="int" nillable="true" type="xs:int" />
+      <xs:element name="long" nillable="true" type="xs:long" />
+      <xs:element name="QName" nillable="true" type="xs:QName" />
+      <xs:element name="short" nillable="true" type="xs:short" />
+      <xs:element name="string" nillable="true" type="xs:string" />
+      <xs:element name="unsignedByte" nillable="true" type="xs:unsignedByte" />
+      <xs:element name="unsignedInt" nillable="true" type="xs:unsignedInt" />
+      <xs:element name="unsignedLong" nillable="true" type="xs:unsignedLong" />
+      <xs:element name="unsignedShort" nillable="true" type="xs:unsignedShort" />
+      <xs:element name="char" nillable="true" type="tns:char" />
+      <xs:simpleType name="char">
+        <xs:restriction base="xs:int" />
+      </xs:simpleType>
+      <xs:element name="duration" nillable="true" type="tns:duration" />
+      <xs:simpleType name="duration">
+        <xs:restriction base="xs:duration">
+          <xs:pattern value="\-?P(\d*D)?(T(\d*H)?(\d*M)?(\d*(\.\d*)?S)?)?" />
+          <xs:minInclusive value="-P10675199DT2H48M5.4775808S" />
+          <xs:maxInclusive value="P10675199DT2H48M5.4775807S" />
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:element name="guid" nillable="true" type="tns:guid" />
+      <xs:simpleType name="guid">
+        <xs:restriction base="xs:string">
+          <xs:pattern value="[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}" />
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:attribute name="FactoryType" type="xs:QName" />
+      <xs:attribute name="Id" type="xs:ID" />
+      <xs:attribute name="Ref" type="xs:IDREF" />
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="FEAPServices_SetDocument_InputMessage">
+    <wsdl:part xmlns:q1="urn:ElectronicInvoice.Objects.Documents.Operations" name="SetDocumentRequest" element="q1:SetDocumentRequest" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SetDocument_InputMessage_Headers">
+    <wsdl:part xmlns:q2="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q2:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_GetDocumentsInfoAsync_InputMessage">
+    <wsdl:part xmlns:q3="urn:ElectronicInvoice.Objects.Documents.Operations" name="GetDocumentsInfoRequest" element="q3:GetDocumentsInfoRequest" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_GetDocumentsInfoAsync_InputMessage_Headers">
+    <wsdl:part xmlns:q4="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q4:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SetOperationResult_InputMessage">
+    <wsdl:part xmlns:q5="urn:ElectronicInvoice.Objects.Documents.Operations" name="SetOperationResultMCIn" element="q5:SetOperationResultMCIn" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SetOperationResult_InputMessage_Headers">
+    <wsdl:part xmlns:q6="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q6:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_FindDocumentId_InputMessage">
+    <wsdl:part xmlns:q7="urn:ElectronicInvoiceService" name="parameters" element="q7:FindDocumentIdMCIn" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_FindDocumentId_InputMessage_Headers">
+    <wsdl:part xmlns:q8="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q8:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_FindDocumentId_OutputMessage">
+    <wsdl:part xmlns:q9="urn:ElectronicInvoiceService" name="parameters" element="q9:FindDocumentIdMCOut" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_FindDocumentId_ElectronicInvoiceFaultException_FaultMessage">
+    <wsdl:part xmlns:q10="http://schemas.datacontract.org/2004/07/eSPap.ElectronicInvoiceService.FaultContracts" name="detail" element="q10:ElectronicInvoiceFaultException" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SearchCommitments_InputMessage">
+    <wsdl:part xmlns:q11="urn:B2BServices" name="parameters" element="q11:CommitmentSearchMCIn" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SearchCommitments_InputMessage_Headers">
+    <wsdl:part xmlns:q12="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q12:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SearchCommitments_OutputMessage">
+    <wsdl:part xmlns:q13="urn:B2BServices" name="parameters" element="q13:CommitmentSearchMCOut" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SearchCommitments_SAPIntegrationFaultException_FaultMessage">
+    <wsdl:part xmlns:q14="http://schemas.datacontract.org/2004/07/GeRAP.Common.Exception.SAPIntegration" name="detail" element="q14:SAPIntegrationFaultException" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SearchPurchaseOrders_InputMessage">
+    <wsdl:part xmlns:q15="urn:B2BServices" name="parameters" element="q15:PurchaseOrderSearchMCIn" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SearchPurchaseOrders_InputMessage_Headers">
+    <wsdl:part xmlns:q16="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q16:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SearchPurchaseOrders_OutputMessage">
+    <wsdl:part xmlns:q17="urn:B2BServices" name="parameters" element="q17:PurchaseOrderSearchMCOut" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SearchPurchaseOrders_SAPIntegrationFaultException_FaultMessage">
+    <wsdl:part xmlns:q18="http://schemas.datacontract.org/2004/07/GeRAP.Common.Exception.SAPIntegration" name="detail" element="q18:SAPIntegrationFaultException" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ListMaterialsByPurchaseOrder_InputMessage">
+    <wsdl:part xmlns:q19="urn:B2BServices" name="parameters" element="q19:MaterialListByPurchaseOrderMCIn" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ListMaterialsByPurchaseOrder_InputMessage_Headers">
+    <wsdl:part xmlns:q20="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q20:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ListMaterialsByPurchaseOrder_OutputMessage">
+    <wsdl:part xmlns:q21="urn:B2BServices" name="parameters" element="q21:MaterialListByPurchaseOrderMCOut" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ListMaterialsByPurchaseOrder_SAPIntegrationFaultException_FaultMessage">
+    <wsdl:part xmlns:q22="http://schemas.datacontract.org/2004/07/GeRAP.Common.Exception.SAPIntegration" name="detail" element="q22:SAPIntegrationFaultException" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ListPaymentConditions_InputMessage">
+    <wsdl:part xmlns:q23="urn:B2BServices" name="parameters" element="q23:PaymentConditionListMCIn" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ListPaymentConditions_InputMessage_Headers">
+    <wsdl:part xmlns:q24="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q24:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ListPaymentConditions_OutputMessage">
+    <wsdl:part xmlns:q25="urn:B2BServices" name="parameters" element="q25:PaymentConditionListMCIOut" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ListPaymentConditions_SAPIntegrationFaultException_FaultMessage">
+    <wsdl:part xmlns:q26="http://schemas.datacontract.org/2004/07/GeRAP.Common.Exception.SAPIntegration" name="detail" element="q26:SAPIntegrationFaultException" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ConfirmResponseReception_InputMessage">
+    <wsdl:part xmlns:q27="urn:eSPap.Integration.BTS.Operations" name="parameters" element="q27:ConfirmWebServiceResponseReceptionRequest" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ConfirmResponseReception_InputMessage_Headers">
+    <wsdl:part xmlns:q28="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q28:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ConfirmResponseReception_OutputMessage">
+    <wsdl:part xmlns:q29="urn:eSPap.Integration.BTS.Operations" name="parameters" element="q29:ConfirmWebServiceResponseReceptionResponse" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ConfirmResponseReception_BehaviorError_FaultMessage">
+    <wsdl:part xmlns:q30="urn:eSPap.Faults" name="detail" element="q30:BehaviorError" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ConfirmResponseReception_InternalError_FaultMessage">
+    <wsdl:part xmlns:q31="urn:eSPap.Faults" name="detail" element="q31:InternalError" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ConfirmResponseReception_ValidationError_FaultMessage">
+    <wsdl:part xmlns:q32="urn:eSPap.Faults" name="detail" element="q32:ValidationError" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ConfirmMessageReception_InputMessage">
+    <wsdl:part xmlns:q33="urn:eSPap.Integration.BTS.Operations" name="parameters" element="q33:ConfirmMessageReceptionRequest" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_ConfirmMessageReception_InputMessage_Headers">
+    <wsdl:part xmlns:q34="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q34:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SendElectronicDocumentAsync_InputMessage">
+    <wsdl:part xmlns:q35="urn:ElectronicInvoice.Objects.Documents.Outbound" name="SendElectronicInvoice" element="q35:SendElectronicInvoice" />
+  </wsdl:message>
+  <wsdl:message name="FEAPServices_SendElectronicDocumentAsync_InputMessage_Headers">
+    <wsdl:part xmlns:q36="urn:eSPap.Services.GSE.ServiceContext" name="ServiceContextHeader" element="q36:ServiceContextHeader" />
+  </wsdl:message>
+  <wsdl:portType name="FEAPServices">
+    <wsdl:operation name="SetDocument">
+      <wsdl:input wsam:Action="SetDocument" message="tns:FEAPServices_SetDocument_InputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDocumentsInfoAsync">
+      <wsdl:input wsam:Action="GetDocumentsInfoAsync" message="tns:FEAPServices_GetDocumentsInfoAsync_InputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SetOperationResult">
+      <wsdl:input wsam:Action="SetOperationResult" message="tns:FEAPServices_SetOperationResult_InputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="FindDocumentId">
+      <wsdl:input wsam:Action="FindDocumentId" message="tns:FEAPServices_FindDocumentId_InputMessage" />
+      <wsdl:output message="tns:FEAPServices_FindDocumentId_OutputMessage" />
+      <wsdl:fault wsam:Action="urn:ElectronicInvoiceService/IElectronicInvoiceService/FindDocumentIdElectronicInvoiceFaultExceptionFault" name="ElectronicInvoiceFaultException" message="tns:FEAPServices_FindDocumentId_ElectronicInvoiceFaultException_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchCommitments">
+      <wsdl:input wsam:Action="SearchCommitments" message="tns:FEAPServices_SearchCommitments_InputMessage" />
+      <wsdl:output message="tns:FEAPServices_SearchCommitments_OutputMessage" />
+      <wsdl:fault wsam:Action="urn:B2BServices/IB2BServices/SearchCommitmentsSAPIntegrationFaultExceptionFault" name="SAPIntegrationFaultException" message="tns:FEAPServices_SearchCommitments_SAPIntegrationFaultException_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SearchPurchaseOrders">
+      <wsdl:input wsam:Action="SearchPurchaseOrders" message="tns:FEAPServices_SearchPurchaseOrders_InputMessage" />
+      <wsdl:output message="tns:FEAPServices_SearchPurchaseOrders_OutputMessage" />
+      <wsdl:fault wsam:Action="urn:B2BServices/IB2BServices/SearchPurchaseOrdersSAPIntegrationFaultExceptionFault" name="SAPIntegrationFaultException" message="tns:FEAPServices_SearchPurchaseOrders_SAPIntegrationFaultException_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListMaterialsByPurchaseOrder">
+      <wsdl:input wsam:Action="ListMaterialsByPurchaseOrder" message="tns:FEAPServices_ListMaterialsByPurchaseOrder_InputMessage" />
+      <wsdl:output message="tns:FEAPServices_ListMaterialsByPurchaseOrder_OutputMessage" />
+      <wsdl:fault wsam:Action="urn:B2BServices/IB2BServices/ListMaterialsByPurchaseOrderSAPIntegrationFaultExceptionFault" name="SAPIntegrationFaultException" message="tns:FEAPServices_ListMaterialsByPurchaseOrder_SAPIntegrationFaultException_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListPaymentConditions">
+      <wsdl:input wsam:Action="ListPaymentConditions" message="tns:FEAPServices_ListPaymentConditions_InputMessage" />
+      <wsdl:output message="tns:FEAPServices_ListPaymentConditions_OutputMessage" />
+      <wsdl:fault wsam:Action="urn:B2BServices/IB2BServices/ListPaymentConditionsSAPIntegrationFaultExceptionFault" name="SAPIntegrationFaultException" message="tns:FEAPServices_ListPaymentConditions_SAPIntegrationFaultException_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConfirmResponseReception">
+      <wsdl:input wsam:Action="ConfirmResponseReception" message="tns:FEAPServices_ConfirmResponseReception_InputMessage" />
+      <wsdl:output message="tns:FEAPServices_ConfirmResponseReception_OutputMessage" />
+      <wsdl:fault wsam:Action="urn:eSPap.Integration.BTS.Operations/IEBTSOperations/ConfirmResponseReceptionBehaviorErrorFault" name="BehaviorError" message="tns:FEAPServices_ConfirmResponseReception_BehaviorError_FaultMessage" />
+      <wsdl:fault wsam:Action="urn:eSPap.Integration.BTS.Operations/IEBTSOperations/ConfirmResponseReceptionInternalErrorFault" name="InternalError" message="tns:FEAPServices_ConfirmResponseReception_InternalError_FaultMessage" />
+      <wsdl:fault wsam:Action="urn:eSPap.Integration.BTS.Operations/IEBTSOperations/ConfirmResponseReceptionValidationErrorFault" name="ValidationError" message="tns:FEAPServices_ConfirmResponseReception_ValidationError_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConfirmMessageReception">
+      <wsdl:input wsam:Action="ConfirmMessageReception" message="tns:FEAPServices_ConfirmMessageReception_InputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SendElectronicDocumentAsync">
+      <wsdl:input wsam:Action="SendElectronicDocumentAsync" message="tns:FEAPServices_SendElectronicDocumentAsync_InputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WSHttpBinding_FEAPServices" type="tns:FEAPServices">
+    <wsp:PolicyReference URI="#WSHttpBinding_FEAPServices_policy" />
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="SetDocument">
+      <soap12:operation soapAction="SetDocument" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_SetDocument_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="GetDocumentsInfoAsync">
+      <soap12:operation soapAction="GetDocumentsInfoAsync" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_GetDocumentsInfoAsync_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="SetOperationResult">
+      <soap12:operation soapAction="SetOperationResult" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_SetOperationResult_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="FindDocumentId">
+      <soap12:operation soapAction="FindDocumentId" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_FindDocumentId_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="ElectronicInvoiceFaultException">
+        <soap12:fault use="literal" name="ElectronicInvoiceFaultException" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="SearchCommitments">
+      <soap12:operation soapAction="SearchCommitments" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_SearchCommitments_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="SAPIntegrationFaultException">
+        <soap12:fault use="literal" name="SAPIntegrationFaultException" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="SearchPurchaseOrders">
+      <soap12:operation soapAction="SearchPurchaseOrders" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_SearchPurchaseOrders_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="SAPIntegrationFaultException">
+        <soap12:fault use="literal" name="SAPIntegrationFaultException" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="ListMaterialsByPurchaseOrder">
+      <soap12:operation soapAction="ListMaterialsByPurchaseOrder" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_ListMaterialsByPurchaseOrder_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="SAPIntegrationFaultException">
+        <soap12:fault use="literal" name="SAPIntegrationFaultException" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="ListPaymentConditions">
+      <soap12:operation soapAction="ListPaymentConditions" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_ListPaymentConditions_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="SAPIntegrationFaultException">
+        <soap12:fault use="literal" name="SAPIntegrationFaultException" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="ConfirmResponseReception">
+      <soap12:operation soapAction="ConfirmResponseReception" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_ConfirmResponseReception_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="BehaviorError">
+        <soap12:fault use="literal" name="BehaviorError" namespace="" />
+      </wsdl:fault>
+      <wsdl:fault name="InternalError">
+        <soap12:fault use="literal" name="InternalError" namespace="" />
+      </wsdl:fault>
+      <wsdl:fault name="ValidationError">
+        <soap12:fault use="literal" name="ValidationError" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="ConfirmMessageReception">
+      <soap12:operation soapAction="ConfirmMessageReception" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_ConfirmMessageReception_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="SendElectronicDocumentAsync">
+      <soap12:operation soapAction="SendElectronicDocumentAsync" style="document" />
+      <wsdl:input>
+        <soap12:header message="tns:FEAPServices_SendElectronicDocumentAsync_InputMessage_Headers" part="ServiceContextHeader" use="literal" />
+        <soap12:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="FEAPServices">
+    <wsdl:port name="WSHttpBinding_FEAPServices" binding="tns:WSHttpBinding_FEAPServices">
+      <soap12:address location="https://pp-gseb2b.gerall.pt/FEAPServices2" />
+      <wsa10:EndpointReference>
+        <wsa10:Address>https://pp-gseb2b.gerall.pt/FEAPServices2</wsa10:Address>
+      </wsa10:EndpointReference>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
