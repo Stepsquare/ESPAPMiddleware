@@ -44,7 +44,7 @@ namespace EspapMiddleware.Shared.DataContracts
         [DataMember(Order = 11)]
         public DocumentActionEnum? actionId { get; set; }
 
-        [DataContract(Namespace = "urnl:ElectronicInvoice.B2BClientOperations")]
+        [DataContract(Name= "Message", Namespace = "urnl:ElectronicInvoice.B2BClientOperations")]
         public class Message
         {
             [DataContract]

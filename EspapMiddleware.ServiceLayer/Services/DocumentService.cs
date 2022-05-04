@@ -1,5 +1,5 @@
 ﻿using EspapMiddleware.ServiceLayer.Helpers;
-using EspapMiddleware.ServiceLayer.Helpers.WcfMessageInspector;
+using EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector;
 using EspapMiddleware.Shared.ConfigModels;
 using EspapMiddleware.Shared.DataContracts;
 using EspapMiddleware.Shared.Entities;
@@ -280,13 +280,11 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             var uniqueId = Guid.NewGuid();
 
-            InspectedSOAPMessages soapMessages = new InspectedSOAPMessages();
-
             try
             {
                 using (var client = new FEAPServices_PP.FEAPServicesClient())
                 {
-                    client.Endpoint.Behaviors.Add(new CapturingEndpointBehavior(soapMessages));
+                    client.Endpoint.Behaviors.Add(new EndpointBehavior(uniqueId.ToString()));
 
                     var feapCredencials = (NameValueCollection)ConfigurationManager.GetSection("FEAPCredencials");
 

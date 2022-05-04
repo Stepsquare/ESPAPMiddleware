@@ -58,7 +58,7 @@ namespace EspapMiddleware.WcfService
         {
             try
             {
-                _service.SyncDocument(request.SetDocumentResultMCIn);
+                _service.SyncDocument(request.SetDocumentResultMCIn).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {

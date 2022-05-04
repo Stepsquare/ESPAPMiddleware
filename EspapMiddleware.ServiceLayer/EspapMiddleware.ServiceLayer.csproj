@@ -83,10 +83,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\FileManager.cs" />
     <Compile Include="Helpers\GenericRestRequestManager.cs" />
-    <Compile Include="Helpers\WcfMessageInspector\CapturingEndpointBehavior.cs" />
-    <Compile Include="Helpers\WcfMessageInspector\CapturingMessageInspector.cs" />
-    <Compile Include="Helpers\WcfMessageInspector\InspectedSOAPMessages.cs" />
+    <Compile Include="Helpers\InboundMessageInspector\MessageInspector.cs" />
+    <Compile Include="Helpers\InboundMessageInspector\ServiceBehavior.cs" />
+    <Compile Include="Helpers\OutboundMessageInspector\EndpointBehavior.cs" />
+    <Compile Include="Helpers\OutboundMessageInspector\MessageInspector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DocumentService.cs" />
     <Compile Include="UnitOfWorkFactory\UnitOfWorkFactory.cs" />
@@ -148,6 +150,7 @@
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Text.Json.6.0.2\build\System.Text.Json.targets" Condition="Exists('..\packages\System.Text.Json.6.0.2\build\System.Text.Json.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

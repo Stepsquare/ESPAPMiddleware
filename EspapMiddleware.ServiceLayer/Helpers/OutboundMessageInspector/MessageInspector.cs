@@ -7,25 +7,26 @@ using System.ServiceModel.Dispatcher;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EspapMiddleware.ServiceLayer.Helpers.WcfMessageInspector
+namespace EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector
 {
-    public class CapturingMessageInspector : IClientMessageInspector
+    public class MessageInspector : IClientMessageInspector
     {
-        public InspectedSOAPMessages SoapMessages { get; set; }
+        private readonly string _uniqueId;
 
-        public CapturingMessageInspector(InspectedSOAPMessages soapMessages)
+        public MessageInspector(string uniqueId)
         {
-            this.SoapMessages = soapMessages;
+            _uniqueId = uniqueId;
         }
 
         public void AfterReceiveReply(ref Message reply, object correlationState)
         {
-            this.SoapMessages.Response = reply.ToString();
+            return;
         }
 
         public object BeforeSendRequest(ref Message request, IClientChannel channel)
         {
-            this.SoapMessages.Request = request.ToString();
+            FileManager.SaveFile("SetDocument", request?.ToString(), _uniqueId);
+
             return null;
         }
     }

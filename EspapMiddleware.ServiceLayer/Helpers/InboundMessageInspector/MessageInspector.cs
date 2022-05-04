@@ -4,15 +4,17 @@ using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Dispatcher;
-using System.Web;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace EspapMiddleware.WcfService.RequestLogMessageInspectorBehavior
+namespace EspapMiddleware.ServiceLayer.Helpers.InboundMessageInspector
 {
-    public class RequestLogMessageInspector : IDispatchMessageInspector
+    public class MessageInspector : IDispatchMessageInspector
     {
         public object AfterReceiveRequest(ref Message request, IClientChannel channel, InstanceContext instanceContext)
         {
-            //TODO - Implementar o save do xml do pedido em file system...
+            FileManager.SaveFile(request?.Headers?.Action?.Substring(28), request?.ToString());
+
             return null;
         }
 
