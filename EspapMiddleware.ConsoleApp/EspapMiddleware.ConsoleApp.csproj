@@ -96,11 +96,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Connected Services\LocalSVFReference\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
     <Compile Include="Connected Services\SVFReference\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -111,25 +106,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Connected Services\LocalSVFReference\Service.wsdl" />
-    <None Include="Connected Services\LocalSVFReference\Service.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Connected Services\LocalSVFReference\Service1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Connected Services\LocalSVFReference\Service2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Connected Services\LocalSVFReference\Service3.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Connected Services\LocalSVFReference\Service4.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Connected Services\LocalSVFReference\Service5.xsd">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Connected Services\SVFReference\Service.wsdl" />
     <None Include="Connected Services\SVFReference\Service.xsd">
       <SubType>Designer</SubType>
@@ -143,17 +119,16 @@
     <None Include="Connected Services\SVFReference\Service3.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Connected Services\SVFReference\Service4.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadataStorage Include="Connected Services\LocalSVFReference\" />
     <WCFMetadataStorage Include="Connected Services\SVFReference\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Connected Services\SVFReference\Service.disco" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Connected Services\SVFReference\configuration91.svcinfo" />
@@ -163,18 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Connected Services\SVFReference\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Connected Services\LocalSVFReference\configuration91.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Connected Services\LocalSVFReference\configuration.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Connected Services\LocalSVFReference\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>

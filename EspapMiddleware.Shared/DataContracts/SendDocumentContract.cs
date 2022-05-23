@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace EspapMiddleware.Shared.DataContracts
 {
-    [DataContract(Namespace = "urnl:ElectronicInvoice.B2BClientOperations")]
+    [DataContract(Namespace = "urn:ElectronicInvoice.B2BClientOperations")]
     public class SendDocumentContract
     {
         private string _ublFormat;
@@ -62,36 +62,7 @@ namespace EspapMiddleware.Shared.DataContracts
 
                         xmlDoc.Load(stream);
 
-                        var nsmgr = new XmlNamespaceManager(xmlDoc.NameTable);
-
-                        nsmgr.AddNamespace("cac", "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2");
-                        nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
-                        nsmgr.AddNamespace("ubl", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2");
-
-                        TotalAmount = xmlDoc.SelectSingleNode("//ubl:Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount", nsmgr)?.InnerText;
-                        CompromiseNumber = xmlDoc.SelectSingleNode("//ubl:Invoice/cbc:AccountingCost", nsmgr)?.InnerText;
-
-                        if (documentType == DocumentTypeEnum.NotaCrédito)
-                        {
-                            RelatedReferenceNumber = xmlDoc.SelectSingleNode("//ubl:Invoice/cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID", nsmgr)?.InnerText; ;
-                        }
-
-                        var invoiceLineNodes = xmlDoc.SelectNodes("//ubl:Invoice/cac:InvoiceLine", nsmgr);
-
-                        InvoiceLines = new List<InvoiceLineModel>();
-
-                        foreach (XmlNode line in invoiceLineNodes)
-                        {
-                            InvoiceLines.Add(new InvoiceLineModel()
-                            {
-                                Id = line["cbc:ID"]?.InnerText,
-                                Name = line["cac:Item"]?["cbc:Name"]?.InnerText,
-                                StandardItemIdentification = line["cac:Item"]?["cac:StandardItemIdentification"]?["cbc:ID"]?.InnerText,
-                                Quantity = line["cbc:InvoicedQuantity"]?.InnerText.Split('.')[0],
-                                TotalLineValue = line["cbc:LineExtensionAmount"]?.InnerText,
-                                TaxPercent = line["cac:Item"]?["cac:ClassifiedTaxCategory"]?["cbc:Percent"]?.InnerText
-                            }); ;
-                        }
+                        ExtractFromUblFormat(xmlDoc);
                     }
                 }
                 finally
@@ -187,6 +158,66 @@ namespace EspapMiddleware.Shared.DataContracts
 
             if (errors.Any())
                 throw new ContractValidationException(errors.ToArray());
+        }
+
+        private void ExtractFromUblFormat(XmlDocument document)
+        {
+            var nsmgr = new XmlNamespaceManager(document.NameTable);
+
+            nsmgr.AddNamespace("cac", "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2");
+            nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
+
+            InvoiceLines = new List<InvoiceLineModel>();
+
+            switch (this.documentType)
+            {
+                case DocumentTypeEnum.Fatura:
+
+                    nsmgr.AddNamespace("ubl", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2");
+
+                    TotalAmount = document.SelectSingleNode("//ubl:Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount", nsmgr)?.InnerText;
+                    CompromiseNumber = document.SelectSingleNode("//ubl:Invoice/cbc:AccountingCost", nsmgr)?.InnerText;
+
+                    foreach (XmlNode line in document.SelectNodes("//ubl:Invoice/cac:InvoiceLine", nsmgr))
+                    {
+                        InvoiceLines.Add(new InvoiceLineModel()
+                        {
+                            Id = line["cbc:ID"]?.InnerText,
+                            Name = line["cac:Item"]?["cbc:Name"]?.InnerText,
+                            StandardItemIdentification = line["cac:Item"]?["cac:StandardItemIdentification"]?["cbc:ID"]?.InnerText,
+                            Quantity = line["cbc:InvoicedQuantity"]?.InnerText.Split('.')[0],
+                            TotalLineValue = line["cbc:LineExtensionAmount"]?.InnerText,
+                            TaxPercent = line["cac:Item"]?["cac:ClassifiedTaxCategory"]?["cbc:Percent"]?.InnerText
+                        });
+                    }
+                    break;
+                case DocumentTypeEnum.NotaCrédito:
+                    
+                    nsmgr.AddNamespace("ubl", "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2");
+
+                    TotalAmount = document.SelectSingleNode("//ubl:CreditNote/cac:LegalMonetaryTotal/cbc:PayableAmount", nsmgr)?.InnerText;
+                    CompromiseNumber = document.SelectSingleNode("//ubl:CreditNote/cbc:AccountingCost", nsmgr)?.InnerText;
+
+                    RelatedReferenceNumber = document.SelectSingleNode("//ubl:CreditNote/cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID", nsmgr)?.InnerText;
+
+                    foreach (XmlNode line in document.SelectNodes("//ubl:CreditNote/cac:CreditNoteLine", nsmgr))
+                    {
+                        InvoiceLines.Add(new InvoiceLineModel()
+                        {
+                            Id = line["cbc:ID"]?.InnerText,
+                            Name = line["cac:Item"]?["cbc:Name"]?.InnerText,
+                            StandardItemIdentification = line["cac:Item"]?["cac:StandardItemIdentification"]?["cbc:ID"]?.InnerText,
+                            Quantity = line["cbc:CreditedQuantity"]?.InnerText.Split('.')[0],
+                            TotalLineValue = line["cbc:LineExtensionAmount"]?.InnerText,
+                            TaxPercent = line["cac:Item"]?["cac:ClassifiedTaxCategory"]?["cbc:Percent"]?.InnerText
+                        });
+                    }
+                    break;
+                case DocumentTypeEnum.NotaDébito:
+                    break;
+                default:
+                    break;
+            }
         }
 
         public class InvoiceLineModel

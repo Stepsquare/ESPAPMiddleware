@@ -1,4 +1,4 @@
-﻿using EspapMiddleware.ConsoleApp.LocalSVFReference;
+﻿using EspapMiddleware.ConsoleApp.SVFReference;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -34,7 +34,9 @@ namespace EspapMiddleware.ConsoleApp
 
                 #endregion
 
-                using (var client = new LocalSVFReference.ServiceClient())
+                #region SVC Local Client Test Example
+
+                using (var client = new SVFReference.ServiceClient())
                 {
                     client.ClientCredentials.UserName.UserName = "3YNLta96dHNwK80jdxgFclH1_espap";
                     client.ClientCredentials.UserName.Password = "rCjJlrRqagOCF8jzY7msflrbUzOi33";
@@ -60,6 +62,8 @@ namespace EspapMiddleware.ConsoleApp
                     Console.WriteLine("Parece que funciona!");
                     Console.ReadLine();
                 }
+
+                #endregion
             }
             catch (Exception ex)
             {

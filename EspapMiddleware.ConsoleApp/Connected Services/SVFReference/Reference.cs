@@ -15,7 +15,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="SendDocumentContract", Namespace="urnl:ElectronicInvoice.B2BClientOperations")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="SendDocumentContract", Namespace="urn:ElectronicInvoice.B2BClientOperations")]
     [System.SerializableAttribute()]
     public partial class SendDocumentContract : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
         
@@ -366,7 +366,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="SetDocumentResultContract", Namespace="urnl:ElectronicInvoice.B2BClientOperations")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="SetDocumentResultContract", Namespace="urn:ElectronicInvoice.B2BClientOperations")]
     [System.SerializableAttribute()]
     public partial class SetDocumentResultContract : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
         
@@ -390,7 +390,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
         private bool isASuccessField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContract.Message[] messagesField;
+        private EspapMiddleware.ConsoleApp.SVFReference.Message[] messagesField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentStateEnum> stateIdField;
@@ -513,7 +513,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute(Order=8)]
-        public EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContract.Message[] messages {
+        public EspapMiddleware.ConsoleApp.SVFReference.Message[] messages {
             get {
                 return this.messagesField;
             }
@@ -559,94 +559,95 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
                 propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="Message", Namespace="urnl:ElectronicInvoice.B2BClientOperations")]
+    [System.SerializableAttribute()]
+    public partial class Message : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
         
-        [System.Diagnostics.DebuggerStepThroughAttribute()]
-        [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-        [System.Runtime.Serialization.DataContractAttribute(Name="SetDocumentResultContract.Message", Namespace="urnl:ElectronicInvoice.B2BClientOperations")]
-        [System.SerializableAttribute()]
-        public partial class Message : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-            
-            [System.NonSerializedAttribute()]
-            private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-            
-            private EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContractMessageMessageType typeIdField;
-            
-            [System.Runtime.Serialization.OptionalFieldAttribute()]
-            private string systemIdField;
-            
-            [System.Runtime.Serialization.OptionalFieldAttribute()]
-            private string codeField;
-            
-            private string descriptionField;
-            
-            public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-                get {
-                    return this.extensionDataField;
-                }
-                set {
-                    this.extensionDataField = value;
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        private EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContractMessageMessageType typeIdField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string systemIdField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string codeField;
+        
+        private string descriptionField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
+        public EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContractMessageMessageType typeId {
+            get {
+                return this.typeIdField;
+            }
+            set {
+                if ((this.typeIdField.Equals(value) != true)) {
+                    this.typeIdField = value;
+                    this.RaisePropertyChanged("typeId");
                 }
             }
-            
-            [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
-            public EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContractMessageMessageType typeId {
-                get {
-                    return this.typeIdField;
-                }
-                set {
-                    if ((this.typeIdField.Equals(value) != true)) {
-                        this.typeIdField = value;
-                        this.RaisePropertyChanged("typeId");
-                    }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(Order=1)]
+        public string systemId {
+            get {
+                return this.systemIdField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.systemIdField, value) != true)) {
+                    this.systemIdField = value;
+                    this.RaisePropertyChanged("systemId");
                 }
             }
-            
-            [System.Runtime.Serialization.DataMemberAttribute(Order=1)]
-            public string systemId {
-                get {
-                    return this.systemIdField;
-                }
-                set {
-                    if ((object.ReferenceEquals(this.systemIdField, value) != true)) {
-                        this.systemIdField = value;
-                        this.RaisePropertyChanged("systemId");
-                    }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(Order=2)]
+        public string code {
+            get {
+                return this.codeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.codeField, value) != true)) {
+                    this.codeField = value;
+                    this.RaisePropertyChanged("code");
                 }
             }
-            
-            [System.Runtime.Serialization.DataMemberAttribute(Order=2)]
-            public string code {
-                get {
-                    return this.codeField;
-                }
-                set {
-                    if ((object.ReferenceEquals(this.codeField, value) != true)) {
-                        this.codeField = value;
-                        this.RaisePropertyChanged("code");
-                    }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=3)]
+        public string description {
+            get {
+                return this.descriptionField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.descriptionField, value) != true)) {
+                    this.descriptionField = value;
+                    this.RaisePropertyChanged("description");
                 }
             }
-            
-            [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=3)]
-            public string description {
-                get {
-                    return this.descriptionField;
-                }
-                set {
-                    if ((object.ReferenceEquals(this.descriptionField, value) != true)) {
-                        this.descriptionField = value;
-                        this.RaisePropertyChanged("description");
-                    }
-                }
-            }
-            
-            public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-            
-            protected void RaisePropertyChanged(string propertyName) {
-                System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-                if ((propertyChanged != null)) {
-                    propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-                }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -690,7 +691,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
     [System.ServiceModel.MessageContractAttribute(IsWrapped=false)]
     public partial class SendDocumentRequest {
         
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="urnl:ElectronicInvoice.B2BClientOperations", Order=0)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="urn:ElectronicInvoice.B2BClientOperations", Order=0)]
         public EspapMiddleware.ConsoleApp.SVFReference.SendDocumentContract SendDocumentMCIn;
         
         public SendDocumentRequest() {
@@ -707,7 +708,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
     [System.ServiceModel.MessageContractAttribute(IsWrapped=false)]
     public partial class SetDocumentResultRequest {
         
-        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="urnl:ElectronicInvoice.B2BClientOperations", Order=0)]
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace="urn:ElectronicInvoice.B2BClientOperations", Order=0)]
         public EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContract SetDocumentResultMCIn;
         
         public SetDocumentResultRequest() {

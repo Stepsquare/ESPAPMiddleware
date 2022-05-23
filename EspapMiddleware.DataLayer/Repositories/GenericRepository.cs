@@ -59,5 +59,10 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Set<TEntity>().Where(predicate).ToListAsync();
         }
+         
+        public async Task<bool> Any(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await DbContext.Set<TEntity>().AnyAsync(predicate);
+        }
     }
 }

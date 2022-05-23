@@ -59,7 +59,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     UniqueId = uniqueId,
                     RequestLogTypeId = type,
-                    DocumentId = documentId,
+                    DocumentId = await unitOfWork.Documents.Any(x => x.DocumentId == documentId) ? documentId : null,
                     Date = DateTime.UtcNow,
                     Successful = false,
                     ExceptionType = ex.GetBaseException().GetType().Name,

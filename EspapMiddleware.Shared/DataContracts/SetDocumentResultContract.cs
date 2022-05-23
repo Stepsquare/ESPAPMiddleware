@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EspapMiddleware.Shared.DataContracts
 {
-    [DataContract(Namespace = "urnl:ElectronicInvoice.B2BClientOperations")]
+    [DataContract(Namespace = "urn:ElectronicInvoice.B2BClientOperations")]
     public class SetDocumentResultContract
     {
         [DataMember(Order = 1, IsRequired = true)]

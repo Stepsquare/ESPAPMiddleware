@@ -48,17 +48,18 @@
   </wsp:Policy>
   <wsdl:types>
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
-      <xsd:import schemaLocation="https://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd3" namespace="urnl:ElectronicInvoice.B2BClientOperations" />
-      <xsd:import schemaLocation="https://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd0" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-      <xsd:import schemaLocation="https://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd1" namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" />
-      <xsd:import schemaLocation="https://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.DataContracts" />
+      <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd3" namespace="urn:ElectronicInvoice.B2BClientOperations" />
+      <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd0" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd1" namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" />
+      <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.DataContracts" />
+      <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd4" namespace="urnl:ElectronicInvoice.B2BClientOperations" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="SendDocumentRequest">
-    <wsdl:part xmlns:q1="urnl:ElectronicInvoice.B2BClientOperations" name="SendDocumentMCIn" element="q1:SendDocumentMCIn" />
+    <wsdl:part xmlns:q1="urn:ElectronicInvoice.B2BClientOperations" name="SendDocumentMCIn" element="q1:SendDocumentMCIn" />
   </wsdl:message>
   <wsdl:message name="SetDocumentResultRequest">
-    <wsdl:part xmlns:q2="urnl:ElectronicInvoice.B2BClientOperations" name="SetDocumentResultMCIn" element="q2:SetDocumentResultMCIn" />
+    <wsdl:part xmlns:q2="urn:ElectronicInvoice.B2BClientOperations" name="SetDocumentResultMCIn" element="q2:SetDocumentResultMCIn" />
   </wsdl:message>
   <wsdl:portType name="IService">
     <wsdl:operation name="SendDocument">
@@ -86,9 +87,9 @@
   </wsdl:binding>
   <wsdl:service name="Service">
     <wsdl:port name="EspapMiddleware.WcfService" binding="tns:EspapMiddleware.WcfService">
-      <soap12:address location="https://localhost/EspapMiddleware.WcfService/Service.svc" />
+      <soap12:address location="https://laptop-2378pttl/EspapMiddleware.WcfService/Service.svc" />
       <wsa10:EndpointReference>
-        <wsa10:Address>https://localhost/EspapMiddleware.WcfService/Service.svc</wsa10:Address>
+        <wsa10:Address>https://laptop-2378pttl/EspapMiddleware.WcfService/Service.svc</wsa10:Address>
       </wsa10:EndpointReference>
     </wsdl:port>
   </wsdl:service>

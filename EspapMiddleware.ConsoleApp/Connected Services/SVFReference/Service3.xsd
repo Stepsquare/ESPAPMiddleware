@@ -1,30 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.DataContracts" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.DataContracts" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:import schemaLocation="https://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd0" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
-  <xs:simpleType name="SetDocumentResultContract.Message.MessageType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="1">
-        <xs:annotation>
-          <xs:appinfo>
-            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">1</EnumerationValue>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="2">
-        <xs:annotation>
-          <xs:appinfo>
-            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">2</EnumerationValue>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="3">
-        <xs:annotation>
-          <xs:appinfo>
-            <EnumerationValue xmlns="http://schemas.microsoft.com/2003/10/Serialization/">3</EnumerationValue>
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="SetDocumentResultContract.Message.MessageType" nillable="true" type="tns:SetDocumentResultContract.Message.MessageType" />
+<xs:schema xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:tns="urn:ElectronicInvoice.B2BClientOperations" elementFormDefault="qualified" targetNamespace="urn:ElectronicInvoice.B2BClientOperations" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd0" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+  <xs:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd1" namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" />
+  <xs:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd4" namespace="urnl:ElectronicInvoice.B2BClientOperations" />
+  <xs:complexType name="SendDocumentContract">
+    <xs:sequence>
+      <xs:element name="uniqueId" type="ser:guid" />
+      <xs:element name="isAnUpdate" type="xs:boolean" />
+      <xs:element name="documentId" nillable="true" type="xs:string" />
+      <xs:element name="referenceNumber" nillable="true" type="xs:string" />
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" name="documentType" type="q1:DocumentTypeEnum" />
+      <xs:element name="issueDate" type="xs:dateTime" />
+      <xs:element name="supplierFiscalId" nillable="true" type="xs:string" />
+      <xs:element name="customerFiscalId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="internalManagement" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="feapPortalUser" nillable="true" type="xs:string" />
+      <xs:element name="ublFormat" nillable="true" type="xs:string" />
+      <xs:element name="pdfFormat" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="attachs" nillable="true" type="xs:string" />
+      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" minOccurs="0" name="stateId" nillable="true" type="q2:DocumentStateEnum" />
+      <xs:element minOccurs="0" name="stateDate" nillable="true" type="xs:dateTime" />
+      <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" minOccurs="0" name="actionId" nillable="true" type="q3:DocumentActionEnum" />
+      <xs:element minOccurs="0" name="actionDate" nillable="true" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SendDocumentContract" nillable="true" type="tns:SendDocumentContract" />
+  <xs:element name="SendDocumentMCIn" nillable="true" type="tns:SendDocumentContract" />
+  <xs:complexType name="SetDocumentResultContract">
+    <xs:sequence>
+      <xs:element name="uniqueId" type="ser:guid" />
+      <xs:element name="documentId" nillable="true" type="xs:string" />
+      <xs:element name="referenceNumber" nillable="true" type="xs:string" />
+      <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" name="documentType" type="q4:DocumentTypeEnum" />
+      <xs:element name="issueDate" type="xs:dateTime" />
+      <xs:element name="supplierFiscalId" nillable="true" type="xs:string" />
+      <xs:element name="customerFiscalId" nillable="true" type="xs:string" />
+      <xs:element name="isASuccess" type="xs:boolean" />
+      <xs:element xmlns:q5="urnl:ElectronicInvoice.B2BClientOperations" minOccurs="0" name="messages" nillable="true" type="q5:ArrayOfMessage" />
+      <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" minOccurs="0" name="stateId" nillable="true" type="q6:DocumentStateEnum" />
+      <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" minOccurs="0" name="actionId" nillable="true" type="q7:DocumentActionEnum" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="SetDocumentResultContract" nillable="true" type="tns:SetDocumentResultContract" />
+  <xs:element name="SetDocumentResultMCIn" nillable="true" type="tns:SetDocumentResultContract" />
 </xs:schema>

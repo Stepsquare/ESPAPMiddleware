@@ -28,14 +28,14 @@ namespace EspapMiddleware.WcfService
     [MessageContract(IsWrapped = false)]
     public class SendDocumentRequest
     {
-        [MessageBodyMember(Namespace = "urnl:ElectronicInvoice.B2BClientOperations")]
+        [MessageBodyMember(Namespace = "urn:ElectronicInvoice.B2BClientOperations")]
         public SendDocumentContract SendDocumentMCIn { get; set; }
     }
 
     [MessageContract(IsWrapped = false)]
     public class SetDocumentResultRequest
     {
-        [MessageBodyMember(Namespace = "urnl:ElectronicInvoice.B2BClientOperations")]
+        [MessageBodyMember(Namespace = "urn:ElectronicInvoice.B2BClientOperations")]
         public SetDocumentResultContract SetDocumentResultMCIn { get; set; }
     }
 }

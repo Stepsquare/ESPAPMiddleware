@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<SavedWcfConfigurationInformation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="9.1" CheckSum="RnGVAljAWZsB81Lk1WVMWz7v7TA/RVv679vyG+kcctQ=">
+<SavedWcfConfigurationInformation xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="9.1" CheckSum="x1ZqbamEucmJ42QxOMUrB3+WPD7gI42wE/E13xOMoKc=">
   <bindingConfigurations>
     <bindingConfiguration bindingType="wsHttpBinding" name="EspapMiddleware.WcfService">
       <properties>
@@ -127,10 +127,10 @@
     </bindingConfiguration>
   </bindingConfigurations>
   <endpoints>
-    <endpoint name="EspapMiddleware.WcfService" contract="SVFReference.IService" bindingType="wsHttpBinding" address="https://localhost/EspapMiddleware.WcfService/Service.svc" bindingConfiguration="EspapMiddleware.WcfService">
+    <endpoint name="EspapMiddleware.WcfService" contract="SVFReference.IService" bindingType="wsHttpBinding" address="https://laptop-2378pttl/EspapMiddleware.WcfService/Service.svc" bindingConfiguration="EspapMiddleware.WcfService">
       <properties>
         <property path="/address" isComplexType="false" isExplicitlyDefined="true" clrType="System.Uri, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>https://localhost/EspapMiddleware.WcfService/Service.svc</serializedValue>
+          <serializedValue>https://laptop-2378pttl/EspapMiddleware.WcfService/Service.svc</serializedValue>
         </property>
         <property path="/behaviorConfiguration" isComplexType="false" isExplicitlyDefined="false" clrType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue />

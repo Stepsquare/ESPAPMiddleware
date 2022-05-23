@@ -23,9 +23,19 @@ namespace EspapMiddleware.ServiceLayer.Helpers
                     var nsmgr = new XmlNamespaceManager(xdoc.NameTable);
 
                     nsmgr.AddNamespace("soap", "http://www.w3.org/2003/05/soap-envelope");
-                    nsmgr.AddNamespace("urnl", "urnl:ElectronicInvoice.B2BClientOperations");
+                    nsmgr.AddNamespace("urn", "urn:ElectronicInvoice.B2BClientOperations");
 
-                    uniqueId = xdoc.SelectSingleNode("//soap:Envelope/soap:Body/urnl:SendDocumentMCIn/urnl:uniqueId", nsmgr)?.InnerText;
+                    switch (service)
+                    {
+                        case "SendDocument":
+                            uniqueId = xdoc.SelectSingleNode("//soap:Envelope/soap:Body/urn:SendDocumentMCIn/urn:uniqueId", nsmgr)?.InnerText;
+                            break;
+                        case "SetDocumentResult":
+                            uniqueId = xdoc.SelectSingleNode("//soap:Envelope/soap:Body/urn:SetDocumentResultMCIn/urn:uniqueId", nsmgr)?.InnerText;
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
                 var path = ConfigurationManager.AppSettings["LogDirectory"] + $@"\{service}";

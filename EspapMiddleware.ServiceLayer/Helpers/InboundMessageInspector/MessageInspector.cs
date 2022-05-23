@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Dispatcher;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace EspapMiddleware.ServiceLayer.Helpers.InboundMessageInspector
 {
@@ -13,7 +16,8 @@ namespace EspapMiddleware.ServiceLayer.Helpers.InboundMessageInspector
     {
         public object AfterReceiveRequest(ref Message request, IClientChannel channel, InstanceContext instanceContext)
         {
-            FileManager.SaveFile(request?.Headers?.Action?.Substring(28), request?.ToString());
+            if (!request.IsEmpty)
+                FileManager.SaveFile(request?.Headers?.Action?.Substring(28), request?.ToString());
 
             return null;
         }
