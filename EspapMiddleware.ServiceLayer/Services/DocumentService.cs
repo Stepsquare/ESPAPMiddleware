@@ -8,6 +8,7 @@ using EspapMiddleware.Shared.Exceptions;
 using EspapMiddleware.Shared.Interfaces.IConfiguration;
 using EspapMiddleware.Shared.Interfaces.IServices;
 using EspapMiddleware.Shared.WebServiceModels;
+using EspapMiddleware.Shared.XmlSerializerModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -198,7 +199,7 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
-        public async Task SyncDocument(SetDocumentResultContract contract)
+        public async Task SyncDocument(SetDocumentResultMCIn contract)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
@@ -301,9 +302,10 @@ namespace EspapMiddleware.ServiceLayer.Services
                     {
                         uniqueId = uniqueId.ToString(),
                         documentId = response.id_doc_feap,
+                        stateIdSpecified = true,
                         stateId = int.Parse(response.state_id),
                         reason = response.state_id == ((int)DocumentStateEnum.Devolvido).ToString() ? response.reason : null,
-                        documentNumbersSpecified1 = true,
+                        documentNumbersSpecified1 = !string.IsNullOrEmpty(response.id_me_fatura),
                         documentNumbers = new string[] { response.id_me_fatura }
                     };
 

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
@@ -38,6 +39,8 @@ namespace EspapMiddleware.ConsoleApp
 
                 using (var client = new SVFReference.ServiceClient())
                 {
+                    ServicePointManager.ServerCertificateValidationCallback += (o, c, ch, er) => true;
+
                     client.ClientCredentials.UserName.UserName = "3YNLta96dHNwK80jdxgFclH1_espap";
                     client.ClientCredentials.UserName.Password = "rCjJlrRqagOCF8jzY7msflrbUzOi33";
 

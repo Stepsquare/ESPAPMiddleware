@@ -9,662 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace EspapMiddleware.ConsoleApp.SVFReference {
-    using System.Runtime.Serialization;
-    using System;
     
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="SendDocumentContract", Namespace="urn:ElectronicInvoice.B2BClientOperations")]
-    [System.SerializableAttribute()]
-    public partial class SendDocumentContract : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        private System.Guid uniqueIdField;
-        
-        private bool isAnUpdateField;
-        
-        private string documentIdField;
-        
-        private string referenceNumberField;
-        
-        private EspapMiddleware.ConsoleApp.SVFReference.DocumentTypeEnum documentTypeField;
-        
-        private System.DateTime issueDateField;
-        
-        private string supplierFiscalIdField;
-        
-        private string customerFiscalIdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string internalManagementField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string feapPortalUserField;
-        
-        private string ublFormatField;
-        
-        private string pdfFormatField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string attachsField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentStateEnum> stateIdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.Nullable<System.DateTime> stateDateField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentActionEnum> actionIdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.Nullable<System.DateTime> actionDateField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
-        public System.Guid uniqueId {
-            get {
-                return this.uniqueIdField;
-            }
-            set {
-                if ((this.uniqueIdField.Equals(value) != true)) {
-                    this.uniqueIdField = value;
-                    this.RaisePropertyChanged("uniqueId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=1)]
-        public bool isAnUpdate {
-            get {
-                return this.isAnUpdateField;
-            }
-            set {
-                if ((this.isAnUpdateField.Equals(value) != true)) {
-                    this.isAnUpdateField = value;
-                    this.RaisePropertyChanged("isAnUpdate");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=2)]
-        public string documentId {
-            get {
-                return this.documentIdField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.documentIdField, value) != true)) {
-                    this.documentIdField = value;
-                    this.RaisePropertyChanged("documentId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=3)]
-        public string referenceNumber {
-            get {
-                return this.referenceNumberField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.referenceNumberField, value) != true)) {
-                    this.referenceNumberField = value;
-                    this.RaisePropertyChanged("referenceNumber");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=4)]
-        public EspapMiddleware.ConsoleApp.SVFReference.DocumentTypeEnum documentType {
-            get {
-                return this.documentTypeField;
-            }
-            set {
-                if ((this.documentTypeField.Equals(value) != true)) {
-                    this.documentTypeField = value;
-                    this.RaisePropertyChanged("documentType");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=5)]
-        public System.DateTime issueDate {
-            get {
-                return this.issueDateField;
-            }
-            set {
-                if ((this.issueDateField.Equals(value) != true)) {
-                    this.issueDateField = value;
-                    this.RaisePropertyChanged("issueDate");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=6)]
-        public string supplierFiscalId {
-            get {
-                return this.supplierFiscalIdField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.supplierFiscalIdField, value) != true)) {
-                    this.supplierFiscalIdField = value;
-                    this.RaisePropertyChanged("supplierFiscalId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=7)]
-        public string customerFiscalId {
-            get {
-                return this.customerFiscalIdField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.customerFiscalIdField, value) != true)) {
-                    this.customerFiscalIdField = value;
-                    this.RaisePropertyChanged("customerFiscalId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=8)]
-        public string internalManagement {
-            get {
-                return this.internalManagementField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.internalManagementField, value) != true)) {
-                    this.internalManagementField = value;
-                    this.RaisePropertyChanged("internalManagement");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=9)]
-        public string feapPortalUser {
-            get {
-                return this.feapPortalUserField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.feapPortalUserField, value) != true)) {
-                    this.feapPortalUserField = value;
-                    this.RaisePropertyChanged("feapPortalUser");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=10)]
-        public string ublFormat {
-            get {
-                return this.ublFormatField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.ublFormatField, value) != true)) {
-                    this.ublFormatField = value;
-                    this.RaisePropertyChanged("ublFormat");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=11)]
-        public string pdfFormat {
-            get {
-                return this.pdfFormatField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.pdfFormatField, value) != true)) {
-                    this.pdfFormatField = value;
-                    this.RaisePropertyChanged("pdfFormat");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=12)]
-        public string attachs {
-            get {
-                return this.attachsField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.attachsField, value) != true)) {
-                    this.attachsField = value;
-                    this.RaisePropertyChanged("attachs");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=13)]
-        public System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentStateEnum> stateId {
-            get {
-                return this.stateIdField;
-            }
-            set {
-                if ((this.stateIdField.Equals(value) != true)) {
-                    this.stateIdField = value;
-                    this.RaisePropertyChanged("stateId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=14)]
-        public System.Nullable<System.DateTime> stateDate {
-            get {
-                return this.stateDateField;
-            }
-            set {
-                if ((this.stateDateField.Equals(value) != true)) {
-                    this.stateDateField = value;
-                    this.RaisePropertyChanged("stateDate");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=15)]
-        public System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentActionEnum> actionId {
-            get {
-                return this.actionIdField;
-            }
-            set {
-                if ((this.actionIdField.Equals(value) != true)) {
-                    this.actionIdField = value;
-                    this.RaisePropertyChanged("actionId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=16)]
-        public System.Nullable<System.DateTime> actionDate {
-            get {
-                return this.actionDateField;
-            }
-            set {
-                if ((this.actionDateField.Equals(value) != true)) {
-                    this.actionDateField = value;
-                    this.RaisePropertyChanged("actionDate");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="DocumentTypeEnum", Namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums")]
-    public enum DocumentTypeEnum : int {
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="1")]
-        _1 = 1,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="2")]
-        _2 = 2,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="3")]
-        _3 = 3,
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="DocumentStateEnum", Namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums")]
-    public enum DocumentStateEnum : int {
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="1")]
-        _1 = 1,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="31")]
-        _31 = 31,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="7")]
-        _7 = 7,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="35")]
-        _35 = 35,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="11")]
-        _11 = 11,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="33")]
-        _33 = 33,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="22")]
-        _22 = 22,
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="DocumentActionEnum", Namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums")]
-    public enum DocumentActionEnum : int {
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="12")]
-        _12 = 12,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="17")]
-        _17 = 17,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="19")]
-        _19 = 19,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="20")]
-        _20 = 20,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="22")]
-        _22 = 22,
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="SetDocumentResultContract", Namespace="urn:ElectronicInvoice.B2BClientOperations")]
-    [System.SerializableAttribute()]
-    public partial class SetDocumentResultContract : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        private System.Guid uniqueIdField;
-        
-        private string documentIdField;
-        
-        private string referenceNumberField;
-        
-        private EspapMiddleware.ConsoleApp.SVFReference.DocumentTypeEnum documentTypeField;
-        
-        private System.DateTime issueDateField;
-        
-        private string supplierFiscalIdField;
-        
-        private string customerFiscalIdField;
-        
-        private bool isASuccessField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private EspapMiddleware.ConsoleApp.SVFReference.Message[] messagesField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentStateEnum> stateIdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentActionEnum> actionIdField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
-        public System.Guid uniqueId {
-            get {
-                return this.uniqueIdField;
-            }
-            set {
-                if ((this.uniqueIdField.Equals(value) != true)) {
-                    this.uniqueIdField = value;
-                    this.RaisePropertyChanged("uniqueId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=1)]
-        public string documentId {
-            get {
-                return this.documentIdField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.documentIdField, value) != true)) {
-                    this.documentIdField = value;
-                    this.RaisePropertyChanged("documentId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=2)]
-        public string referenceNumber {
-            get {
-                return this.referenceNumberField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.referenceNumberField, value) != true)) {
-                    this.referenceNumberField = value;
-                    this.RaisePropertyChanged("referenceNumber");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=3)]
-        public EspapMiddleware.ConsoleApp.SVFReference.DocumentTypeEnum documentType {
-            get {
-                return this.documentTypeField;
-            }
-            set {
-                if ((this.documentTypeField.Equals(value) != true)) {
-                    this.documentTypeField = value;
-                    this.RaisePropertyChanged("documentType");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=4)]
-        public System.DateTime issueDate {
-            get {
-                return this.issueDateField;
-            }
-            set {
-                if ((this.issueDateField.Equals(value) != true)) {
-                    this.issueDateField = value;
-                    this.RaisePropertyChanged("issueDate");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=5)]
-        public string supplierFiscalId {
-            get {
-                return this.supplierFiscalIdField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.supplierFiscalIdField, value) != true)) {
-                    this.supplierFiscalIdField = value;
-                    this.RaisePropertyChanged("supplierFiscalId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=6)]
-        public string customerFiscalId {
-            get {
-                return this.customerFiscalIdField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.customerFiscalIdField, value) != true)) {
-                    this.customerFiscalIdField = value;
-                    this.RaisePropertyChanged("customerFiscalId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=7)]
-        public bool isASuccess {
-            get {
-                return this.isASuccessField;
-            }
-            set {
-                if ((this.isASuccessField.Equals(value) != true)) {
-                    this.isASuccessField = value;
-                    this.RaisePropertyChanged("isASuccess");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=8)]
-        public EspapMiddleware.ConsoleApp.SVFReference.Message[] messages {
-            get {
-                return this.messagesField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.messagesField, value) != true)) {
-                    this.messagesField = value;
-                    this.RaisePropertyChanged("messages");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=9)]
-        public System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentStateEnum> stateId {
-            get {
-                return this.stateIdField;
-            }
-            set {
-                if ((this.stateIdField.Equals(value) != true)) {
-                    this.stateIdField = value;
-                    this.RaisePropertyChanged("stateId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=10)]
-        public System.Nullable<EspapMiddleware.ConsoleApp.SVFReference.DocumentActionEnum> actionId {
-            get {
-                return this.actionIdField;
-            }
-            set {
-                if ((this.actionIdField.Equals(value) != true)) {
-                    this.actionIdField = value;
-                    this.RaisePropertyChanged("actionId");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="Message", Namespace="urnl:ElectronicInvoice.B2BClientOperations")]
-    [System.SerializableAttribute()]
-    public partial class Message : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
-        
-        [System.NonSerializedAttribute()]
-        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
-        
-        private EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContractMessageMessageType typeIdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string systemIdField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string codeField;
-        
-        private string descriptionField;
-        
-        [global::System.ComponentModel.BrowsableAttribute(false)]
-        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
-            get {
-                return this.extensionDataField;
-            }
-            set {
-                this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true)]
-        public EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContractMessageMessageType typeId {
-            get {
-                return this.typeIdField;
-            }
-            set {
-                if ((this.typeIdField.Equals(value) != true)) {
-                    this.typeIdField = value;
-                    this.RaisePropertyChanged("typeId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=1)]
-        public string systemId {
-            get {
-                return this.systemIdField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.systemIdField, value) != true)) {
-                    this.systemIdField = value;
-                    this.RaisePropertyChanged("systemId");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(Order=2)]
-        public string code {
-            get {
-                return this.codeField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.codeField, value) != true)) {
-                    this.codeField = value;
-                    this.RaisePropertyChanged("code");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute(IsRequired=true, Order=3)]
-        public string description {
-            get {
-                return this.descriptionField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.descriptionField, value) != true)) {
-                    this.descriptionField = value;
-                    this.RaisePropertyChanged("description");
-                }
-            }
-        }
-        
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-        
-        protected void RaisePropertyChanged(string propertyName) {
-            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
-            if ((propertyChanged != null)) {
-                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-    
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="SetDocumentResultContract.Message.MessageType", Namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.DataContracts")]
-    public enum SetDocumentResultContractMessageMessageType : int {
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="1")]
-        _1 = 1,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="2")]
-        _2 = 2,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute(Value="3")]
-        _3 = 3,
-    }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="SVFReference.IService")]
@@ -672,6 +17,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
         
         // CODEGEN: Generating message contract since the operation SendDocument is neither RPC nor document wrapped.
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IService/SendDocument")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         void SendDocument(EspapMiddleware.ConsoleApp.SVFReference.SendDocumentRequest request);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IService/SendDocument")]
@@ -679,10 +25,404 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
         
         // CODEGEN: Generating message contract since the operation SetDocumentResult is neither RPC nor document wrapped.
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IService/SetDocumentResult")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
         void SetDocumentResult(EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultRequest request);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IService/SetDocumentResult")]
         System.Threading.Tasks.Task SetDocumentResultAsync(EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultRequest request);
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.4084.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="urn:ElectronicInvoice.B2BClientOperations")]
+    public partial class SendDocumentContract : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private string uniqueIdField;
+        
+        private bool isAnUpdateField;
+        
+        private string documentIdField;
+        
+        private string referenceNumberField;
+        
+        private DocumentTypeEnum documentTypeField;
+        
+        private System.DateTime issueDateField;
+        
+        private string supplierFiscalIdField;
+        
+        private string customerFiscalIdField;
+        
+        private string internalManagementField;
+        
+        private string feapPortalUserField;
+        
+        private string ublFormatField;
+        
+        private string pdfFormatField;
+        
+        private string attachsField;
+        
+        private System.Nullable<DocumentStateEnum> stateIdField;
+        
+        private bool stateIdFieldSpecified;
+        
+        private System.Nullable<System.DateTime> stateDateField;
+        
+        private bool stateDateFieldSpecified;
+        
+        private System.Nullable<DocumentActionEnum> actionIdField;
+        
+        private bool actionIdFieldSpecified;
+        
+        private System.Nullable<System.DateTime> actionDateField;
+        
+        private bool actionDateFieldSpecified;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public string uniqueId {
+            get {
+                return this.uniqueIdField;
+            }
+            set {
+                this.uniqueIdField = value;
+                this.RaisePropertyChanged("uniqueId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=1)]
+        public bool isAnUpdate {
+            get {
+                return this.isAnUpdateField;
+            }
+            set {
+                this.isAnUpdateField = value;
+                this.RaisePropertyChanged("isAnUpdate");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=2)]
+        public string documentId {
+            get {
+                return this.documentIdField;
+            }
+            set {
+                this.documentIdField = value;
+                this.RaisePropertyChanged("documentId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=3)]
+        public string referenceNumber {
+            get {
+                return this.referenceNumberField;
+            }
+            set {
+                this.referenceNumberField = value;
+                this.RaisePropertyChanged("referenceNumber");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=4)]
+        public DocumentTypeEnum documentType {
+            get {
+                return this.documentTypeField;
+            }
+            set {
+                this.documentTypeField = value;
+                this.RaisePropertyChanged("documentType");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=5)]
+        public System.DateTime issueDate {
+            get {
+                return this.issueDateField;
+            }
+            set {
+                this.issueDateField = value;
+                this.RaisePropertyChanged("issueDate");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=6)]
+        public string supplierFiscalId {
+            get {
+                return this.supplierFiscalIdField;
+            }
+            set {
+                this.supplierFiscalIdField = value;
+                this.RaisePropertyChanged("supplierFiscalId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=7)]
+        public string customerFiscalId {
+            get {
+                return this.customerFiscalIdField;
+            }
+            set {
+                this.customerFiscalIdField = value;
+                this.RaisePropertyChanged("customerFiscalId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=8)]
+        public string internalManagement {
+            get {
+                return this.internalManagementField;
+            }
+            set {
+                this.internalManagementField = value;
+                this.RaisePropertyChanged("internalManagement");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=9)]
+        public string feapPortalUser {
+            get {
+                return this.feapPortalUserField;
+            }
+            set {
+                this.feapPortalUserField = value;
+                this.RaisePropertyChanged("feapPortalUser");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=10)]
+        public string ublFormat {
+            get {
+                return this.ublFormatField;
+            }
+            set {
+                this.ublFormatField = value;
+                this.RaisePropertyChanged("ublFormat");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=11)]
+        public string pdfFormat {
+            get {
+                return this.pdfFormatField;
+            }
+            set {
+                this.pdfFormatField = value;
+                this.RaisePropertyChanged("pdfFormat");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=12)]
+        public string attachs {
+            get {
+                return this.attachsField;
+            }
+            set {
+                this.attachsField = value;
+                this.RaisePropertyChanged("attachs");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=13)]
+        public System.Nullable<DocumentStateEnum> stateId {
+            get {
+                return this.stateIdField;
+            }
+            set {
+                this.stateIdField = value;
+                this.RaisePropertyChanged("stateId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool stateIdSpecified {
+            get {
+                return this.stateIdFieldSpecified;
+            }
+            set {
+                this.stateIdFieldSpecified = value;
+                this.RaisePropertyChanged("stateIdSpecified");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=14)]
+        public System.Nullable<System.DateTime> stateDate {
+            get {
+                return this.stateDateField;
+            }
+            set {
+                this.stateDateField = value;
+                this.RaisePropertyChanged("stateDate");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool stateDateSpecified {
+            get {
+                return this.stateDateFieldSpecified;
+            }
+            set {
+                this.stateDateFieldSpecified = value;
+                this.RaisePropertyChanged("stateDateSpecified");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=15)]
+        public System.Nullable<DocumentActionEnum> actionId {
+            get {
+                return this.actionIdField;
+            }
+            set {
+                this.actionIdField = value;
+                this.RaisePropertyChanged("actionId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool actionIdSpecified {
+            get {
+                return this.actionIdFieldSpecified;
+            }
+            set {
+                this.actionIdFieldSpecified = value;
+                this.RaisePropertyChanged("actionIdSpecified");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=16)]
+        public System.Nullable<System.DateTime> actionDate {
+            get {
+                return this.actionDateField;
+            }
+            set {
+                this.actionDateField = value;
+                this.RaisePropertyChanged("actionDate");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool actionDateSpecified {
+            get {
+                return this.actionDateFieldSpecified;
+            }
+            set {
+                this.actionDateFieldSpecified = value;
+                this.RaisePropertyChanged("actionDateSpecified");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.4084.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums")]
+    public enum DocumentTypeEnum {
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("1")]
+        Item1,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("2")]
+        Item2,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("3")]
+        Item3,
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.4084.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums")]
+    public enum DocumentStateEnum {
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("1")]
+        Item1,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("31")]
+        Item31,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("7")]
+        Item7,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("35")]
+        Item35,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("11")]
+        Item11,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("33")]
+        Item33,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("22")]
+        Item22,
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.4084.0")]
+    [System.SerializableAttribute()]
+    [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums")]
+    public enum DocumentActionEnum {
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("12")]
+        Item12,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("17")]
+        Item17,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("19")]
+        Item19,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("20")]
+        Item20,
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("22")]
+        Item22,
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -692,6 +432,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
     public partial class SendDocumentRequest {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="urn:ElectronicInvoice.B2BClientOperations", Order=0)]
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true)]
         public EspapMiddleware.ConsoleApp.SVFReference.SendDocumentContract SendDocumentMCIn;
         
         public SendDocumentRequest() {
@@ -702,6 +443,252 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
         }
     }
     
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.4084.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="urn:ElectronicInvoice.B2BClientOperations")]
+    public partial class SetDocumentResultMCIn : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private System.Guid uniqueIdField;
+        
+        private string documentIdField;
+        
+        private string referenceNumberField;
+        
+        private System.Nullable<int> documentTypeField;
+        
+        private System.Nullable<System.DateTime> issueDateField;
+        
+        private string supplierFiscalIdField;
+        
+        private string customerFiscalIdField;
+        
+        private bool isASuccessField;
+        
+        private SetDocumentResultMCInMessages[] messagesField;
+        
+        private System.Nullable<int> stateIdField;
+        
+        private System.Nullable<int> actionIdField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public System.Guid uniqueId {
+            get {
+                return this.uniqueIdField;
+            }
+            set {
+                this.uniqueIdField = value;
+                this.RaisePropertyChanged("uniqueId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=1)]
+        public string documentId {
+            get {
+                return this.documentIdField;
+            }
+            set {
+                this.documentIdField = value;
+                this.RaisePropertyChanged("documentId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=2)]
+        public string referenceNumber {
+            get {
+                return this.referenceNumberField;
+            }
+            set {
+                this.referenceNumberField = value;
+                this.RaisePropertyChanged("referenceNumber");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=3)]
+        public System.Nullable<int> documentType {
+            get {
+                return this.documentTypeField;
+            }
+            set {
+                this.documentTypeField = value;
+                this.RaisePropertyChanged("documentType");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=4)]
+        public System.Nullable<System.DateTime> issueDate {
+            get {
+                return this.issueDateField;
+            }
+            set {
+                this.issueDateField = value;
+                this.RaisePropertyChanged("issueDate");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=5)]
+        public string supplierFiscalId {
+            get {
+                return this.supplierFiscalIdField;
+            }
+            set {
+                this.supplierFiscalIdField = value;
+                this.RaisePropertyChanged("supplierFiscalId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=6)]
+        public string customerFiscalId {
+            get {
+                return this.customerFiscalIdField;
+            }
+            set {
+                this.customerFiscalIdField = value;
+                this.RaisePropertyChanged("customerFiscalId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=7)]
+        public bool isASuccess {
+            get {
+                return this.isASuccessField;
+            }
+            set {
+                this.isASuccessField = value;
+                this.RaisePropertyChanged("isASuccess");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute("messages", IsNullable=true, Order=8)]
+        public SetDocumentResultMCInMessages[] messages {
+            get {
+                return this.messagesField;
+            }
+            set {
+                this.messagesField = value;
+                this.RaisePropertyChanged("messages");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=9)]
+        public System.Nullable<int> stateId {
+            get {
+                return this.stateIdField;
+            }
+            set {
+                this.stateIdField = value;
+                this.RaisePropertyChanged("stateId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=10)]
+        public System.Nullable<int> actionId {
+            get {
+                return this.actionIdField;
+            }
+            set {
+                this.actionIdField = value;
+                this.RaisePropertyChanged("actionId");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.8.4084.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="urn:ElectronicInvoice.B2BClientOperations")]
+    public partial class SetDocumentResultMCInMessages : object, System.ComponentModel.INotifyPropertyChanged {
+        
+        private int typeIdField;
+        
+        private string systemIdField;
+        
+        private string codeField;
+        
+        private string descriptionField;
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(Order=0)]
+        public int typeId {
+            get {
+                return this.typeIdField;
+            }
+            set {
+                this.typeIdField = value;
+                this.RaisePropertyChanged("typeId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=1)]
+        public string systemId {
+            get {
+                return this.systemIdField;
+            }
+            set {
+                this.systemIdField = value;
+                this.RaisePropertyChanged("systemId");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=2)]
+        public string code {
+            get {
+                return this.codeField;
+            }
+            set {
+                this.codeField = value;
+                this.RaisePropertyChanged("code");
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlElementAttribute(IsNullable=true, Order=3)]
+        public string description {
+            get {
+                return this.descriptionField;
+            }
+            set {
+                this.descriptionField = value;
+                this.RaisePropertyChanged("description");
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -709,12 +696,12 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
     public partial class SetDocumentResultRequest {
         
         [System.ServiceModel.MessageBodyMemberAttribute(Namespace="urn:ElectronicInvoice.B2BClientOperations", Order=0)]
-        public EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContract SetDocumentResultMCIn;
+        public EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultMCIn SetDocumentResultMCIn;
         
         public SetDocumentResultRequest() {
         }
         
-        public SetDocumentResultRequest(EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContract SetDocumentResultMCIn) {
+        public SetDocumentResultRequest(EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultMCIn SetDocumentResultMCIn) {
             this.SetDocumentResultMCIn = SetDocumentResultMCIn;
         }
     }
@@ -773,7 +760,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
             base.Channel.SetDocumentResult(request);
         }
         
-        public void SetDocumentResult(EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContract SetDocumentResultMCIn) {
+        public void SetDocumentResult(EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultMCIn SetDocumentResultMCIn) {
             EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultRequest inValue = new EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultRequest();
             inValue.SetDocumentResultMCIn = SetDocumentResultMCIn;
             ((EspapMiddleware.ConsoleApp.SVFReference.IService)(this)).SetDocumentResult(inValue);
@@ -784,7 +771,7 @@ namespace EspapMiddleware.ConsoleApp.SVFReference {
             return base.Channel.SetDocumentResultAsync(request);
         }
         
-        public System.Threading.Tasks.Task SetDocumentResultAsync(EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultContract SetDocumentResultMCIn) {
+        public System.Threading.Tasks.Task SetDocumentResultAsync(EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultMCIn SetDocumentResultMCIn) {
             EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultRequest inValue = new EspapMiddleware.ConsoleApp.SVFReference.SetDocumentResultRequest();
             inValue.SetDocumentResultMCIn = SetDocumentResultMCIn;
             return ((EspapMiddleware.ConsoleApp.SVFReference.IService)(this)).SetDocumentResultAsync(inValue);

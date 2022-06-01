@@ -1,6 +1,7 @@
 ﻿using EspapMiddleware.Shared.DataContracts;
 using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.WebServiceModels;
+using EspapMiddleware.Shared.XmlSerializerModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace EspapMiddleware.WcfService
 {
@@ -21,7 +23,7 @@ namespace EspapMiddleware.WcfService
         [OperationContract(IsOneWay = true)]
         void SendDocument(SendDocumentRequest request);
 
-        [OperationContract(IsOneWay = true)]
+        [OperationContract(IsOneWay = true), XmlSerializerFormat]
         void SetDocumentResult(SetDocumentResultRequest request);
     }
 
@@ -36,6 +38,6 @@ namespace EspapMiddleware.WcfService
     public class SetDocumentResultRequest
     {
         [MessageBodyMember(Namespace = "urn:ElectronicInvoice.B2BClientOperations")]
-        public SetDocumentResultContract SetDocumentResultMCIn { get; set; }
+        public SetDocumentResultMCIn SetDocumentResultMCIn { get; set; }
     }
 }

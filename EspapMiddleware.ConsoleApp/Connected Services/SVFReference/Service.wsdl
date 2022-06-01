@@ -52,7 +52,7 @@
       <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd0" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd1" namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" />
       <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.DataContracts" />
-      <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd4" namespace="urnl:ElectronicInvoice.B2BClientOperations" />
+      <xsd:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd4" namespace="http://microsoft.com/wsdl/types/" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="SendDocumentRequest">

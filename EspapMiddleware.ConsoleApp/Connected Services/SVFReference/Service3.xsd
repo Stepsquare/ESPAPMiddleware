@@ -2,7 +2,7 @@
 <xs:schema xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:tns="urn:ElectronicInvoice.B2BClientOperations" elementFormDefault="qualified" targetNamespace="urn:ElectronicInvoice.B2BClientOperations" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd0" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
   <xs:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd1" namespace="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" />
-  <xs:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd4" namespace="urnl:ElectronicInvoice.B2BClientOperations" />
+  <xs:import schemaLocation="http://localhost/EspapMiddleware.WcfService/Service.svc?xsd=xsd4" namespace="http://microsoft.com/wsdl/types/" />
   <xs:complexType name="SendDocumentContract">
     <xs:sequence>
       <xs:element name="uniqueId" type="ser:guid" />
@@ -26,21 +26,30 @@
   </xs:complexType>
   <xs:element name="SendDocumentContract" nillable="true" type="tns:SendDocumentContract" />
   <xs:element name="SendDocumentMCIn" nillable="true" type="tns:SendDocumentContract" />
-  <xs:complexType name="SetDocumentResultContract">
-    <xs:sequence>
-      <xs:element name="uniqueId" type="ser:guid" />
-      <xs:element name="documentId" nillable="true" type="xs:string" />
-      <xs:element name="referenceNumber" nillable="true" type="xs:string" />
-      <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" name="documentType" type="q4:DocumentTypeEnum" />
-      <xs:element name="issueDate" type="xs:dateTime" />
-      <xs:element name="supplierFiscalId" nillable="true" type="xs:string" />
-      <xs:element name="customerFiscalId" nillable="true" type="xs:string" />
-      <xs:element name="isASuccess" type="xs:boolean" />
-      <xs:element xmlns:q5="urnl:ElectronicInvoice.B2BClientOperations" minOccurs="0" name="messages" nillable="true" type="q5:ArrayOfMessage" />
-      <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" minOccurs="0" name="stateId" nillable="true" type="q6:DocumentStateEnum" />
-      <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/EspapMiddleware.Shared.Enums" minOccurs="0" name="actionId" nillable="true" type="q7:DocumentActionEnum" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:element name="SetDocumentResultContract" nillable="true" type="tns:SetDocumentResultContract" />
-  <xs:element name="SetDocumentResultMCIn" nillable="true" type="tns:SetDocumentResultContract" />
+  <xs:element name="SetDocumentResultMCIn">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q4="http://microsoft.com/wsdl/types/" minOccurs="1" maxOccurs="1" name="uniqueId" type="q4:guid" />
+        <xs:element minOccurs="1" maxOccurs="1" name="documentId" nillable="true" type="xs:string" />
+        <xs:element minOccurs="1" maxOccurs="1" name="referenceNumber" nillable="true" type="xs:string" />
+        <xs:element minOccurs="1" maxOccurs="1" name="documentType" nillable="true" type="xs:int" />
+        <xs:element minOccurs="1" maxOccurs="1" name="issueDate" nillable="true" type="xs:dateTime" />
+        <xs:element minOccurs="1" maxOccurs="1" name="supplierFiscalId" nillable="true" type="xs:string" />
+        <xs:element minOccurs="1" maxOccurs="1" name="customerFiscalId" nillable="true" type="xs:string" />
+        <xs:element minOccurs="1" maxOccurs="1" name="isASuccess" type="xs:boolean" />
+        <xs:element minOccurs="0" maxOccurs="unbounded" name="messages" nillable="true">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element minOccurs="1" maxOccurs="1" name="typeId" type="xs:int" />
+              <xs:element minOccurs="1" maxOccurs="1" name="systemId" nillable="true" type="xs:string" />
+              <xs:element minOccurs="1" maxOccurs="1" name="code" nillable="true" type="xs:string" />
+              <xs:element minOccurs="1" maxOccurs="1" name="description" nillable="true" type="xs:string" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element minOccurs="1" maxOccurs="1" name="stateId" nillable="true" type="xs:int" />
+        <xs:element minOccurs="1" maxOccurs="1" name="actionId" nillable="true" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 </xs:schema>

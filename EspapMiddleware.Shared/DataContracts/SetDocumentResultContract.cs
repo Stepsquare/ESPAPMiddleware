@@ -14,22 +14,22 @@ namespace EspapMiddleware.Shared.DataContracts
         [DataMember(Order = 1, IsRequired = true)]
         public Guid uniqueId { get; set; }
 
-        [DataMember(Order = 2, IsRequired = true)]
+        [DataMember(Order = 2)]
         public string documentId { get; set; }
 
-        [DataMember(Order = 3, IsRequired = true)]
+        [DataMember(Order = 3)]
         public string referenceNumber { get; set; }
 
-        [DataMember(Order = 4, IsRequired = true)]
+        [DataMember(Order = 4)]
         public DocumentTypeEnum documentType { get; set; }
 
-        [DataMember(Order = 5, IsRequired = true)]
+        [DataMember(Order = 5)]
         public DateTime issueDate { get; set; }
 
-        [DataMember(Order = 6, IsRequired = true)]
+        [DataMember(Order = 6)]
         public string supplierFiscalId { get; set; }
 
-        [DataMember(Order = 7, IsRequired = true)]
+        [DataMember(Order = 7)]
         public string customerFiscalId { get; set; }
 
         [DataMember(Order = 8, IsRequired = true)]
@@ -44,7 +44,7 @@ namespace EspapMiddleware.Shared.DataContracts
         [DataMember(Order = 11)]
         public DocumentActionEnum? actionId { get; set; }
 
-        [DataContract(Name= "Message", Namespace = "urnl:ElectronicInvoice.B2BClientOperations")]
+        [DataContract(Name= "Message", Namespace = "urn:ElectronicInvoice.B2BClientOperations")]
         public class Message
         {
             [DataContract]

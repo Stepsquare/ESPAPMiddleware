@@ -72,6 +72,7 @@
     <Compile Include="WebServiceModels\GetDocFaturacaoResponse.cs" />
     <Compile Include="WebServiceModels\SetDocFaturacao.cs" />
     <Compile Include="WebServiceModels\SetDocFaturacaoResponse.cs" />
+    <Compile Include="XmlSerializerModel\SetDocumentResultMCIn.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
