@@ -13,7 +13,7 @@ namespace EspapMiddleware.DataLayer.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "202204141508178_Initial_deploy"; }
+            get { return "202206020104140_Initial_deploy"; }
         }
         
         string IMigrationMetadata.Source

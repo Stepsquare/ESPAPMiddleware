@@ -211,7 +211,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 documentToUpdate.IsSynchronizedWithFEAP = contract.isASuccess;
 
                 if (contract.messages.Length > 0)
-                    documentToUpdate.FEAPMessages = string.Join(Environment.NewLine, contract.messages.Select(x => x.typeId.ToString() + " - " + x.description).ToArray());
+                    documentToUpdate.FEAPMessages = string.Join(Environment.NewLine, contract.messages.Select(x => x.code.ToString() + " - " + x.description).ToArray());
 
                 unitOfWork.Documents.Update(documentToUpdate);
 
@@ -388,7 +388,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 num_fatura = contract.referenceNumber,
                 total_fatura = contract.TotalAmount,
                 fatura_base64 = contract.pdfFormat,
-                tp_doc = contract.documentType == DocumentTypeEnum.Fatura ? SetDocFaturacao.fatura.tp_docs.FAT : SetDocFaturacao.fatura.tp_docs.NTC,
+                tp_doc = contract.documentType == DocumentTypeEnum.Fatura ? "FAT" : "NTC",
                 dt_fatura = contract.issueDate.ToString("dd-MM-yyyy"),
                 num_doc_rel = contract.documentType == DocumentTypeEnum.NotaCrédito ? contract.RelatedReferenceNumber : null,
                 num_compromisso = contract.CompromiseNumber
@@ -428,7 +428,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 num_fatura = document.ReferenceNumber,
                 total_fatura = document.TotalAmount,
                 fatura_base64 = Convert.ToBase64String(document.PdfFormat),
-                tp_doc = document.TypeId == DocumentTypeEnum.Fatura ? SetDocFaturacao.fatura.tp_docs.FAT : SetDocFaturacao.fatura.tp_docs.NTC,
+                tp_doc = document.TypeId == DocumentTypeEnum.Fatura ? "FAT" : "NTC",
                 dt_fatura = document.IssueDate.ToString("dd-MM-yyyy"),
                 num_doc_rel = document.TypeId == DocumentTypeEnum.NotaCrédito ? document.RelatedDocument.ReferenceNumber : null,
                 num_compromisso = document.CompromiseNumber,

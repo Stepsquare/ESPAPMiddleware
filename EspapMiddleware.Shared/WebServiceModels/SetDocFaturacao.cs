@@ -17,16 +17,10 @@ namespace EspapMiddleware.Shared.WebServiceModels
 
         public class fatura
         {
-            public enum tp_docs
-            {
-                FAT,
-                NTC
-            }
-
             public string num_fatura { get; set; }
             public string total_fatura { get; set; }
             public string fatura_base64 { get; set; }
-            public tp_docs tp_doc { get; set; }
+            public string tp_doc { get; set; }
             public string dt_fatura { get; set; }
             public string num_doc_rel { get; set; }
             public string id_doc_feap { get; set; }

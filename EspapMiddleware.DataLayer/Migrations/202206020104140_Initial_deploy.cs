@@ -82,7 +82,7 @@
                         ExceptionStackTrace = c.String(),
                         ExceptionMessage = c.String(),
                     })
-                .PrimaryKey(t => t.UniqueId)
+                .PrimaryKey(t => new { t.UniqueId, t.RequestLogTypeId })
                 .ForeignKey("dbo.Documents", t => t.DocumentId)
                 .ForeignKey("dbo.RequestLogTypes", t => t.RequestLogTypeId, cascadeDelete: true)
                 .Index(t => t.RequestLogTypeId)

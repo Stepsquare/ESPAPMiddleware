@@ -52,9 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context\EspapMiddlewareDbContext.cs" />
-    <Compile Include="Migrations\202204141508178_Initial_deploy.cs" />
-    <Compile Include="Migrations\202204141508178_Initial_deploy.designer.cs">
-      <DependentUpon>202204141508178_Initial_deploy.cs</DependentUpon>
+    <Compile Include="Migrations\202206020104140_Initial_deploy.cs" />
+    <Compile Include="Migrations\202206020104140_Initial_deploy.designer.cs">
+      <DependentUpon>202206020104140_Initial_deploy.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,8 +74,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202204141508178_Initial_deploy.resx">
-      <DependentUpon>202204141508178_Initial_deploy.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202206020104140_Initial_deploy.resx">
+      <DependentUpon>202206020104140_Initial_deploy.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
