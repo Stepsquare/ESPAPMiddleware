@@ -32,7 +32,7 @@ namespace EspapMiddleware.ServiceLayer.Services
             var webservices = (NameValueCollection)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/webServices");
 
             _webserviceRequest = new GenericRestRequestManager(environment, webservices);
-            
+
             _unitOfWorkFactory = unitOfWorkFactory;
         }
 
@@ -88,6 +88,15 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 contract.SchoolYear = _webserviceRequest.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
 
+                var SendDocumentRequestLog = new RequestLog()
+                {
+                    UniqueId = contract.uniqueId,
+                    RequestLogTypeId = RequestLogTypeEnum.SendDocument,
+                    DocumentId = contract.documentId,
+                    Successful = true,
+                    Date = DateTime.UtcNow
+                };
+
                 documentToInsert = new Document();
 
                 FillWithContract(in contract, ref documentToInsert);
@@ -97,50 +106,142 @@ namespace EspapMiddleware.ServiceLayer.Services
                     var relatedDocument = await unitOfWork.Documents.Find(x => x.ReferenceNumber == contract.RelatedReferenceNumber
                                                                             && x.SupplierFiscalId == contract.supplierFiscalId
                                                                             && x.SchoolYear == contract.SchoolYear
-                                                                            && x.TypeId != contract.documentType);
+                                                                            && (x.TypeId == DocumentTypeEnum.Fatura || x.TypeId == DocumentTypeEnum.NotaCrédito));
 
-                    if (relatedDocument == null)
-                        throw new DatabaseException("Documento relacionado não encontrado na BD. Inserir documento referente à fatura original.");
-                    
-                    documentToInsert.RelatedDocumentId = relatedDocument.DocumentId;
+                    if (relatedDocument != null)
+                    {
+                        documentToInsert.RelatedDocumentId = relatedDocument.DocumentId;
+                        documentToInsert.RelatedDocument = relatedDocument;
+                    }
+
+                    var documentToInsertResult = await RequestSetDocFaturacao(documentToInsert);
+
+                    documentToInsert.IsSynchronizedWithSigefe = documentToInsertResult.cod_msg_fat == "200";
+
+                    documentToInsert.MEId = documentToInsertResult.id_me_fatura;
+
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = contract.documentId,
+                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                        Date = DateTime.UtcNow,
+                        MessageContent = documentToInsertResult.cod_msg_fat + " - " + documentToInsertResult.msg_fat
+                    });
+
+                    if (documentToInsertResult.cod_msg_fat != "490")
+                    {
+                        if (documentToInsertResult.state_id == "35")
+                        {
+                            //Nota de Crédito para estado Processado
+                            documentToInsert.StateId = DocumentStateEnum.Processado;
+                            documentToInsert.StateDate = DateTime.UtcNow;
+
+                            //Fatura relacionada para estado Processado
+                            documentToInsert.RelatedDocument.StateId = DocumentStateEnum.Processado;
+                            documentToInsert.RelatedDocument.StateDate = DateTime.UtcNow;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert.RelatedDocument));
+                        }
+                        else if (documentToInsertResult.state_id == "22")
+                        {
+                            documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                            documentToInsert.ActionDate = DateTime.UtcNow;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
+                        }
+                    }
                 }
-
-                var faturaResult = await RequestSetDocFaturacao(contract);
-
-                documentToInsert.MEId = faturaResult.id_me_fatura;
-
-                switch (faturaResult.state_id)
+                else
                 {
-                    case "35":
+                    var documentToInsertResult = await RequestSetDocFaturacao(documentToInsert);
+
+                    documentToInsert.MEId = documentToInsertResult.id_me_fatura;
+
+                    documentToInsert.IsSynchronizedWithSigefe = documentToInsertResult.cod_msg_fat == "200";
+
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = contract.documentId,
+                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                        Date = DateTime.UtcNow,
+                        MessageContent = documentToInsertResult.cod_msg_fat + " - " + documentToInsertResult.msg_fat
+                    });
+
+                    if (documentToInsertResult.state_id == "35")
+                    {
                         documentToInsert.StateId = DocumentStateEnum.ValidadoConferido;
                         documentToInsert.StateDate = DateTime.UtcNow;
-                        break;
-                    case "22":
-                        documentToInsert.StateId = DocumentStateEnum.Devolvido;
-                        documentToInsert.StateDate = DateTime.UtcNow;
-                        break;
-                    default:
-                        break;
-                }
 
-                if (documentToInsert.StateId == DocumentStateEnum.ValidadoConferido 
-                    || documentToInsert.StateId == DocumentStateEnum.Devolvido)
-                {
-                    var setDocumentLog = await RequestSetDocument(faturaResult);
+                        unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
+                    }
+                    else
+                    {
+                        var relatedDocument = await unitOfWork.Documents.Find(x => x.RelatedReferenceNumber == contract.referenceNumber
+                                                                            && x.SupplierFiscalId == contract.supplierFiscalId
+                                                                            && x.SchoolYear == contract.SchoolYear
+                                                                            && x.TypeId == DocumentTypeEnum.NotaCrédito);
 
-                    unitOfWork.RequestLogs.Add(setDocumentLog);
+                        if (relatedDocument != null)
+                        {
+                            relatedDocument.RelatedDocumentId = documentToInsert.DocumentId;
+                            relatedDocument.RelatedDocument = documentToInsert;
+
+                            var relatedDocumentResult = await RequestSetDocFaturacao(relatedDocument);
+
+                            relatedDocument.MEId = documentToInsertResult.id_me_fatura;
+
+                            relatedDocument.IsSynchronizedWithSigefe = documentToInsertResult.cod_msg_fat == "200";
+
+                            unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                            {
+                                DocumentId = relatedDocument.DocumentId,
+                                MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                Date = DateTime.UtcNow,
+                                MessageContent = relatedDocumentResult.cod_msg_fat + " - " + relatedDocumentResult.msg_fat
+                            });
+
+                            if (relatedDocumentResult.state_id == "35")
+                            {
+                                //Fatura inserida para estado Processado
+                                documentToInsert.StateId = DocumentStateEnum.Processado;
+                                documentToInsert.StateDate = DateTime.UtcNow;
+
+                                //Nota de crédito relacionada para estado Processado
+                                relatedDocument.StateId = DocumentStateEnum.Processado;
+                                relatedDocument.StateDate = DateTime.UtcNow;
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
+                            }
+                            else
+                            {
+                                relatedDocument.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                relatedDocument.ActionDate = DateTime.UtcNow;
+
+                                documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                documentToInsert.ActionDate = DateTime.UtcNow;
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument, relatedDocumentResult.reason));
+                            }
+
+                            unitOfWork.Documents.Update(relatedDocument);
+                        }
+                        else
+                        {
+                            documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                            documentToInsert.ActionDate = DateTime.UtcNow;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
+                        }
+                    }
                 }
 
                 unitOfWork.Documents.Add(documentToInsert);
 
-                unitOfWork.RequestLogs.Add(new RequestLog()
-                {
-                    UniqueId = contract.uniqueId,
-                    RequestLogTypeId = RequestLogTypeEnum.SendDocument,
-                    DocumentId = contract.documentId,
-                    Successful = true,
-                    Date = DateTime.UtcNow
-                });
+                unitOfWork.RequestLogs.Add(SendDocumentRequestLog);
 
                 var result = await unitOfWork.SaveChangesAsync();
 
@@ -168,15 +269,22 @@ namespace EspapMiddleware.ServiceLayer.Services
                     if (contract.stateId == DocumentStateEnum.EmitidoPagamento)
                     {
                         var faturaResult = await RequestSetDocFaturacao(documentToUpdate);
+
+                        documentToUpdate.IsSynchronizedWithSigefe = faturaResult.cod_msg_fat == "200";
+
+                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                        {
+                            DocumentId = documentToUpdate.DocumentId,
+                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                            Date = DateTime.UtcNow,
+                            MessageContent = faturaResult.cod_msg_fat + " - " + faturaResult.msg_fat
+                        });
                     }
                 }
-                else
+                else if (contract.actionId.HasValue)
                 {
-                    if (contract.actionId.HasValue)
-                    {
-                        documentToUpdate.ActionId = contract.actionId;
-                        documentToUpdate.ActionDate = contract.actionDate;
-                    }
+                    documentToUpdate.ActionId = contract.actionId;
+                    documentToUpdate.ActionDate = contract.actionDate;
                 }
 
                 unitOfWork.Documents.Update(documentToUpdate);
@@ -210,8 +318,19 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 documentToUpdate.IsSynchronizedWithFEAP = contract.isASuccess;
 
-                if (contract.messages.Length > 0)
-                    documentToUpdate.FEAPMessages = string.Join(Environment.NewLine, contract.messages.Select(x => x.code.ToString() + " - " + x.description).ToArray());
+                if (contract.messages?.Length > 0)
+                {
+                    foreach (var message in contract.messages)
+                    {
+                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                        {
+                            DocumentId = contract.documentId,
+                            MessageTypeId = DocumentMessageTypeEnum.FEAP,
+                            Date = DateTime.UtcNow,
+                            MessageContent = message.code + " - " + message.description
+                        });
+                    }
+                }
 
                 unitOfWork.Documents.Update(documentToUpdate);
 
@@ -235,27 +354,6 @@ namespace EspapMiddleware.ServiceLayer.Services
 
         #region Private Methods
 
-        private async Task<SetDocFaturacaoResponse.fatura> RequestSetDocFaturacao(SendDocumentContract contract)
-        {
-            var setDocFaturacaoObj = new SetDocFaturacao();
-
-            FillWithContract(in contract, ref setDocFaturacaoObj);
-
-            var setDocFaturacaoResult = await _webserviceRequest.Post<SetDocFaturacaoResponse, SetDocFaturacao>("setDocFaturacao", setDocFaturacaoObj);
-
-            if (setDocFaturacaoResult == null)
-                throw new WebserviceException("Erro de comunicação com os webservices.");
-
-            if (setDocFaturacaoResult.messages.Any(x => x.cod_msg == "200"))
-            {
-                return setDocFaturacaoResult.faturas.FirstOrDefault();
-            }
-            else
-            {
-                throw new WebserviceException(setDocFaturacaoResult.messages.Select(x => x.msg).ToArray());
-            }
-        }
-
         private async Task<SetDocFaturacaoResponse.fatura> RequestSetDocFaturacao(Document document)
         {
             var setDocFaturacaoObj = new SetDocFaturacao();
@@ -277,7 +375,7 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
-        private async Task<RequestLog> RequestSetDocument(SetDocFaturacaoResponse.fatura response)
+        private async Task<RequestLog> RequestSetDocument(Document document, string reason = null)
         {
             var uniqueId = Guid.NewGuid();
 
@@ -295,19 +393,46 @@ namespace EspapMiddleware.ServiceLayer.Services
                     var serviceContextHeader = new FEAPServices_PP.ServiceContextHeader()
                     {
                         Application = "FaturacaoEletronica",
-                        ProcessId = response.id_doc_feap,
+                        ProcessId = document.DocumentId,
                     };
 
                     var setDocumentRequest = new FEAPServices_PP.SetDocumentRequest()
                     {
                         uniqueId = uniqueId.ToString(),
-                        documentId = response.id_doc_feap,
-                        stateIdSpecified = true,
-                        stateId = int.Parse(response.state_id),
-                        reason = response.state_id == ((int)DocumentStateEnum.Devolvido).ToString() ? response.reason : null,
-                        documentNumbersSpecified1 = !string.IsNullOrEmpty(response.id_me_fatura),
-                        documentNumbers = new string[] { response.id_me_fatura }
+                        documentId = document.DocumentId,
                     };
+
+                    if (document.StateId == DocumentStateEnum.ValidadoConferido || document.StateId == DocumentStateEnum.Processado)
+                    {
+                        setDocumentRequest.documentNumbersSpecified1Specified = true;
+                        setDocumentRequest.documentNumbersSpecified1 = true;
+                        setDocumentRequest.documentNumbers = new string[] { document.MEId };
+                        setDocumentRequest.stateIdSpecified = true;
+                        setDocumentRequest.stateId = (int)document.StateId;
+                    }
+                    else if (document.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
+                    {
+                        setDocumentRequest.actionIdSpecified = true;
+                        setDocumentRequest.actionId = (int)document.ActionId;
+                        setDocumentRequest.regularizationSpecified = true;
+
+                        switch (document.TypeId)
+                        {
+                            case DocumentTypeEnum.Fatura:
+                                setDocumentRequest.regularization = 2;
+                                break;
+                            case DocumentTypeEnum.NotaCrédito:
+                                setDocumentRequest.regularization = 3;
+                                break;
+                            case DocumentTypeEnum.NotaDébito:
+                                setDocumentRequest.regularization = 2;
+                                break;
+                            default:
+                                break;
+                        }
+                        
+                        setDocumentRequest.reason = reason;
+                    }
 
                     await client.SetDocumentAsync(serviceContextHeader, setDocumentRequest);
 
@@ -315,7 +440,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     {
                         UniqueId = uniqueId,
                         RequestLogTypeId = RequestLogTypeEnum.SetDocument,
-                        DocumentId = response.id_doc_feap,
+                        DocumentId = document.DocumentId,
                         Date = DateTime.UtcNow,
                         Successful = true
                     };
@@ -327,7 +452,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     UniqueId = uniqueId,
                     RequestLogTypeId = RequestLogTypeEnum.SetDocument,
-                    DocumentId = response.id_doc_feap,
+                    DocumentId = document.DocumentId,
                     Date = DateTime.UtcNow,
                     Successful = false,
                     ExceptionType = ex.GetBaseException().GetType().Name,
@@ -341,6 +466,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             obj.DocumentId = contract.documentId;
             obj.ReferenceNumber = contract.referenceNumber;
+            obj.RelatedReferenceNumber = contract.RelatedReferenceNumber;
             obj.TypeId = contract.documentType;
             obj.IssueDate = contract.issueDate;
             obj.SupplierFiscalId = contract.supplierFiscalId;
@@ -376,45 +502,6 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
-        private void FillWithContract(in SendDocumentContract contract, ref SetDocFaturacao obj)
-        {
-            obj.id_ano_letivo = contract.SchoolYear;
-
-            obj.nif = contract.supplierFiscalId.Substring(2);
-
-            var faturaToSend = new SetDocFaturacao.fatura()
-            {
-                id_doc_feap = contract.documentId,
-                num_fatura = contract.referenceNumber,
-                total_fatura = contract.TotalAmount,
-                fatura_base64 = contract.pdfFormat,
-                tp_doc = contract.documentType == DocumentTypeEnum.Fatura ? "FAT" : "NTC",
-                dt_fatura = contract.issueDate.ToString("dd-MM-yyyy"),
-                num_doc_rel = contract.documentType == DocumentTypeEnum.NotaCrédito ? contract.RelatedReferenceNumber : null,
-                num_compromisso = contract.CompromiseNumber
-            };
-
-            faturaToSend.linhas = new List<SetDocFaturacao.fatura.linhaModel>();
-
-            foreach (var line in contract.InvoiceLines)
-            {
-                faturaToSend.linhas.Add(new SetDocFaturacao.fatura.linhaModel()
-                {
-                    num_linha = int.Parse(line.Id),
-                    id_linha = line.StandardItemIdentification,
-                    descricao_linha = line.Name,
-                    qtd_linha = int.Parse(line.Quantity),
-                    valor_linha = decimal.Parse(line.TotalLineValue, CultureInfo.InvariantCulture),
-                    perc_iva_linha = decimal.Parse(line.TaxPercent, CultureInfo.InvariantCulture),
-                });
-            }
-
-            obj.faturas = new List<SetDocFaturacao.fatura>
-            {
-                faturaToSend
-            };
-        }
-
         private void FillWithContract(in Document document, ref SetDocFaturacao obj)
         {
             obj.id_ano_letivo = document.SchoolYear;
@@ -428,13 +515,32 @@ namespace EspapMiddleware.ServiceLayer.Services
                 num_fatura = document.ReferenceNumber,
                 total_fatura = document.TotalAmount,
                 fatura_base64 = Convert.ToBase64String(document.PdfFormat),
-                tp_doc = document.TypeId == DocumentTypeEnum.Fatura ? "FAT" : "NTC",
                 dt_fatura = document.IssueDate.ToString("dd-MM-yyyy"),
-                num_doc_rel = document.TypeId == DocumentTypeEnum.NotaCrédito ? document.RelatedDocument.ReferenceNumber : null,
                 num_compromisso = document.CompromiseNumber,
-                estado_doc = "5",
-                dt_estado = document.StateDate.ToString("dd-MM-yyyy")
             };
+
+            switch (document.TypeId)
+            {
+                case DocumentTypeEnum.Fatura:
+                    faturaToSend.tp_doc = "FAT";
+                    break;
+                case DocumentTypeEnum.NotaCrédito:
+                    faturaToSend.tp_doc = "NTC";
+                    faturaToSend.num_doc_rel = document.RelatedReferenceNumber;
+                    break;
+                case DocumentTypeEnum.NotaDébito:
+                    faturaToSend.tp_doc = "NTD";
+                    faturaToSend.num_doc_rel = document.RelatedReferenceNumber;
+                    break;
+                default:
+                    break;
+            }
+
+            if (document.StateId == DocumentStateEnum.EmitidoPagamento)
+            {
+                faturaToSend.estado_doc = "5";
+                faturaToSend.dt_estado = document.StateDate.ToString("dd-MM-yyyy");
+            }
 
             faturaToSend.linhas = new List<SetDocFaturacao.fatura.linhaModel>();
 

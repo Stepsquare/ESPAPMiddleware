@@ -13,7 +13,7 @@ namespace EspapMiddleware.Shared.Enums
         [EnumMember(Value = "12")]
         RegularizaçãoRececionada = 12,
         [EnumMember(Value = "17")]
-        SolicitaçãoRececionada = 17,
+        SolicitaçãoDocumentoRegularização = 17,
         [EnumMember(Value = "19")]
         AprovaçãoRececionada = 19,
         [EnumMember(Value = "20")]

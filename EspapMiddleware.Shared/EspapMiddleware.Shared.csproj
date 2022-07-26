@@ -49,11 +49,14 @@
     <Compile Include="Entities\Document.cs" />
     <Compile Include="Entities\DocumentAction.cs" />
     <Compile Include="Entities\DocumentLine.cs" />
+    <Compile Include="Entities\DocumentMessage.cs" />
+    <Compile Include="Entities\DocumentMessageType.cs" />
     <Compile Include="Entities\DocumentState.cs" />
     <Compile Include="Entities\DocumentType.cs" />
     <Compile Include="Entities\RequestLog.cs" />
     <Compile Include="Entities\RequestLogType.cs" />
     <Compile Include="Enums\DocumentActionEnum.cs" />
+    <Compile Include="Enums\DocumentMessageTypeEnum.cs" />
     <Compile Include="Enums\DocumentStateEnum.cs" />
     <Compile Include="Enums\DocumentTypeEnum.cs" />
     <Compile Include="Enums\RequestLogTypeEnum.cs" />
@@ -62,6 +65,7 @@
     <Compile Include="Exceptions\WebserviceException.cs" />
     <Compile Include="Interfaces\IConfiguration\IUnitOfWork.cs" />
     <Compile Include="Interfaces\IConfiguration\IUnitOfWorkFactory.cs" />
+    <Compile Include="Interfaces\IRepositories\IDocumentMessageRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IDocumentRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IGenericRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IRequestLogRepository.cs" />

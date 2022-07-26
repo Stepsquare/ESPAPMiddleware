@@ -15,6 +15,8 @@ namespace EspapMiddleware.DataLayer.Context
         public DbSet<DocumentType> DocumentTypes { get; set; }
         public DbSet<DocumentState> DocumentStates { get; set; }
         public DbSet<DocumentAction> DocumentActions { get; set; }
+        public DbSet<DocumentMessage> DocumentMessages { get; set; }
+        public DbSet<DocumentMessageType> DocumentMessagesTypes { get; set; }
         public DbSet<RequestLog> RequestLogs { get; set; }
         public DbSet<RequestLogType> RequestLogTypes { get; set; }
 

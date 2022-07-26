@@ -37,14 +37,7 @@ namespace EspapMiddleware.ServiceLayer.Helpers
 
             RestResponse<T> response = await client.ExecuteGetAsync<T>(request);
 
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                return response.Data;
-            }
-            else
-            {
-                throw new WebserviceException($"{response.StatusCode} - {response.ErrorMessage}");
-            }
+            return response.Data;
         }
 
         public async Task<TOutput> Post<TOutput, TInput>(string webservice, TInput bodyObject, IDictionary<string, string> headers = null) where TOutput : class where TInput : class
@@ -63,14 +56,7 @@ namespace EspapMiddleware.ServiceLayer.Helpers
 
             RestResponse<TOutput> response = await client.ExecutePostAsync<TOutput>(request);
 
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                return response.Data;
-            }
-            else
-            {
-                throw new WebserviceException($"{(int)response.StatusCode} - {response.StatusDescription}");
-            }
+            return response.Data;
         }
 
         #region Private methods

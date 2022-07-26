@@ -11,6 +11,7 @@ namespace EspapMiddleware.Shared.Interfaces.IConfiguration
     {
         IDocumentRepository Documents { get; }
         IRequestLogRepository RequestLogs { get; }
+        IDocumentMessageRepository DocumentMessages { get; }
         Task<int> SaveChangesAsync();
     }
 }

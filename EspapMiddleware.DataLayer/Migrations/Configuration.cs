@@ -41,6 +41,14 @@
                         Description = e.ToString()
                     }));
 
+            if (!context.DocumentMessagesTypes.Any())
+                context.DocumentMessagesTypes.AddRange(Enum.GetValues(typeof(DocumentMessageTypeEnum)).Cast<DocumentMessageTypeEnum>()
+                    .Select(e => new DocumentMessageType()
+                    {
+                        Id = e,
+                        Description = e.ToString()
+                    }));
+
             if (!context.RequestLogTypes.Any())
                 context.RequestLogTypes.AddRange(Enum.GetValues(typeof(RequestLogTypeEnum)).Cast<RequestLogTypeEnum>()
                     .Select(e => new RequestLogType()
