@@ -3,7 +3,7 @@
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class Initial_deploy : DbMigration
+    public partial class InitialDeploy : DbMigration
     {
         public override void Up()
         {
@@ -37,8 +37,10 @@
                 c => new
                     {
                         DocumentId = c.String(nullable: false, maxLength: 128),
+                        MEId = c.String(),
                         RelatedDocumentId = c.String(),
                         ReferenceNumber = c.String(),
+                        RelatedReferenceNumber = c.String(),
                         TypeId = c.Int(nullable: false),
                         IssueDate = c.DateTime(nullable: false),
                         SupplierFiscalId = c.String(),
@@ -54,9 +56,8 @@
                         StateDate = c.DateTime(nullable: false),
                         ActionId = c.Int(),
                         ActionDate = c.DateTime(),
-                        MEId = c.String(),
+                        IsSynchronizedWithSigefe = c.Boolean(nullable: false),
                         IsSynchronizedWithFEAP = c.Boolean(nullable: false),
-                        FEAPMessages = c.String(),
                         RelatedDocument_DocumentId = c.String(maxLength: 128),
                     })
                 .PrimaryKey(t => t.DocumentId)
@@ -68,6 +69,31 @@
                 .Index(t => t.StateId)
                 .Index(t => t.ActionId)
                 .Index(t => t.RelatedDocument_DocumentId);
+            
+            CreateTable(
+                "dbo.DocumentMessages",
+                c => new
+                    {
+                        Id = c.Int(nullable: false, identity: true),
+                        DocumentId = c.String(maxLength: 128),
+                        MessageTypeId = c.Int(nullable: false),
+                        Date = c.DateTime(nullable: false),
+                        MessageContent = c.String(),
+                    })
+                .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.Documents", t => t.DocumentId)
+                .ForeignKey("dbo.DocumentMessageTypes", t => t.MessageTypeId, cascadeDelete: true)
+                .Index(t => t.DocumentId)
+                .Index(t => t.MessageTypeId);
+            
+            CreateTable(
+                "dbo.DocumentMessageTypes",
+                c => new
+                    {
+                        Id = c.Int(nullable: false),
+                        Description = c.String(),
+                    })
+                .PrimaryKey(t => t.Id);
             
             CreateTable(
                 "dbo.RequestLogs",
@@ -125,9 +151,13 @@
             DropForeignKey("dbo.RequestLogs", "RequestLogTypeId", "dbo.RequestLogTypes");
             DropForeignKey("dbo.RequestLogs", "DocumentId", "dbo.Documents");
             DropForeignKey("dbo.Documents", "RelatedDocument_DocumentId", "dbo.Documents");
+            DropForeignKey("dbo.DocumentMessages", "MessageTypeId", "dbo.DocumentMessageTypes");
+            DropForeignKey("dbo.DocumentMessages", "DocumentId", "dbo.Documents");
             DropForeignKey("dbo.Documents", "ActionId", "dbo.DocumentActions");
             DropIndex("dbo.RequestLogs", new[] { "DocumentId" });
             DropIndex("dbo.RequestLogs", new[] { "RequestLogTypeId" });
+            DropIndex("dbo.DocumentMessages", new[] { "MessageTypeId" });
+            DropIndex("dbo.DocumentMessages", new[] { "DocumentId" });
             DropIndex("dbo.Documents", new[] { "RelatedDocument_DocumentId" });
             DropIndex("dbo.Documents", new[] { "ActionId" });
             DropIndex("dbo.Documents", new[] { "StateId" });
@@ -137,6 +167,8 @@
             DropTable("dbo.DocumentStates");
             DropTable("dbo.RequestLogTypes");
             DropTable("dbo.RequestLogs");
+            DropTable("dbo.DocumentMessageTypes");
+            DropTable("dbo.DocumentMessages");
             DropTable("dbo.Documents");
             DropTable("dbo.DocumentLines");
             DropTable("dbo.DocumentActions");
