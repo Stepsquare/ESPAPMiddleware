@@ -323,6 +323,16 @@ namespace EspapMiddleware.ServiceLayer.Services
                         });
                     }
                 }
+                else if (contract.isASuccess)
+                {
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = contract.documentId,
+                        MessageTypeId = DocumentMessageTypeEnum.FEAP,
+                        Date = DateTime.UtcNow,
+                        MessageContent = "Documento atualizado com sucesso."
+                    });
+                }
 
                 unitOfWork.Documents.Update(documentToUpdate);
 
