@@ -109,10 +109,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                                                                             && (x.TypeId == DocumentTypeEnum.Fatura || x.TypeId == DocumentTypeEnum.NotaCrédito));
 
                     if (relatedDocument != null)
-                    {
                         documentToInsert.RelatedDocumentId = relatedDocument.DocumentId;
-                        documentToInsert.RelatedDocument = relatedDocument;
-                    }
 
                     var documentToInsertResult = await RequestSetDocFaturacao(documentToInsert);
 
@@ -124,35 +121,32 @@ namespace EspapMiddleware.ServiceLayer.Services
                         MessageContent = documentToInsertResult != null ? documentToInsertResult.cod_msg_fat + " - " + documentToInsertResult.msg_fat : "500 - Falha de comunicação. Reenviar pedido mais tarde."
                     });
 
-                    if (documentToInsertResult != null)
+                    if (documentToInsertResult != null && documentToInsertResult.cod_msg_fat != "490")
                     {
                         documentToInsert.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(documentToInsertResult.id_me_fatura);
 
                         documentToInsert.MEId = documentToInsertResult.id_me_fatura;
 
-                        if (documentToInsertResult.cod_msg_fat != "490")
+                        if (documentToInsertResult.state_id == "35")
                         {
-                            if (documentToInsertResult.state_id == "35")
-                            {
-                                //Nota de Crédito para estado Processado
-                                documentToInsert.StateId = DocumentStateEnum.Processado;
-                                documentToInsert.StateDate = DateTime.UtcNow;
+                            documentToInsert.StateId = DocumentStateEnum.Processado;
+                            documentToInsert.StateDate = DateTime.UtcNow;
 
-                                //Fatura relacionada para estado Processado
-                                documentToInsert.RelatedDocument.StateId = DocumentStateEnum.Processado;
-                                documentToInsert.RelatedDocument.StateDate = DateTime.UtcNow;
+                            relatedDocument.StateId = DocumentStateEnum.Processado;
+                            relatedDocument.StateDate = DateTime.UtcNow;
 
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert.RelatedDocument));
-                            }
-                            else if (documentToInsertResult.state_id == "22")
-                            {
-                                documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                documentToInsert.ActionDate = DateTime.UtcNow;
-
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
-                            }
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
                         }
+                        else if (documentToInsertResult.state_id == "22")
+                        {
+                            documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                            documentToInsert.ActionDate = DateTime.UtcNow;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
+                        }
+
+                        unitOfWork.Documents.Update(relatedDocument);
                     }
                 }
                 else
