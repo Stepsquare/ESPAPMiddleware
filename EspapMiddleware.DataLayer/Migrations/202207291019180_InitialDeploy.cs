@@ -38,7 +38,7 @@
                     {
                         DocumentId = c.String(nullable: false, maxLength: 128),
                         MEId = c.String(),
-                        RelatedDocumentId = c.String(),
+                        RelatedDocumentId = c.String(maxLength: 128),
                         ReferenceNumber = c.String(),
                         RelatedReferenceNumber = c.String(),
                         TypeId = c.Int(nullable: false),
@@ -58,17 +58,16 @@
                         ActionDate = c.DateTime(),
                         IsSynchronizedWithSigefe = c.Boolean(nullable: false),
                         IsSynchronizedWithFEAP = c.Boolean(nullable: false),
-                        RelatedDocument_DocumentId = c.String(maxLength: 128),
                     })
                 .PrimaryKey(t => t.DocumentId)
                 .ForeignKey("dbo.DocumentActions", t => t.ActionId)
-                .ForeignKey("dbo.Documents", t => t.RelatedDocument_DocumentId)
+                .ForeignKey("dbo.Documents", t => t.RelatedDocumentId)
                 .ForeignKey("dbo.DocumentStates", t => t.StateId, cascadeDelete: true)
                 .ForeignKey("dbo.DocumentTypes", t => t.TypeId, cascadeDelete: true)
+                .Index(t => t.RelatedDocumentId)
                 .Index(t => t.TypeId)
                 .Index(t => t.StateId)
-                .Index(t => t.ActionId)
-                .Index(t => t.RelatedDocument_DocumentId);
+                .Index(t => t.ActionId);
             
             CreateTable(
                 "dbo.DocumentMessages",
@@ -150,7 +149,7 @@
             DropForeignKey("dbo.Documents", "StateId", "dbo.DocumentStates");
             DropForeignKey("dbo.RequestLogs", "RequestLogTypeId", "dbo.RequestLogTypes");
             DropForeignKey("dbo.RequestLogs", "DocumentId", "dbo.Documents");
-            DropForeignKey("dbo.Documents", "RelatedDocument_DocumentId", "dbo.Documents");
+            DropForeignKey("dbo.Documents", "RelatedDocumentId", "dbo.Documents");
             DropForeignKey("dbo.DocumentMessages", "MessageTypeId", "dbo.DocumentMessageTypes");
             DropForeignKey("dbo.DocumentMessages", "DocumentId", "dbo.Documents");
             DropForeignKey("dbo.Documents", "ActionId", "dbo.DocumentActions");
@@ -158,10 +157,10 @@
             DropIndex("dbo.RequestLogs", new[] { "RequestLogTypeId" });
             DropIndex("dbo.DocumentMessages", new[] { "MessageTypeId" });
             DropIndex("dbo.DocumentMessages", new[] { "DocumentId" });
-            DropIndex("dbo.Documents", new[] { "RelatedDocument_DocumentId" });
             DropIndex("dbo.Documents", new[] { "ActionId" });
             DropIndex("dbo.Documents", new[] { "StateId" });
             DropIndex("dbo.Documents", new[] { "TypeId" });
+            DropIndex("dbo.Documents", new[] { "RelatedDocumentId" });
             DropIndex("dbo.DocumentLines", new[] { "DocumentId" });
             DropTable("dbo.DocumentTypes");
             DropTable("dbo.DocumentStates");

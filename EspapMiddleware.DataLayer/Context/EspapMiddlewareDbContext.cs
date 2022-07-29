@@ -27,6 +27,8 @@ namespace EspapMiddleware.DataLayer.Context
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Document>().HasOptional(x => x.RelatedDocument).WithMany(x => x.RelatedDocuments).HasForeignKey(x => x.RelatedDocumentId);
+
             modelBuilder.Entity<RequestLog>().HasKey(x => new { x.UniqueId, x.RequestLogTypeId });
             modelBuilder.Entity<RequestLog>().HasOptional(x => x.Document).WithMany(x => x.RequestLogs).HasForeignKey(x => x.DocumentId);
 

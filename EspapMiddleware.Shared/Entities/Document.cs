@@ -44,6 +44,7 @@ namespace EspapMiddleware.Shared.Entities
         public virtual DocumentState State { get; set; }
         public virtual DocumentAction Action { get; set; }
         public virtual Document RelatedDocument { get; set; }
+        public virtual ICollection<Document> RelatedDocuments { get; set; }
         public ICollection<RequestLog> RequestLogs { get; set; }
         public ICollection<DocumentLine> DocumentLines { get; set; }
         public ICollection<DocumentMessage> DocumentMessages { get; set; }
