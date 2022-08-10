@@ -1,0 +1,79 @@
+﻿@model PaginatedResult<Document>
+
+
+<div class="ig-grid ig-grid-1l">
+    <div class="k-grid k-widget k-display-block k-editable">
+        <table style="width:100%">
+            <tbody>
+                <tr class="k-grid-header">
+                    <th class="k-header">ID Documento</th>
+                    <th class="k-header">N.º Fatura</th>
+                    <th class="k-header">Data</th>
+                    <th class="k-header">NIF Fornecedor</th>
+                    <th class="k-header">Ano letivo</th>
+                    <th class="k-header">Estado</th>
+                    <th class="k-header">N.º Compromisso</th>
+                    <th class="k-header">Montante</th>
+                    <th class="k-header">ID ME</th>
+                    <th class="k-header ig-xml-col">Detalhe</th>
+                </tr>
+                @if (Model.TotalCount != 0)
+                {
+                    foreach (var doc in Model.Data)
+                    {
+                        <tr>
+                            <td>@doc.DocumentId</td>
+                            <td>@doc.ReferenceNumber</td>
+                            <td>@doc.IssueDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>@doc.SupplierFiscalId</td>
+                            <td>@doc.SchoolYear</td>
+
+                            @switch (doc.StateId)
+                            {
+                                case DocumentStateEnum.Iniciado:
+                                    <td><strong><i class="fas fa-play"></i> Iniciado</strong></td>
+                                    break;
+                                case DocumentStateEnum.ValidadoConferido:
+                                    <td><strong><i class="fas fa-check"></i> Validado</strong></td>
+                                    break;
+                                case DocumentStateEnum.Processado:
+                                    <td><strong><i class="fas fa-cog"></i> Processado</strong></td>
+                                    break;
+                                case DocumentStateEnum.EmitidoPagamento:
+                                    <td><span class="ig-state-success"><i class="fas fa-receipt"></i> Emitido pagamento</span></td>
+                                    break;
+                                case DocumentStateEnum.Devolvido:
+                                    <td><span class="ig-state-warning"><i class="fas fa-undo-alt"></i> Devolvido</span></td>
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            <td>@doc.CompromiseNumber</td>
+                            <td class="text-right">@(decimal.Parse(doc.TotalAmount, CultureInfo.InvariantCulture).ToString("C", CultureInfo.CreateSpecificCulture("pt-PT")))</td>
+                            <td>@doc.MEId</td>
+                            <td><a class="btn ig-btn-round" href="@Url.Action("Detail","Document", new { id = doc.DocumentId } )"><i class="far fa-file-alt"></i></a></td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan=10>
+                            <div class="row ig-noresults">
+                                <i class="fas fa-search"></i>
+                                <h3>Sem Resultados</h3>
+                                <p>Verifique se os termos introduzidos estão bem escritos ou faça uma nova pesquisa.</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (Model.TotalCount != 0)
+{
+    Html.RenderPartial("_paginationPartial", new PaginationPartialViewModel(Model.PageIndex, Model.PageSize, Model.TotalCount, "searchDocuments({0}, {1})") { });
+}

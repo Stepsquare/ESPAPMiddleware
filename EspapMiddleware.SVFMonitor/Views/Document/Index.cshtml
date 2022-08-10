@@ -1,0 +1,180 @@
+﻿
+@{
+    ViewBag.Title = "Listagem Documentos";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="ig-pagetitle">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>@ViewBag.Title</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default ig-panel">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">ID Documento</label>
+                        <input id="document_id_search" type="text" class="form-control" />
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">NIF Fornecedor:</label>
+                        <input id="supplier_fiscal_id_search" type="text" class="form-control">
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">N.º Compromisso:</label>
+                        <input id="compromise_search" type="text" class="form-control">
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">ID ME:</label>
+                        <input id="me_id_search" type="text" class="form-control">
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Sincronizado FE-AP:</label>
+                        <select id="feap_syncronized_search" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Sincronizado SIGeFE:</label>
+                        <select id="sigefe_syncronized_search" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Ano letivo:</label>
+                        <input type="text" id="school_year_search" class="form-control" />
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Tipo de documento:</label>
+                        <input type="text" id="doc_type_search" class="form-control" />
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Estado:</label>
+                        <input type="text" id="doc_state_search" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4 form-group ig-k-datepicker">
+                        <label class="control-label">Documentos entre:</label>
+                        <div id="date_range_search">
+                        </div>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">&nbsp;</label>
+                        <button onclick="searchDocuments()" type="button" class="btn ig-btn-green btn-block">
+                            <i class="fas fa-search"></i> Pesquisar documentos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div id="result_container" class="col-md-12">
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#doc_type_search").kendoComboBox({
+            dataTextField: "Description",
+            dataValueField: "Id",
+            dataSource: {
+                transport: {
+                    read: {
+                        dataType: "json",
+                        url: "@Url.Action("GetTypes", "Document")"
+                    }
+                }
+            }
+        });
+
+        $("#doc_state_search").kendoComboBox({
+            dataTextField: "Description",
+            dataValueField: "Id",
+            dataSource: {
+                transport: {
+                    read: {
+                        dataType: "json",
+                        url: "@Url.Action("GetStates", "Document")"
+                    }
+                }
+            }
+        });
+
+        $("#school_year_search").kendoComboBox({
+            dataTextField: "Description",
+            dataValueField: "Id",
+            dataSource: {
+                transport: {
+                    read: {
+                        dataType: "json",
+                        url: "@Url.Action("GetSchoolYears", "Document")"
+                    }
+                }
+            }
+        });
+
+        var picker = $("#date_range_search").kendoDateRangePicker({
+            format: "dd/MM/yyyy",
+            culture: "pt-PT",
+            labels: false
+        }).data('kendoDateRangePicker');
+
+        picker._startDateInput.destroy();
+        picker._endDateInput.destroy();
+        picker._startInput.val('');
+        picker._endInput.val('');
+
+        searchDocuments();
+    });
+
+    function searchDocuments(pageIndex, pageSize) {
+        var dateRange = $("#date_range_search").data("kendoDateRangePicker").range();
+
+        ShowLoadingModal();
+
+        $.ajax({
+            url: '@Url.Action("Search", "Document")',
+            type: "POST",
+            data: {
+                documentId: $("#document_id_search").val(),
+                fromDate: dateRange != null && dateRange.start != null ? dateRange.start.toISOString() : null,
+                untilDate: dateRange != null && dateRange.end != null ? dateRange.end.toISOString() : null,
+                supplierFiscalId: $("#supplier_fiscal_id_search").val(),
+                schoolYear: $("#school_year_search").val(),
+                compromiseNumber: $("#compromise_search").val(),
+                type: $("#doc_type_search").data("kendoComboBox").value(),
+                state: $("#doc_state_search").data("kendoComboBox").value(),
+                meId: $("#me_id_search").val(),
+                feapSyncronized: $("#feap_syncronized_search").val(),
+                sigefeSyncronized: $("#sigefe_syncronized_search").val(),
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            },
+            success: function (data) {
+                $('#result_container').html(data);
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+</script>
+

@@ -1,0 +1,87 @@
+﻿@model PaginatedResult<RequestLog>
+
+<div class="ig-grid ig-grid-1l">
+    <div class="k-grid k-widget k-display-block k-editable">
+        <table style="width:100%">
+            <tbody>
+                <tr class="k-grid-header">
+                    <th class="k-header">ID Único</th>
+                    <th class="k-header">Tipo pedido:</th>
+                    <th class="k-header">Documento</th>
+                    <th class="k-header">Data chamada</th>
+                    <th class="k-header">Estado</th>
+                    <th class="k-header ig-xml-col">XML</th>
+                </tr>
+                @if (Model.TotalCount != 0)
+                {
+                    foreach (var log in Model.Data)
+                    {
+                        <tr>
+                            <td>@log.UniqueId</td>
+                            <td>@log.RequestLogTypeId.ToString()</td>
+                            <td><a href="@Url.Action("Detail", "Document", new { id = log.DocumentId })"><i class="far fa-file-alt"></i> @log.DocumentId</a></td>
+                            <td>@log.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
+
+                            @if (!log.Successful)
+                            {
+                                <td>
+                                    <span class="ig-state-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> Com erros
+                                    </span>
+                                    <a class="btn ig-btn-round" title="Mostrar/esconder erros"
+                                       role="button" data-toggle="collapse" href="#err_detail_@log.UniqueId"
+                                       aria-expanded="false" aria-controls="err_detail_@log.UniqueId">
+                                        <i class="fas fa-list"></i>
+                                    </a>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <span class="ig-state-success"><i class="fas fa-check"></i> Sem erros</span>
+                                </td>
+                            }
+                            <td><a class="btn ig-btn-round" title="Download XML" href="@Url.Action("Download", "RequestLog", new { uniqueId = log.UniqueId })"><i class="fas fa-download"></i></a></td>
+                        </tr>
+
+                        if (!log.Successful)
+                        {
+                            <tr class="ig-additional-row">
+                                <td colspan="6">
+                                    <div id="err_detail_@log.UniqueId" class="collapse ig-log-collapse">
+                                        <div>
+                                            <p><strong>Erro:</strong></p>
+                                            <ul>
+                                                <li>@log.ExceptionType</li>
+                                                <li>@log.ExceptionMessage</li>
+                                                <li>@log.ExceptionStackTrace</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan=6>
+                            <div class="row ig-noresults">
+                                <i class="fas fa-search"></i>
+                                <h3>Sem Resultados</h3>
+                                <p>Verifique se os termos introduzidos estão bem escritos ou faça uma nova pesquisa.</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (Model.TotalCount != 0)
+{
+    Html.RenderPartial("_paginationPartial", new PaginationPartialViewModel(Model.PageIndex, Model.PageSize, Model.TotalCount, "searchLogs({0}, {1})") {  });
+}
+

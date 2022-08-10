@@ -65,11 +65,17 @@
     <Compile Include="Exceptions\WebserviceException.cs" />
     <Compile Include="Interfaces\IConfiguration\IUnitOfWork.cs" />
     <Compile Include="Interfaces\IConfiguration\IUnitOfWorkFactory.cs" />
+    <Compile Include="Interfaces\IHelpers\IGenericRestRequestManager.cs" />
     <Compile Include="Interfaces\IRepositories\IDocumentMessageRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IDocumentRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IGenericRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IRequestLogRepository.cs" />
     <Compile Include="Interfaces\IServices\IDocumentService.cs" />
+    <Compile Include="Interfaces\IServices\IMonitorService.cs" />
+    <Compile Include="MonitorServiceModels\DocumentSearchFilters.cs" />
+    <Compile Include="MonitorServiceModels\PaginationModels\PaginatedResult.cs" />
+    <Compile Include="MonitorServiceModels\PaginationModels\PaginatedSearchFilter.cs" />
+    <Compile Include="MonitorServiceModels\RequestLogSearchFilters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebServiceModels\GetFaseResponse.cs" />
     <Compile Include="WebServiceModels\GenericPostResponse.cs" />

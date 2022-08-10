@@ -8,6 +8,9 @@ EspapMiddleware.ConsoleApp/App.config
 EspapMiddleware.WcfService/Web.config
 EspapMiddleware.WcfService/Web.Debug.config
 EspapMiddleware.WcfService/Web.Release.config
+EspapMiddleware.SVFMonitor/Web.config
+EspapMiddleware.SVFMonitor/Web.Debug.config
+EspapMiddleware.SVFMonitor/Web.Release.config
 
 # User-specific files
 *.rsuser

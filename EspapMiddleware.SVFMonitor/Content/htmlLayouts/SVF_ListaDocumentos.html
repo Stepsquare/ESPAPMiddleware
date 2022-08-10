@@ -1,0 +1,290 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SVF - Instituto de Gestão Financeira da Educação</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bree+Serif|Roboto:400,700">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../css/site.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../lib/font-awesome/css/all.min.css" rel="stylesheet">
+
+    <!--Kendo UI-->
+    <link href="../lib/kendo-ui/styles/kendo.common-nova.min.css" rel="stylesheet">
+    <link href="../lib/kendo-ui/styles/kendo.material.min.css" rel="stylesheet">
+
+    <!-- jQuery -->
+    <script src="../lib/jquery/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+    <nav class="ig-navbar navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="ig-green-gradient"></div>
+        <div class="container ig-svf-container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">
+                    <img src="../images/logo.png" />
+                </a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#">
+                        Logs
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        Faturas
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+
+    </nav>
+    <div class="container ig-content ig-svf-container" style="padding-top: 70px">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ig-pagetitle">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h2>Lista de Documentos</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default ig-panel">
+                    <div class="panel-body">
+                        <div class="row ">
+                            <div class="col-md-4 form-group">
+                                <label class="control-label">ID Documento</label>
+                                <input type="text" class="form-control" />
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label class="control-label">Documentos entre:</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" />
+                                    <span class="input-group-addon">e</span>
+                                    <input type="date" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">NIF Fornecedor:</label>
+                                <input type="number" class="form-control">
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">Ano letivo:</label>
+                                <select class="form-control">
+                                    <option>2022/23</option>
+                                    <option>2021/22</option>
+                                    <option>2020/21</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">N.º Compromisso:</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">Tipo de documento:</label>
+                                <select class="form-control">
+                                    <option>Todos</option>
+                                    <option>Faturas</option>
+                                    <option>Notas de crédito</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">Estado:</label>
+                                <select class="form-control">
+                                    <option>Iniciado</option>
+                                    <option>Devolvido</option>
+                                    <option>Validado</option>
+                                    <option>Conferido</option>
+                                    <option>Processado</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">ID ME:</label>
+                                <input type="text" class="form-control">
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">Sincronizado:</label>
+                                <select class="form-control">
+                                    <option>Sim</option>
+                                    <option>Não</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">&nbsp;</label>
+                                <button type="button" class="btn ig-btn-green btn-block">
+                                    <i class="fas fa-search"></i> Pesquisar documentos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ig-grid ig-grid-1l">
+                    <div class="k-grid k-widget k-display-block k-editable">
+                        <table style="width:100%">
+                            <tbody>
+                                <tr class="k-grid-header">
+                                    <th class="k-header">ID Documento</th>
+                                    <th class="k-header">N.º Fatura</th>
+                                    <th class="k-header">Data</th>
+                                    <th class="k-header">NIF Fornecedor</th>
+                                    <th class="k-header">Ano letivo</th>
+                                    <th class="k-header">Estado</th>
+                                    <th class="k-header">N.º Compromisso</th>
+                                    <th class="k-header">Montante</th>
+                                    <th class="k-header">ID ME</th>
+                                    <th class="k-header ig-xml-col">Detalhe</th>
+                                </tr>
+                                <tr>
+                                    <td>1234567890</td>
+                                    <td>1234567890</td>
+                                    <td>31/09/2022 14:59</td>
+                                    <td>123456789</td>
+                                    <td>2022/23</td>
+                                    <td><strong><i class="fas fa-play"></i> Iniciado</strong></td>
+                                    <td>1234567890</td>
+                                    <td class="text-right">€ 1234,56</td>
+                                    <td>AAAAA</td>
+                                    <td><a class="btn ig-btn-round" href="#"><i class="far fa-file-alt"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <td>1234567890</td>
+                                    <td>1234567890</td>
+                                    <td>31/09/2022 14:59</td>
+                                    <td>123456789</td>
+                                    <td>2022/23</td>
+                                    <td><span class="ig-state-warning"><i class="fas fa-undo-alt"></i> Devolvido</span></td>
+                                    <td>1234567890</td>
+                                    <td class="text-right">€ 1234,56</td>
+                                    <td>AAAAA</td>
+                                    <td><a class="btn ig-btn-round" href="#"><i class="far fa-file-alt"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <td>1234567890</td>
+                                    <td>1234567890</td>
+                                    <td>31/09/2022 14:59</td>
+                                    <td>123456789</td>
+                                    <td>2022/23</td>
+                                    <td><strong><i class="fas fa-cog"></i> Processado</strong></td>
+                                    <td>1234567890</td>
+                                    <td class="text-right">€ 1234,56</td>
+                                    <td>AAAAA</td>
+                                    <td><a class="btn ig-btn-round" href="#"><i class="far fa-file-alt"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <td>1234567890</td>
+                                    <td>1234567890</td>
+                                    <td>31/09/2022 14:59</td>
+                                    <td>123456789</td>
+                                    <td>2022/23</td>
+                                    <td><strong><i class="fas fa-check"></i> Validado</strong></td>
+                                    <td>1234567890</td>
+                                    <td class="text-right">€ 1234,56</td>
+                                    <td>AAAAA</td>
+                                    <td><a class="btn ig-btn-round" href="#"><i class="far fa-file-alt"></i></a></td>
+                                </tr>
+                                <tr>
+                                    <td>1234567890</td>
+                                    <td>1234567890</td>
+                                    <td>31/09/2022 14:59</td>
+                                    <td>123456789</td>
+                                    <td>2022/23</td>
+                                    <td><span class="ig-state-success"><i class="fas fa-receipt"></i> Emitido pagamento</span></td>
+                                    <td>1234567890</td>
+                                    <td class="text-right">€ 1234,56</td>
+                                    <td>AAAAA</td>
+                                    <td><a class="btn ig-btn-round" href="#"><i class="far fa-file-alt"></i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="ig-pagination-info">1 a 5 de 330 resultados</p>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <nav aria-label="Navegação">
+                            <ul class="pagination">
+                                <li>
+                                    <a href="#" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">1</a>
+                                </li>
+                                <li>
+                                    <a href="#">2</a>
+                                </li>
+                                <li>
+                                    <a href="#">3</a>
+                                </li>
+                                <li>
+                                    <a href="#">4</a>
+                                </li>
+                                <li>
+                                    <a href="#">5</a>
+                                </li>
+                                <li>
+                                    <a href="#" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="col-md-12 ig-footer">
+        <div class="row">
+            <div class="ig-logo-left col-sm-6">
+                <img src="../images/footer/logo-left.png" title="Instituto de Gestão Financeira da Educação" />
+            </div>
+            <div class="ig-logo-right col-sm-6">
+                <img src="../images/footer/logo-right.png" title="Ministério da Educação" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ig-copyright">
+                    2019 Instituto de Gestão Financeira da Educação, IP
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

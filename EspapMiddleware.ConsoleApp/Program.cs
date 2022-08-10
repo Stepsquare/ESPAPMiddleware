@@ -39,7 +39,7 @@ namespace EspapMiddleware.ConsoleApp
 
                 using (var client = new SVFReference.ServiceClient())
                 {
-                    ServicePointManager.ServerCertificateValidationCallback += (o, c, ch, er) => true;
+                    ServicePointManager.ServerCertificateValidationCallback += ((sender, certificate, chain, sslPolicyErrors) => true);
 
                     client.ClientCredentials.UserName.UserName = "3YNLta96dHNwK80jdxgFclH1_espap";
                     client.ClientCredentials.UserName.Password = "rCjJlrRqagOCF8jzY7msflrbUzOi33";

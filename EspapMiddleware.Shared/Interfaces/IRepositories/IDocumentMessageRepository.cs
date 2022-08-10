@@ -9,6 +9,6 @@ namespace EspapMiddleware.Shared.Interfaces.IRepositories
 {
     public interface IDocumentMessageRepository : IGenericRepository<DocumentMessage>
     {
-
+        Task<DocumentMessage> GetLastSigefeMessage(string documentId);
     }
 }

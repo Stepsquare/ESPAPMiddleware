@@ -16,6 +16,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.Shared", "E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.WcfService", "EspapMiddleware.WcfService\EspapMiddleware.WcfService.csproj", "{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.SVFMonitor", "EspapMiddleware.SVFMonitor\EspapMiddleware.SVFMonitor.csproj", "{BFE45F55-26BD-48F7-ACB8-91BC99D3FFDE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D075DF67-C40D-4F2F-94BA-A50A5291700B} = {D075DF67-C40D-4F2F-94BA-A50A5291700B}
+		{6D3BC2F4-78BF-4BB5-9EE2-55748017191E} = {6D3BC2F4-78BF-4BB5-9EE2-55748017191E}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +48,10 @@ Global
 		{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1C2A4CE-5DAA-42F2-B9E9-70333CD5A18B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFE45F55-26BD-48F7-ACB8-91BC99D3FFDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFE45F55-26BD-48F7-ACB8-91BC99D3FFDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFE45F55-26BD-48F7-ACB8-91BC99D3FFDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFE45F55-26BD-48F7-ACB8-91BC99D3FFDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

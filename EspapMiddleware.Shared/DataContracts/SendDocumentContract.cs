@@ -171,26 +171,6 @@ namespace EspapMiddleware.Shared.DataContracts
 
             switch (this.documentType)
             {
-                case DocumentTypeEnum.Fatura:
-
-                    nsmgr.AddNamespace("ubl", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2");
-
-                    TotalAmount = document.SelectSingleNode("//ubl:Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount", nsmgr)?.InnerText;
-                    CompromiseNumber = document.SelectSingleNode("//ubl:Invoice/cbc:AccountingCost", nsmgr)?.InnerText;
-
-                    foreach (XmlNode line in document.SelectNodes("//ubl:Invoice/cac:InvoiceLine", nsmgr))
-                    {
-                        InvoiceLines.Add(new InvoiceLineModel()
-                        {
-                            Id = line["cbc:ID"]?.InnerText,
-                            Name = line["cac:Item"]?["cbc:Name"]?.InnerText,
-                            StandardItemIdentification = line["cac:Item"]?["cac:StandardItemIdentification"]?["cbc:ID"]?.InnerText,
-                            Quantity = line["cbc:InvoicedQuantity"]?.InnerText.Split('.')[0],
-                            TotalLineValue = line["cbc:LineExtensionAmount"]?.InnerText,
-                            TaxPercent = line["cac:Item"]?["cac:ClassifiedTaxCategory"]?["cbc:Percent"]?.InnerText
-                        });
-                    }
-                    break;
                 case DocumentTypeEnum.NotaCrédito:
                     
                     nsmgr.AddNamespace("ubl", "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2");
@@ -213,9 +193,25 @@ namespace EspapMiddleware.Shared.DataContracts
                         });
                     }
                     break;
-                case DocumentTypeEnum.NotaDébito:
-                    break;
                 default:
+
+                    nsmgr.AddNamespace("ubl", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2");
+
+                    TotalAmount = document.SelectSingleNode("//ubl:Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount", nsmgr)?.InnerText;
+                    CompromiseNumber = document.SelectSingleNode("//ubl:Invoice/cbc:AccountingCost", nsmgr)?.InnerText;
+
+                    foreach (XmlNode line in document.SelectNodes("//ubl:Invoice/cac:InvoiceLine", nsmgr))
+                    {
+                        InvoiceLines.Add(new InvoiceLineModel()
+                        {
+                            Id = line["cbc:ID"]?.InnerText,
+                            Name = line["cac:Item"]?["cbc:Name"]?.InnerText,
+                            StandardItemIdentification = line["cac:Item"]?["cac:StandardItemIdentification"]?["cbc:ID"]?.InnerText,
+                            Quantity = line["cbc:InvoicedQuantity"]?.InnerText.Split('.')[0],
+                            TotalLineValue = line["cbc:LineExtensionAmount"]?.InnerText,
+                            TaxPercent = line["cac:Item"]?["cac:ClassifiedTaxCategory"]?["cbc:Percent"]?.InnerText
+                        });
+                    }
                     break;
             }
         }

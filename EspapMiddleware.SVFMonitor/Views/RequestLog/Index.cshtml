@@ -1,0 +1,120 @@
+﻿
+@{
+    ViewBag.Title = "Listagem Logs";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="ig-pagetitle">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>@ViewBag.Title</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default ig-panel">
+            <div class="panel-body">
+                <div class="row ">
+                    <div class="col-md-3 form-group">
+                        <label class="control-label">ID Único</label>
+                        <input id="uniqueId_search" type="text" class="form-control" />
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Tipo pedido:</label>
+                        <input type="text" id="log_type_search" class="form-control" />
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Estado:</label>
+                        <select id="successful_search" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="false">Com erros</option>
+                            <option value="true">Sem erros</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group ig-k-datepicker">
+                        <label class="control-label">Pedidos entre:</label>
+                        <div id="date_range_search">
+                        </div>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">&nbsp;</label>
+                        <button onclick="searchLogs()" type="button" class="btn ig-btn-green btn-block">
+                            <i class="fas fa-search"></i> Pesquisar logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div id="result_container" class="col-md-12">
+        
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#log_type_search").kendoComboBox({
+            dataTextField: "Description",
+            dataValueField: "Id",
+            dataSource: {
+                transport: {
+                    read: {
+                        dataType: "json",
+                        url: "@Url.Action("GetTypes", "RequestLog")"
+                    }
+                }
+            }
+        });
+
+        var picker = $("#date_range_search").kendoDateRangePicker({
+            format: "dd/MM/yyyy",
+            culture: "pt-PT",
+            labels: false
+        }).data('kendoDateRangePicker');
+
+        picker._startDateInput.destroy();
+        picker._endDateInput.destroy();
+        picker._startInput.val('');
+        picker._endInput.val('');
+
+        searchLogs();
+    });
+
+    function searchLogs(pageIndex, pageSize) {
+        var dateRange = $("#date_range_search").data("kendoDateRangePicker").range();
+
+        ShowLoadingModal();
+
+        $.ajax({
+            url: '@Url.Action("Search", "RequestLog")',
+            type: "POST",
+            data: {
+                uniqueId: $("#uniqueId_search").val(),
+                type: $("#log_type_search").data("kendoComboBox").value(),
+                isSuccessFul: $("#successful_search").val(),
+                fromDate: dateRange != null && dateRange.start != null ? dateRange.start.toISOString() : null,
+                untilDate: dateRange != null && dateRange.end != null ? dateRange.end.toISOString() : null,
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            },
+            success: function (data) {
+                $('#result_container').html(data);
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+</script>
+

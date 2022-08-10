@@ -1,4 +1,5 @@
 ﻿using EspapMiddleware.Shared.Entities;
+using EspapMiddleware.Shared.MonitorServiceModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace EspapMiddleware.Shared.Interfaces.IRepositories
 {
     public interface IRequestLogRepository: IGenericRepository<RequestLog>
     {
-
+        Task<IEnumerable<RequestLog>> GetFilteredPaginated(RequestLogSearchFilters filters);
     }
 }

@@ -1,0 +1,65 @@
+﻿@model PaginationPartialViewModel
+
+<div class="row">
+    <div class="col-md-6">
+        @{
+            int firstResult = (Model.PageSize * (Model.PageIndex - 1)) + 1;
+            var lastResult = Math.Min(Model.PageSize * Model.PageIndex, Model.TotalCount);
+
+            <p class="ig-pagination-info">@firstResult a @lastResult de @Model.TotalCount resultados</p>
+        }
+    </div>
+    <div class="col-md-6 text-right">
+        <nav aria-label="Navegação">
+            <ul class="pagination">
+                <li class="@(Model.PageIndex == 1 ? "disabled" : "")"
+                    onclick="@string.Format(Model.AjaxRequestMethod, 1, Model.PageSize )">
+                    <a href="#" aria-label="Primeira">
+                        <span aria-hidden="true">
+                            <i class="fas fa-angle-double-left"></i>
+                        </span>
+                    </a>
+                </li>
+                <li class="@(Model.PageIndex == 1 ? "disabled" : "")"
+                    onclick="@string.Format(Model.AjaxRequestMethod, Model.PageIndex - 1, Model.PageSize )">
+                    <a href="#" aria-label="Anterior">
+                        <span aria-hidden="true">
+                            <i class="fas fa-angle-left"></i>
+                        </span>
+                    </a>
+                </li>
+
+                @{
+                    int numberOfPagesOnDisplay = 9;
+                    int firstPageOnDisplay = Math.Max(1, Model.PageIndex - (numberOfPagesOnDisplay / 2));
+                    int lastPageOnDisplay = Math.Min(Model.TotalPages, Model.PageIndex + (numberOfPagesOnDisplay / 2) + Math.Max(0, firstPageOnDisplay - Model.PageIndex + (numberOfPagesOnDisplay / 2)));
+
+                    for (int i = firstPageOnDisplay; i <= lastPageOnDisplay; i++)
+                    {
+                        <li class="@(Model.PageIndex == i ? "active" : "")"
+                            onclick="@string.Format(Model.AjaxRequestMethod, i, Model.PageSize )">
+                            <a href="#">@i</a>
+                        </li>
+                    }
+                }
+
+                <li class="@(Model.PageIndex == Model.TotalPages ? "disabled" : "")"
+                    onclick="@string.Format(Model.AjaxRequestMethod, Model.PageIndex + 1, Model.PageSize )">
+                    <a href="#" aria-label="Próxima">
+                        <span aria-hidden="true">
+                            <i class="fas fa-angle-right"></i>
+                        </span>
+                    </a>
+                </li>
+                <li class="@(Model.PageIndex == Model.TotalPages ? "disabled" : "")"
+                    onclick="@string.Format(Model.AjaxRequestMethod, Model.TotalPages, Model.PageSize )">
+                    <a href="#" aria-label="Última">
+                        <span aria-hidden="true">
+                            <i class="fas fa-angle-double-right"></i>
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>

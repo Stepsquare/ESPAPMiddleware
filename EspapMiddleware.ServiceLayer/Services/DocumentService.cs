@@ -6,6 +6,7 @@ using EspapMiddleware.Shared.Entities;
 using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.Exceptions;
 using EspapMiddleware.Shared.Interfaces.IConfiguration;
+using EspapMiddleware.Shared.Interfaces.IHelpers;
 using EspapMiddleware.Shared.Interfaces.IServices;
 using EspapMiddleware.Shared.WebServiceModels;
 using EspapMiddleware.Shared.XmlSerializerModel;
@@ -24,14 +25,11 @@ namespace EspapMiddleware.ServiceLayer.Services
     public class DocumentService : IDocumentService
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
-        private readonly GenericRestRequestManager _webserviceRequest;
+        private readonly IGenericRestRequestManager _genericRestRequestManager;
 
-        public DocumentService(IUnitOfWorkFactory unitOfWorkFactory)
+        public DocumentService(IUnitOfWorkFactory unitOfWorkFactory, IGenericRestRequestManager genericRestRequestManager)
         {
-            var environment = (EnvironmentConfig)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/environment");
-            var webservices = (NameValueCollection)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/webServices");
-
-            _webserviceRequest = new GenericRestRequestManager(environment, webservices);
+            _genericRestRequestManager = genericRestRequestManager;
 
             _unitOfWorkFactory = unitOfWorkFactory;
         }
@@ -40,7 +38,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             var headers = new Dictionary<string, string>()
             {
-                { "id_ano_letivo", _webserviceRequest.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual }
+                { "id_ano_letivo", _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual }
             };
 
             if (!string.IsNullOrEmpty(nif))
@@ -49,7 +47,7 @@ namespace EspapMiddleware.ServiceLayer.Services
             if (!string.IsNullOrEmpty(id_doc_feap))
                 headers.Add("id_doc_feap", id_doc_feap);
 
-            return await _webserviceRequest.Get<GetDocFaturacaoResponse>("getDocFaturacao", headers);
+            return await _genericRestRequestManager.Get<GetDocFaturacaoResponse>("getDocFaturacao", headers);
         }
 
         public async Task AddFailedRequestLog(RequestLogTypeEnum type, Exception ex, Guid uniqueId, string documentId = null)
@@ -86,7 +84,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 if (documentToInsert != null)
                     throw new DatabaseException("Documento já inserido na BD. Ativar flag \"isUpdate\" para atualizar.");
 
-                contract.SchoolYear = _webserviceRequest.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
+                contract.SchoolYear = _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
 
                 var SendDocumentRequestLog = new RequestLog()
                 {
@@ -118,7 +116,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                         DocumentId = contract.documentId,
                         MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
                         Date = DateTime.UtcNow,
-                        MessageContent = documentToInsertResult != null ? documentToInsertResult.cod_msg_fat + " - " + documentToInsertResult.msg_fat : "500 - Falha de comunicação. Reenviar pedido mais tarde."
+                        MessageCode = documentToInsertResult != null ? documentToInsertResult.cod_msg_fat : "500",
+                        MessageContent = documentToInsertResult != null ? documentToInsertResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
                     });
 
                     if (documentToInsertResult != null && documentToInsertResult.cod_msg_fat != "490")
@@ -158,7 +157,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                         DocumentId = contract.documentId,
                         MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
                         Date = DateTime.UtcNow,
-                        MessageContent = documentToInsertResult != null ? documentToInsertResult.cod_msg_fat + " - " + documentToInsertResult.msg_fat : "500 - Falha de comunicação. Reenviar pedido mais tarde."
+                        MessageCode = documentToInsertResult != null ? documentToInsertResult.cod_msg_fat : "500",
+                        MessageContent = documentToInsertResult != null ? documentToInsertResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
                     });
 
                     if (documentToInsertResult != null)
@@ -198,7 +198,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                             DocumentId = relatedDocument.DocumentId,
                             MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
                             Date = DateTime.UtcNow,
-                            MessageContent = relatedDocumentResult != null ? relatedDocumentResult.cod_msg_fat + " - " + relatedDocumentResult.msg_fat : "500 - Falha de comunicação. Reenviar pedido mais tarde."
+                            MessageCode = relatedDocumentResult != null ? relatedDocumentResult.cod_msg_fat : "500",
+                            MessageContent = relatedDocumentResult != null ? relatedDocumentResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
                         });
 
                         if (relatedDocumentResult != null)
@@ -269,7 +270,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                             DocumentId = documentToUpdate.DocumentId,
                             MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
                             Date = DateTime.UtcNow,
-                            MessageContent = faturaResult != null ? faturaResult.cod_msg_fat + " - " + faturaResult.msg_fat : "500 - Falha de comunicação. Reenviar pedido mais tarde."
+                            MessageCode = faturaResult != null ? faturaResult.cod_msg_fat : "500",
+                            MessageContent = faturaResult != null ? faturaResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
                         });
                     }
                 }
@@ -319,7 +321,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                             DocumentId = contract.documentId,
                             MessageTypeId = DocumentMessageTypeEnum.FEAP,
                             Date = DateTime.UtcNow,
-                            MessageContent = message.code + " - " + message.description
+                            MessageCode = message.code,
+                            MessageContent = message.description
                         });
                     }
                 }
@@ -362,7 +365,7 @@ namespace EspapMiddleware.ServiceLayer.Services
 
             FillWithContract(in document, ref setDocFaturacaoObj);
 
-            var setDocFaturacaoResult = await _webserviceRequest.Post<SetDocFaturacaoResponse, SetDocFaturacao>("setDocFaturacao", setDocFaturacaoObj);
+            var setDocFaturacaoResult = await _genericRestRequestManager.Post<SetDocFaturacaoResponse, SetDocFaturacao>("setDocFaturacao", setDocFaturacaoObj);
 
             if (setDocFaturacaoResult == null)
                 return null;
@@ -411,6 +414,16 @@ namespace EspapMiddleware.ServiceLayer.Services
                         setDocumentRequest.documentNumbers = new string[] { document.MEId };
                         setDocumentRequest.stateIdSpecified = true;
                         setDocumentRequest.stateId = (int)document.StateId;
+
+                        if (document.StateId == DocumentStateEnum.Processado)
+                        {
+                            setDocumentRequest.commitmentSpecified1Specified = true;
+                            setDocumentRequest.commitmentSpecified1 = true;
+                            setDocumentRequest.commitment = document.CompromiseNumber;
+
+                            setDocumentRequest.postingDateSpecified = true;
+                            setDocumentRequest.postingDate = DateTime.UtcNow;
+                        }
                     }
                     else if (document.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
                     {

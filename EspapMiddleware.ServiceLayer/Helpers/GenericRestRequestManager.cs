@@ -1,5 +1,6 @@
 ﻿using EspapMiddleware.Shared.ConfigModels;
 using EspapMiddleware.Shared.Exceptions;
+using EspapMiddleware.Shared.Interfaces.IHelpers;
 using EspapMiddleware.Shared.WebServiceModels;
 using RestSharp;
 using System;
@@ -12,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace EspapMiddleware.ServiceLayer.Helpers
 {
-    public class GenericRestRequestManager
+    public class GenericRestRequestManager : IGenericRestRequestManager
     {
         private EnvironmentConfig Environment { get; set; }
         private NameValueCollection Webservices { get; set; }

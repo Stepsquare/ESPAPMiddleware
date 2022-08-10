@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>SVF - Instituto de Gestão Financeira da Educação</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bree+Serif|Roboto:400,700">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../css/site.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../lib/font-awesome/css/all.min.css" rel="stylesheet">
+
+    <!--Kendo UI-->
+    <link href="../lib/kendo-ui/styles/kendo.common-nova.min.css" rel="stylesheet">
+    <link href="../lib/kendo-ui/styles/kendo.material.min.css" rel="stylesheet">
+
+    <!-- jQuery -->
+    <script src="../lib/jquery/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+    <nav class="ig-navbar navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="ig-green-gradient"></div>
+        <div class="container ig-svf-container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">
+                    <img src="../images/logo.png" />
+                </a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#">
+                        Logs
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        Faturas
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+
+    </nav>
+    <div class="container ig-svf-container ig-content" style="padding-top: 70px">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ig-pagetitle">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h2>Lista de Logs</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default ig-panel">
+                    <div class="panel-body">
+                        <div class="row ">
+                            <div class="col-md-3 form-group">
+                                <label class="control-label">ID Único</label>
+                                <input type="text" class="form-control" />
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">Tipo pedido:</label>
+                                <select class="form-control">
+                                    <option>Todos</option>
+                                    <option>1 - SendDocument</option>
+                                    <option>2 - SetDocument</option>
+                                    <option>3 - SetDocumentResult</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">Estado:</label>
+                                <select class="form-control">
+                                    <option>Com e sem erros</option>
+                                    <option>Com erros</option>
+                                    <option>Sem erros</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 form-group">
+                                <label class="control-label">Pedidos entre:</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" />
+                                    <span class="input-group-addon">e</span>
+                                    <input type="date" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="control-label">&nbsp;</label>
+                                <button type="button" class="btn ig-btn-green btn-block">
+                                    <i class="fas fa-search"></i> Pesquisar logs
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ig-grid ig-grid-1l">
+                    <div class="k-grid k-widget k-display-block k-editable">
+                        <table style="width:100%">
+                            <tbody>
+                                <tr class="k-grid-header">
+                                    <th class="k-header">ID Único</th>
+                                    <th class="k-header">Tipo pedido:</th>
+                                    <th class="k-header">Documento</th>
+                                    <th class="k-header">Data chamada</th>
+                                    <th class="k-header">Estado</th>
+                                    <th class="k-header ig-xml-col">XML</th>
+                                </tr>
+                                <tr>
+                                    <td>1234567890</td>
+                                    <td>2 - SendDocument</td>
+                                    <td><a href="#"><i class="far fa-file-alt"></i> Fatura1234567890.pdf</a></td>
+                                    <td>31/09/2022 14:59</td>
+                                    <td><span class="ig-state-warning"><i class="fas fa-exclamation-triangle"></i> Com
+                                            erros</span> <a class="btn ig-btn-round" title="Mostrar/esconder erros"
+                                            role="button" data-toggle="collapse" href="#igTrCollapse"
+                                            aria-expanded="false" aria-controls="igTrCollapse"><i
+                                                class="fas fa-list"></i></a> </td>
+                                    <td><a class="btn ig-btn-round" title="Download XML" href="#"><i class="fas fa-download"></i></a></td>
+                                </tr>
+                                <tr class="ig-additional-row">
+                                    <td colspan="6">
+                                        <div id="igTrCollapse" class="collapse ig-log-collapse">
+                                            <div>
+                                                <p><strong>Lista de erros:</strong></p>
+                                                <ul>
+                                                    <li>Erro 1 - Cenas</li>
+                                                    <li>Erro 2 - Ai e tal coiso</li>
+                                                    <li>Erro 3 - Tudo bugado!!!1!!</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>1234567890</td>
+                                    <td>2 - SendDocument</td>
+                                    <td><a href="#"><i class="far fa-file-alt"></i> Fatura1234567890.pdf</a></td>
+                                    <td>31/09/2022 14:59</td>
+                                    <td><span class="ig-state-success"><i class="fas fa-check"></i> Sem erros</span>
+                                    </td>
+                                    <td><a class="btn ig-btn-round" title="Download XML" href="#"><i class="fas fa-download"></i></a></td>
+                                </tr>
+
+                                <tr>
+                                    <td>1234567890</td>
+                                    <td>2 - SendDocument</td>
+                                    <td><a href="#"><i class="far fa-file-alt"></i> Fatura1234567890.pdf</a></td>
+                                    <td>31/09/2022 14:59 </td>
+                                    <td><span class="ig-state-success"><i class="fas fa-check"></i> Sem erros</span>
+                                    </td>
+                                    <td><a class="btn ig-btn-round" title="Download XML" href="#"><i class="fas fa-download"></i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="ig-pagination-info">1 a 5 de 330 resultados</p>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <nav aria-label="Navegação">
+                            <ul class="pagination">
+                                <li>
+                                    <a href="#" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#">1</a>
+                                </li>
+                                <li>
+                                    <a href="#">2</a>
+                                </li>
+                                <li>
+                                    <a href="#">3</a>
+                                </li>
+                                <li>
+                                    <a href="#">4</a>
+                                </li>
+                                <li>
+                                    <a href="#">5</a>
+                                </li>
+                                <li>
+                                    <a href="#" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="col-md-12 ig-footer">
+        <div class="row">
+            <div class="ig-logo-left col-sm-6">
+                <img src="../images/footer/logo-left.png" title="Instituto de Gestão Financeira da Educação" />
+            </div>
+            <div class="ig-logo-right col-sm-6">
+                <img src="../images/footer/logo-right.png" title="Ministério da Educação" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ig-copyright">
+                    2019 Instituto de Gestão Financeira da Educação, IP
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

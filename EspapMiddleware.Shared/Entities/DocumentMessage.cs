@@ -13,6 +13,7 @@ namespace EspapMiddleware.Shared.Entities
         public string DocumentId { get; set; }
         public DocumentMessageTypeEnum MessageTypeId { get; set; }
         public DateTime Date { get; set; }
+        public string MessageCode { get; set; }
         public string MessageContent { get; set; }
 
         public virtual Document Document { get; set; }

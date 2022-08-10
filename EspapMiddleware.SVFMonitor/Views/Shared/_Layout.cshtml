@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVF - @ViewBag.Title</title>
+    <link rel="shortcut icon" href="~/Content/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bree+Serif|Roboto:400,700">
+    @Styles.Render("~/Content/css")
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/kendo-ui")
+    @Scripts.Render("~/Content/scripts/site.js")
+
+</head>
+<body>
+    <nav class="ig-navbar navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="ig-green-gradient"></div>
+        <div class="container ig-svf-container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">
+                    <img src="~/Content/Images/logo.png" />
+                </a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    @Html.ActionLink("Logs", "Index", "RequestLog")
+                </li>
+                <li>
+                    @Html.ActionLink("Documentos", "Index", "Document")
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container ig-content ig-svf-container" style="padding-top: 70px">
+        @RenderBody()
+    </div>
+
+    <footer class="col-md-12 ig-footer">
+        <div class="row">
+            <div class="ig-logo-left col-sm-6">
+                <img src="~/Content/images/footer/logo-left.png" title="Instituto de Gestão Financeira da Educação" />
+            </div>
+            <div class="ig-logo-right col-sm-6">
+                <img src="~/Content/images/footer/logo-right.png" title="Ministério da Educação" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="ig-copyright">
+                    @DateTime.Now.Year Instituto de Gestão Financeira da Educação, IP
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!--MODALS-->
+    <!--Modal Erros-->
+    <div class="modal fade ig-modal ig-modal-error" id="igmodalErro" tabindex="-1" role="dialog" aria-labelledby="igModalLabelErro">
+        <div class="modal-dialog " role="document">
+            <div class="modal-content">
+                <div class="modal-header ig-modal-header-error">
+                    <h4 class="modal-title">Erro</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn ig-btn-greent" data-dismiss="modal"><i class="fas fa-check"></i> OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Modal Success-->
+    <div class="modal fade ig-modal ig-modal-error" id="igmodalSucesso" tabindex="-1" role="dialog" aria-labelledby="igModalLabelErro">
+        <div class="modal-dialog " role="document">
+            <div class="modal-content">
+                <div class="modal-header ig-modal-header-success">
+                    <h4 class="modal-title">Sucesso</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn ig-btn-greent" data-dismiss="modal"><i class="fas fa-check"></i> OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--LOADER-->
+    <!-- Modal -->
+    <div class="modal fade ig-modal-loader" id="myLoader" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="sk-fading-circle">
+                        <div class="sk-circle1 sk-circle"></div>
+                        <div class="sk-circle2 sk-circle"></div>
+                        <div class="sk-circle3 sk-circle"></div>
+                        <div class="sk-circle4 sk-circle"></div>
+                        <div class="sk-circle5 sk-circle"></div>
+                        <div class="sk-circle6 sk-circle"></div>
+                        <div class="sk-circle7 sk-circle"></div>
+                        <div class="sk-circle8 sk-circle"></div>
+                        <div class="sk-circle9 sk-circle"></div>
+                        <div class="sk-circle10 sk-circle"></div>
+                        <div class="sk-circle11 sk-circle"></div>
+                        <div class="sk-circle12 sk-circle"></div>
+                    </div>
+                    <h3>Aguarde por favor...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Modal Confirmaçao-->
+    <div class="modal fade ig-modal" id="shared-modal-confirm" tabindex="-1" role="dialog">
+        <div class="modal-dialog " role="document">
+            <div class="modal-content">
+                <div class="modal-header ig-modal-header-success">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 id="shared-title-confirm" class="modal-title">Remover</h4>
+                </div>
+                <div class="modal-body" id="shared-mensagem-positiva">
+                    <input type="hidden" id="shared-objid-confirm" />
+                    <p id="shared-mensagem-confirm">Tem a certeza?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fas fa-times"></i> Não</button>
+                    <button id="shared-button-confirm" type="button" class="btn ig-btn-green" data-dismiss="modal"><i class="fas fa-check"></i> Sim</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
