@@ -59,7 +59,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                     return Json(new
                     {
                         statusCode = HttpStatusCode.OK,
-                        message = new string[] { "Documento sicronizado com sucesso." }
+                        messages = new string[] { "Documento sicronizado com sucesso." }
                     });
                 else
                     return Json(new
@@ -87,7 +87,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                     return Json(new
                     {
                         statusCode = HttpStatusCode.OK,
-                        message = new string[] { "Documento sicronizado com sucesso." }
+                        messages = new string[] { "Documento sicronizado com sucesso." }
                     });
                 else
                     return Json(new

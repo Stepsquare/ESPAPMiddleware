@@ -1,4 +1,5 @@
 ﻿using EspapMiddleware.Shared.Entities;
+using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.MonitorServiceModels;
 using EspapMiddleware.Shared.MonitorServiceModels.PaginationModels;
 using System;
@@ -13,7 +14,7 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
     {
         #region RequestLogs
         Task<PaginatedResult<RequestLog>> RequestLogSearch(RequestLogSearchFilters filters);
-        Task<RequestLog> GetLogForDownload(Guid uniqueId);
+        Task<RequestLog> GetLogForDownload(Guid uniqueId, RequestLogTypeEnum type);
 
         #endregion
 

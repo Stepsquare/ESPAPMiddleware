@@ -42,9 +42,9 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Download(Guid uniqueId)
+        public async Task<ActionResult> Download(Guid uniqueId, RequestLogTypeEnum type)
         {
-            var log = await _monitorServices.GetLogForDownload(uniqueId);
+            var log = await _monitorServices.GetLogForDownload(uniqueId, type);
 
             var fileName = log.UniqueId.ToString() + ".xml";
 

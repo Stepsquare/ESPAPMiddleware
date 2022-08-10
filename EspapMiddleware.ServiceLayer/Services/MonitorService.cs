@@ -47,10 +47,10 @@ namespace EspapMiddleware.ServiceLayer.Services
                 };
         }
 
-        public async Task<RequestLog> GetLogForDownload(Guid uniqueId)
+        public async Task<RequestLog> GetLogForDownload(Guid uniqueId, RequestLogTypeEnum type)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.RequestLogs.Find(x => x.UniqueId == uniqueId);
+                return await unitOfWork.RequestLogs.Find(x => x.UniqueId == uniqueId && x.RequestLogTypeId == type);
         }
 
         #endregion
@@ -222,8 +222,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                             setDocumentRequest.commitmentSpecified1 = true;
                             setDocumentRequest.commitment = document.CompromiseNumber;
 
-                            //setDocumentRequest.postingDateSpecified1Specified = true;
-                            //setDocumentRequest.postingDateSpecified1 = true;
+                            setDocumentRequest.postingDateSpecified1Specified = true;
                             setDocumentRequest.postingDateSpecified = true;
                             setDocumentRequest.postingDate = DateTime.UtcNow;
                         }

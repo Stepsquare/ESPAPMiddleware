@@ -421,6 +421,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                             setDocumentRequest.commitmentSpecified1 = true;
                             setDocumentRequest.commitment = document.CompromiseNumber;
 
+                            setDocumentRequest.postingDateSpecified1Specified = true;
                             setDocumentRequest.postingDateSpecified = true;
                             setDocumentRequest.postingDate = DateTime.UtcNow;
                         }
