@@ -123,6 +123,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     if (documentToInsertResult != null && documentToInsertResult.cod_msg_fat != "490")
                     {
                         documentToInsert.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(documentToInsertResult.id_me_fatura);
+                        documentToInsert.IsSynchronizedWithFEAP = !documentToInsert.IsSynchronizedWithSigefe;
 
                         documentToInsert.MEId = documentToInsertResult.id_me_fatura;
 
@@ -130,12 +131,16 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             documentToInsert.StateId = DocumentStateEnum.Processado;
                             documentToInsert.StateDate = DateTime.UtcNow;
-
-                            relatedDocument.StateId = DocumentStateEnum.Processado;
-                            relatedDocument.StateDate = DateTime.UtcNow;
-
                             unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
-                            unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
+
+                            if (relatedDocument != null)
+                            {
+                                relatedDocument.StateId = DocumentStateEnum.Processado;
+                                relatedDocument.StateDate = DateTime.UtcNow;
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
+
+                                unitOfWork.Documents.Update(relatedDocument);
+                            }
                         }
                         else if (documentToInsertResult.state_id == "22")
                         {
@@ -144,8 +149,6 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                             unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
                         }
-
-                        unitOfWork.Documents.Update(relatedDocument);
                     }
                 }
                 else
@@ -166,6 +169,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         documentToInsert.MEId = documentToInsertResult.id_me_fatura;
 
                         documentToInsert.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(documentToInsertResult.id_me_fatura);
+                        documentToInsert.IsSynchronizedWithFEAP = !documentToInsert.IsSynchronizedWithSigefe;
 
                         if (documentToInsertResult.state_id == "35")
                         {
@@ -207,17 +211,17 @@ namespace EspapMiddleware.ServiceLayer.Services
                             relatedDocument.MEId = relatedDocumentResult.id_me_fatura;
 
                             relatedDocument.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(relatedDocumentResult.id_me_fatura);
+                            relatedDocument.IsSynchronizedWithFEAP = !relatedDocument.IsSynchronizedWithSigefe;
 
                             if (relatedDocumentResult.state_id == "35")
                             {
                                 documentToInsert.StateId = DocumentStateEnum.Processado;
                                 documentToInsert.StateDate = DateTime.UtcNow;
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
 
                                 relatedDocument.StateId = DocumentStateEnum.Processado;
                                 relatedDocument.StateDate = DateTime.UtcNow;
-
                                 unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
                             }
                             else
                             {
@@ -226,9 +230,9 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                                 unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument, relatedDocumentResult.reason));
                             }
-                        }
 
-                        unitOfWork.Documents.Update(relatedDocument);
+                            unitOfWork.Documents.Update(relatedDocument);
+                        }
                     }
                 }
 
@@ -253,6 +257,8 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 if (documentToUpdate == null)
                     throw new DatabaseException("Documento não encontrado na BD.");
+
+                documentToUpdate.IsSynchronizedWithFEAP = true;
 
                 if (contract.stateId.HasValue)
                 {
@@ -422,6 +428,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                             setDocumentRequest.commitment = document.CompromiseNumber;
 
                             setDocumentRequest.postingDateSpecified1Specified = true;
+                            setDocumentRequest.postingDateSpecified1 = true;
                             setDocumentRequest.postingDateSpecified = true;
                             setDocumentRequest.postingDate = DateTime.UtcNow;
                         }
@@ -500,6 +507,8 @@ namespace EspapMiddleware.ServiceLayer.Services
 
             obj.StateId = contract.stateId ?? contract.stateId.Value;
             obj.StateDate = contract.stateDate ?? contract.stateDate.Value;
+
+            obj.IsSynchronizedWithFEAP = true;
 
             obj.DocumentLines = new List<DocumentLine>();
 
