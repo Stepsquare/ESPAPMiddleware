@@ -2460,6 +2460,10 @@ p.ig-dsr-cont {
 }
 
 /*KENDO Grid*/
+.ig-grid .k-grid {
+    overflow-x: auto;
+    max-height: 70vh;
+}
 .ig-grid .k-grouping-header {
     background: #2f3e53;
 }
@@ -2582,6 +2586,8 @@ td.ig-studentname-classgrid > a:hover span {
 
 .ig-grid .k-grid-header th.k-header, .ig-grid .k-filter-row th {
     white-space: normal;
+    position: sticky;
+    top: 0;
 }
 
 .ig-grid .k-grid-header .k-i-sort-asc-sm, .ig-grid .k-grid-header .k-i-sort-desc-sm, .ig-grid .k-grid-header .k-sort-order {
