@@ -2758,6 +2758,13 @@ th.k-header.ig-propcol {
 .form-group p {
     margin-bottom: 0;
 }
+.ig-k-datepicker span.k-widget.k-dateinput.k-state-default {
+    width: 50%;
+    display: inline-block;
+}
+.ig-k-datepicker span {
+    display: none;
+}
 /*KENDO-CHECKS*/
 .ig-check.k-checkbox:checked + .ig-check-label.k-checkbox-label:before, .ig-check.k-checkbox:checked:hover + .ig-check-label.k-checkbox-label:before, .ig-check.k-checkbox:checked + .ig-check-label.k-checkbox-label:hover:before {
     border-color: #007236;
