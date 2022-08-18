@@ -2460,6 +2460,10 @@ p.ig-dsr-cont {
 }
 
 /*KENDO Grid*/
+.ig-grid .k-grid {
+    overflow-x: auto;
+    max-height: 70vh;
+}
 .ig-grid .k-grouping-header {
     background: #2f3e53;
 }
@@ -2582,6 +2586,8 @@ td.ig-studentname-classgrid > a:hover span {
 
 .ig-grid .k-grid-header th.k-header, .ig-grid .k-filter-row th {
     white-space: normal;
+    position: sticky;
+    top: 0;
 }
 
 .ig-grid .k-grid-header .k-i-sort-asc-sm, .ig-grid .k-grid-header .k-i-sort-desc-sm, .ig-grid .k-grid-header .k-sort-order {
@@ -2757,6 +2763,13 @@ th.k-header.ig-propcol {
 
 .form-group p {
     margin-bottom: 0;
+}
+.ig-k-datepicker span.k-widget.k-dateinput.k-state-default {
+    width: 50%;
+    display: inline-block;
+}
+.ig-k-datepicker span {
+    display: none;
 }
 /*KENDO-CHECKS*/
 .ig-check.k-checkbox:checked + .ig-check-label.k-checkbox-label:before, .ig-check.k-checkbox:checked:hover + .ig-check-label.k-checkbox-label:before, .ig-check.k-checkbox:checked + .ig-check-label.k-checkbox-label:hover:before {
