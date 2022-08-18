@@ -14,7 +14,7 @@
             <ul class="pagination">
                 <li class="@(Model.PageIndex == 1 ? "disabled" : "")"
                     onclick="@string.Format(Model.AjaxRequestMethod, 1, Model.PageSize )">
-                    <a href="#" aria-label="Primeira">
+                    <a href="javascript:void(0);" aria-label="Primeira">
                         <span aria-hidden="true">
                             <i class="fas fa-angle-double-left"></i>
                         </span>
@@ -22,7 +22,7 @@
                 </li>
                 <li class="@(Model.PageIndex == 1 ? "disabled" : "")"
                     onclick="@string.Format(Model.AjaxRequestMethod, Model.PageIndex - 1, Model.PageSize )">
-                    <a href="#" aria-label="Anterior">
+                    <a href="javascript:void(0);" aria-label="Anterior">
                         <span aria-hidden="true">
                             <i class="fas fa-angle-left"></i>
                         </span>
@@ -38,14 +38,14 @@
                     {
                         <li class="@(Model.PageIndex == i ? "active" : "")"
                             onclick="@string.Format(Model.AjaxRequestMethod, i, Model.PageSize )">
-                            <a href="#">@i</a>
+                            <a href="javascript:void(0);">@i</a>
                         </li>
                     }
                 }
 
                 <li class="@(Model.PageIndex == Model.TotalPages ? "disabled" : "")"
                     onclick="@string.Format(Model.AjaxRequestMethod, Model.PageIndex + 1, Model.PageSize )">
-                    <a href="#" aria-label="Próxima">
+                    <a href="javascript:void(0);" aria-label="Próxima">
                         <span aria-hidden="true">
                             <i class="fas fa-angle-right"></i>
                         </span>
@@ -53,7 +53,7 @@
                 </li>
                 <li class="@(Model.PageIndex == Model.TotalPages ? "disabled" : "")"
                     onclick="@string.Format(Model.AjaxRequestMethod, Model.TotalPages, Model.PageSize )">
-                    <a href="#" aria-label="Última">
+                    <a href="javascript:void(0);" aria-label="Última">
                         <span aria-hidden="true">
                             <i class="fas fa-angle-double-right"></i>
                         </span>

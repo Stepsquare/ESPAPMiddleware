@@ -66,12 +66,14 @@
     <Compile Include="Interfaces\IConfiguration\IUnitOfWork.cs" />
     <Compile Include="Interfaces\IConfiguration\IUnitOfWorkFactory.cs" />
     <Compile Include="Interfaces\IHelpers\IGenericRestRequestManager.cs" />
+    <Compile Include="Interfaces\IRepositories\IDocumentLineRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IDocumentMessageRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IDocumentRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IGenericRepository.cs" />
     <Compile Include="Interfaces\IRepositories\IRequestLogRepository.cs" />
     <Compile Include="Interfaces\IServices\IDocumentService.cs" />
     <Compile Include="Interfaces\IServices\IMonitorService.cs" />
+    <Compile Include="MonitorServiceModels\DocumentDetailLineFilter.cs" />
     <Compile Include="MonitorServiceModels\DocumentSearchFilters.cs" />
     <Compile Include="MonitorServiceModels\PaginationModels\PaginatedResult.cs" />
     <Compile Include="MonitorServiceModels\PaginationModels\PaginatedSearchFilter.cs" />

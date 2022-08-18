@@ -236,6 +236,7 @@
     <Content Include="Views\RequestLog\_searchResultPartial.cshtml" />
     <Content Include="Views\Shared\_paginationPartial.cshtml" />
     <Content Include="Views\Document\_searchResultPartial.cshtml" />
+    <Content Include="Views\Document\_linesResultPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EspapMiddleware.ServiceLayer\EspapMiddleware.ServiceLayer.csproj">

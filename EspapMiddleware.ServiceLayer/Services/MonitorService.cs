@@ -82,7 +82,19 @@ namespace EspapMiddleware.ServiceLayer.Services
         public async Task<Document> GetDocumentDetail(string documentId)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.Documents.GetByIdIncludeRelatedDoc(documentId);
+                return await unitOfWork.Documents.GetDocumentForDetail(documentId);
+        }
+
+        public async Task<PaginatedResult<DocumentLine>> GetDocumentLinesForDetail(DocumentDetailLineFilter filters)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+                return new PaginatedResult<DocumentLine>()
+                {
+                    PageIndex = filters.PageIndex,
+                    PageSize = filters.PageSize,
+                    TotalCount = await unitOfWork.DocumentLines.Count(x => x.DocumentId == filters.DocumentId),
+                    Data = await unitOfWork.DocumentLines.GetFilteredPaginated(filters)
+                };
         }
 
         public async Task<IEnumerable<string>> GetSchoolYears()
@@ -95,7 +107,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var docToSync = await unitOfWork.Documents.GetByIdIncludeRelatedDoc(documentId);
+                var docToSync = await unitOfWork.Documents.GetDocumentForSyncSigefe(documentId);
 
                 if (docToSync.IsSynchronizedWithSigefe)
                     throw new Exception("Documento já se encontra sincronizado.");

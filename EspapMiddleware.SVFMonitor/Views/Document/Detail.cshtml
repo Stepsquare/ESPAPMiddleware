@@ -287,52 +287,41 @@
         </div>
 
         <h4 class="ig-small-title">LINHAS DO DOCUMENTO:</h4>
-        <div class="ig-grid ig-grid-1l">
-            <div class="k-grid k-widget k-display-block k-editable">
-                <table style="width:100%">
-                    <tbody>
-                        <tr class="k-grid-header">
-                            <th class="k-header">ID Linha</th>
-                            <th class="k-header">Descrição</th>
-                            <th class="k-header">ISBN</th>
-                            <th class="k-header">Imposto</th>
-                            <th class="k-header">Valor</th>
-                            <th class="k-header">Quantidade</th>
-                        </tr>
-                        @if (Model.DocumentLines != null && Model.DocumentLines.Any())
-                        {
-                            foreach (var line in Model.DocumentLines.OrderBy(x => x.LineId))
-                            {
-                                <tr>
-                                    <td>@line.LineId</td>
-                                    <td>@line.Description</td>
-                                    <td>@line.StandardItemIdentification</td>
-                                    <td>@line.TaxPercentage%</td>
-                                    <td class="text-right">@line.Value.ToString("C", CultureInfo.CreateSpecificCulture("pt-PT"))</td>
-                                    <td>@line.Quantity</td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan=6>
-                                    <div class="row ig-noresults">
-                                        <i class="fas fa-search"></i>
-                                        <h3>Sem linhas registadas.</h3>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+        <div id="line_container" class="ig-grid ig-budgetpropgrid">
+
         </div>
 
     </div>
 </div>
 
 <script>
+    $(document).ready(function () {
+        getDocumentLines();
+    });
+
+    function getDocumentLines(pageIndex, pageSize) {
+        ShowLoadingModal();
+
+        $.ajax({
+            url: '@Url.Action("GetLines", "Document")',
+            type: "POST",
+            data: {
+                documentId: "@Model.DocumentId",
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            },
+            success: function (data) {
+                $('#line_container').html(data);
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+
     function syncFeap() {
         ShowLoadingModal();
 

@@ -16,7 +16,8 @@ namespace EspapMiddleware.DataLayer.UnitOfWork
 
         public IDocumentRepository Documents { get; private set; }
         public IRequestLogRepository RequestLogs { get; private set; }
-        public IDocumentMessageRepository DocumentMessages { get; set; }
+        public IDocumentMessageRepository DocumentMessages { get; private set; }
+        public IDocumentLineRepository DocumentLines { get; private set; }
 
         public UnitOfWork()
         {
@@ -24,6 +25,7 @@ namespace EspapMiddleware.DataLayer.UnitOfWork
             Documents = new DocumentRepository(dbContext);
             RequestLogs = new RequestLogRepository(dbContext);
             DocumentMessages = new DocumenMessageRepository(dbContext);
+            DocumentLines = new DocumentLineRepository(dbContext);
         }
 
         public async Task<int> SaveChangesAsync()

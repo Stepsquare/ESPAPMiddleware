@@ -1,4 +1,5 @@
 ﻿using EspapMiddleware.Shared.Entities;
+using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.MonitorServiceModels;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,9 @@ namespace EspapMiddleware.Shared.Interfaces.IRepositories
 {
     public interface IDocumentRepository : IGenericRepository<Document>
     {
-        Task<Document> GetByIdIncludeRelatedDoc(string DocumentId);
+        Task<Document> GetDocumentForSyncSigefe(string documentId);
+        Task<Document> GetRelatedDocument(string relatedReferenceNumber, string supplierFiscalId, string schoolYear, DocumentTypeEnum type);
+        Task<Document> GetDocumentForDetail(string documentId);
         Task<IEnumerable<Document>> GetFilteredPaginated(DocumentSearchFilters filters);
         Task<IEnumerable<string>> GetSchoolYears();
     }

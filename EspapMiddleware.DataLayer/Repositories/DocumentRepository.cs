@@ -6,6 +6,7 @@ using EspapMiddleware.Shared.MonitorServiceModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,14 +19,30 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
         }
 
-        public async Task<Document> GetByIdIncludeRelatedDoc(string documentId)
+        public async Task<Document> GetDocumentForSyncSigefe(string documentId)
         {
-            var cenas = await DbContext.Documents.ToListAsync();
-
             return await DbContext.Documents
-                .Include(x => x.DocumentLines)
                 .Include(x => x.DocumentMessages)
-                .Include(x => x.RelatedDocument)
+                .Include(x => x.RequestLogs)
+                .FirstOrDefaultAsync(x => x.DocumentId == documentId);
+        }
+
+        public async Task<Document> GetRelatedDocument(string relatedReferenceNumber, string supplierFiscalId, string schoolYear, DocumentTypeEnum type)
+        {
+            return await DbContext.Documents
+                                .Where(x => x.ReferenceNumber == relatedReferenceNumber
+                                        && x.SupplierFiscalId == supplierFiscalId
+                                        && x.SchoolYear == schoolYear
+                                        && ((type == DocumentTypeEnum.Fatura && x.TypeId == DocumentTypeEnum.NotaCrédito)
+                                            || (type != DocumentTypeEnum.Fatura && (x.TypeId == DocumentTypeEnum.Fatura || x.TypeId == DocumentTypeEnum.NotaCrédito))))
+                                .Include(x => x.DocumentLines)
+                                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Document> GetDocumentForDetail(string documentId)
+        {
+            return await DbContext.Documents
+                .Include(x => x.DocumentMessages)
                 .Include(x => x.RequestLogs)
                 .FirstOrDefaultAsync(x => x.DocumentId == documentId);
         }

@@ -51,6 +51,14 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         }
 
         [HttpPost]
+        public async Task<PartialViewResult> GetLines(DocumentDetailLineFilter filters)
+        {
+            var model = await _monitorServices.GetDocumentLinesForDetail(filters);
+
+            return PartialView("_linesResultPartial", model);
+        }
+
+        [HttpPost]
         public async Task<JsonResult> SyncFeap(string id)
         {
             try
@@ -65,7 +73,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                     return Json(new
                     {
                         statusCode = HttpStatusCode.InternalServerError,
-                        messages = new string[] { "Erro de comunicação com a FE-AP. Verificar Log de Comunicação." }
+                        messages = new string[] { "Erro na sincronização com a FE-AP." }
                     });
             }
             catch (Exception ex)
@@ -93,7 +101,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                     return Json(new
                     {
                         statusCode = HttpStatusCode.InternalServerError,
-                        messages = new string[] { "Erro de comunicação com a FE-AP. Verificar Log de Comunicação." }
+                        messages = new string[] { "Erro na sincronização com o SIGeFE." }
                     });
             }
             catch (Exception ex)

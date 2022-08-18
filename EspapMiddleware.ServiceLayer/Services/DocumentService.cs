@@ -101,10 +101,10 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 if (contract.documentType != DocumentTypeEnum.Fatura)
                 {
-                    var relatedDocument = await unitOfWork.Documents.Find(x => x.ReferenceNumber == contract.RelatedReferenceNumber
-                                                                            && x.SupplierFiscalId == contract.supplierFiscalId
-                                                                            && x.SchoolYear == contract.SchoolYear
-                                                                            && (x.TypeId == DocumentTypeEnum.Fatura || x.TypeId == DocumentTypeEnum.NotaCrédito));
+                    var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(contract.RelatedReferenceNumber,
+                                                                                        contract.supplierFiscalId,
+                                                                                        contract.SchoolYear,
+                                                                                        contract.documentType);
 
                     if (relatedDocument != null)
                         documentToInsert.RelatedDocumentId = relatedDocument.DocumentId;
@@ -185,10 +185,10 @@ namespace EspapMiddleware.ServiceLayer.Services
                         unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
                     }
 
-                    var relatedDocument = await unitOfWork.Documents.Find(x => x.RelatedReferenceNumber == contract.referenceNumber
-                                                                            && x.SupplierFiscalId == contract.supplierFiscalId
-                                                                            && x.SchoolYear == contract.SchoolYear
-                                                                            && x.TypeId == DocumentTypeEnum.NotaCrédito);
+                    var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(contract.RelatedReferenceNumber,
+                                                                                        contract.supplierFiscalId,
+                                                                                        contract.SchoolYear,
+                                                                                        contract.documentType);
 
                     if (relatedDocument != null)
                     {
@@ -253,7 +253,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var documentToUpdate = await unitOfWork.Documents.GetByIdIncludeRelatedDoc(contract.documentId);
+                var documentToUpdate = await unitOfWork.Documents.Find(x => x.DocumentId == contract.documentId);
 
                 if (documentToUpdate == null)
                     throw new DatabaseException("Documento não encontrado na BD.");

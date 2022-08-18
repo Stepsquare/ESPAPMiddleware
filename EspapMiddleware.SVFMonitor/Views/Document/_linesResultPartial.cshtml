@@ -1,0 +1,47 @@
+﻿@model PaginatedResult<DocumentLine>
+
+
+<div class="k-grid k-widget k-display-block k-editable">
+    <table style="width:100%">
+        <tbody>
+            <tr class="k-grid-header">
+                <th class="k-header">ID Linha</th>
+                <th class="k-header">Descrição</th>
+                <th class="k-header">ISBN</th>
+                <th class="k-header">Imposto</th>
+                <th class="k-header">Valor</th>
+                <th class="k-header">Quantidade</th>
+            </tr>
+            @if (Model.Data != null && Model.Data.Any())
+            {
+                foreach (var line in Model.Data)
+                {
+                    <tr>
+                        <td>@line.LineId</td>
+                        <td>@line.Description</td>
+                        <td>@line.StandardItemIdentification</td>
+                        <td>@line.TaxPercentage%</td>
+                        <td class="text-right">@line.Value.ToString("C", CultureInfo.CreateSpecificCulture("pt-PT"))</td>
+                        <td>@line.Quantity</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan=6>
+                        <div class="row ig-noresults">
+                            <i class="fas fa-search"></i>
+                            <h3>Sem linhas registadas.</h3>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.TotalCount != 0)
+{
+    Html.RenderPartial("_paginationPartial", new PaginationPartialViewModel(Model.PageIndex, Model.PageSize, Model.TotalCount, "getDocumentLines({0}, {1})") { });
+}
