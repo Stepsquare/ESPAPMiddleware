@@ -175,63 +175,66 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             documentToInsert.StateId = DocumentStateEnum.ValidadoConferido;
                             documentToInsert.StateDate = DateTime.UtcNow;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
                         }
                         else
                         {
-                            documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                            documentToInsert.ActionDate = DateTime.UtcNow;
-                        }
-
-                        unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
-                    }
-
-                    var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(contract.RelatedReferenceNumber,
+                            var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(contract.referenceNumber,
                                                                                         contract.supplierFiscalId,
                                                                                         contract.SchoolYear,
                                                                                         contract.documentType);
 
-                    if (relatedDocument != null)
-                    {
-                        relatedDocument.RelatedDocumentId = documentToInsert.DocumentId;
-                        relatedDocument.RelatedDocument = documentToInsert;
-
-                        var relatedDocumentResult = await RequestSetDocFaturacao(relatedDocument);
-
-                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
-                        {
-                            DocumentId = relatedDocument.DocumentId,
-                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                            Date = DateTime.UtcNow,
-                            MessageCode = relatedDocumentResult != null ? relatedDocumentResult.cod_msg_fat : "500",
-                            MessageContent = relatedDocumentResult != null ? relatedDocumentResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
-                        });
-
-                        if (relatedDocumentResult != null)
-                        {
-                            relatedDocument.MEId = relatedDocumentResult.id_me_fatura;
-
-                            relatedDocument.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(relatedDocumentResult.id_me_fatura);
-                            relatedDocument.IsSynchronizedWithFEAP = !relatedDocument.IsSynchronizedWithSigefe;
-
-                            if (relatedDocumentResult.state_id == "35")
+                            if (relatedDocument != null)
                             {
-                                documentToInsert.StateId = DocumentStateEnum.Processado;
-                                documentToInsert.StateDate = DateTime.UtcNow;
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
+                                relatedDocument.RelatedDocumentId = documentToInsert.DocumentId;
 
-                                relatedDocument.StateId = DocumentStateEnum.Processado;
-                                relatedDocument.StateDate = DateTime.UtcNow;
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
+                                var relatedDocumentResult = await RequestSetDocFaturacao(relatedDocument);
+
+                                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                                {
+                                    DocumentId = relatedDocument.DocumentId,
+                                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                    Date = DateTime.UtcNow,
+                                    MessageCode = relatedDocumentResult != null ? relatedDocumentResult.cod_msg_fat : "500",
+                                    MessageContent = relatedDocumentResult != null ? relatedDocumentResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
+                                });
+
+                                if (relatedDocumentResult != null)
+                                {
+                                    relatedDocument.MEId = relatedDocumentResult.id_me_fatura;
+
+                                    relatedDocument.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(relatedDocumentResult.id_me_fatura);
+                                    relatedDocument.IsSynchronizedWithFEAP = !relatedDocument.IsSynchronizedWithSigefe;
+
+                                    if (relatedDocumentResult.state_id == "35")
+                                    {
+                                        documentToInsert.StateId = DocumentStateEnum.Processado;
+                                        documentToInsert.StateDate = DateTime.UtcNow;
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
+
+                                        relatedDocument.StateId = DocumentStateEnum.Processado;
+                                        relatedDocument.StateDate = DateTime.UtcNow;
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
+                                    }
+                                    else
+                                    {
+                                        relatedDocument.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                        relatedDocument.ActionDate = DateTime.UtcNow;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument, relatedDocumentResult.reason));
+                                    }
+
+                                    unitOfWork.Documents.Update(relatedDocument);
+                                }
                             }
                             else
                             {
-                                relatedDocument.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                relatedDocument.ActionDate = DateTime.UtcNow;
+                                documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                documentToInsert.ActionDate = DateTime.UtcNow;
 
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument, relatedDocumentResult.reason));
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
                             }
-
-                            unitOfWork.Documents.Update(relatedDocument);
                         }
                     }
                 }

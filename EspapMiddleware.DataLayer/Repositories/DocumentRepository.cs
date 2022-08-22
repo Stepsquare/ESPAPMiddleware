@@ -27,14 +27,14 @@ namespace EspapMiddleware.DataLayer.Repositories
                 .FirstOrDefaultAsync(x => x.DocumentId == documentId);
         }
 
-        public async Task<Document> GetRelatedDocument(string relatedReferenceNumber, string supplierFiscalId, string schoolYear, DocumentTypeEnum type)
+        public async Task<Document> GetRelatedDocument(string referenceNumber, string supplierFiscalId, string schoolYear, DocumentTypeEnum type)
         {
             return await DbContext.Documents
-                                .Where(x => x.ReferenceNumber == relatedReferenceNumber
-                                        && x.SupplierFiscalId == supplierFiscalId
+                                .Where(x => x.SupplierFiscalId == supplierFiscalId
                                         && x.SchoolYear == schoolYear
-                                        && ((type == DocumentTypeEnum.Fatura && x.TypeId == DocumentTypeEnum.NotaCrédito)
-                                            || (type != DocumentTypeEnum.Fatura && (x.TypeId == DocumentTypeEnum.Fatura || x.TypeId == DocumentTypeEnum.NotaCrédito))))
+                                        && ((type == DocumentTypeEnum.Fatura && x.TypeId == DocumentTypeEnum.NotaCrédito && x.RelatedReferenceNumber == referenceNumber)
+                                            || (type == DocumentTypeEnum.NotaCrédito && x.TypeId == DocumentTypeEnum.Fatura && x.ReferenceNumber == referenceNumber)
+                                            || (type == DocumentTypeEnum.NotaDébito && x.TypeId == DocumentTypeEnum.NotaCrédito && x.ReferenceNumber == referenceNumber)))
                                 .Include(x => x.DocumentLines)
                                 .FirstOrDefaultAsync();
         }
