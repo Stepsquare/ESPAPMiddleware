@@ -19,7 +19,7 @@ namespace EspapMiddleware.DataLayer.Repositories
             DbContext = context;
         }
 
-        public void Add(TEntity entity)
+        public virtual void Add(TEntity entity)
         {
             DbContext.Set<TEntity>().Add(entity);
         }
@@ -39,7 +39,7 @@ namespace EspapMiddleware.DataLayer.Repositories
             DbContext.Set<TEntity>().RemoveRange(entities);
         }
 
-        public void Update(TEntity entity)
+        public virtual void Update(TEntity entity)
         {
             DbContext.Set<TEntity>().Attach(entity);
             DbContext.Entry(entity).State = EntityState.Modified;

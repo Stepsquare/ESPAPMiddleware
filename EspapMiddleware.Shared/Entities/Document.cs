@@ -40,6 +40,9 @@ namespace EspapMiddleware.Shared.Entities
         public bool IsSynchronizedWithSigefe { get; set; }
         public bool IsSynchronizedWithFEAP { get; set; }
 
+        public DateTime CreatedOn { get; set; }
+        public DateTime? UpdatedOn { get; set; }
+
         public virtual DocumentType Type { get; set; }
         public virtual DocumentState State { get; set; }
         public virtual DocumentAction Action { get; set; }

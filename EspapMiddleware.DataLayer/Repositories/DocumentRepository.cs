@@ -19,6 +19,19 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
         }
 
+        public override void Add(Document entity)
+        {
+            entity.CreatedOn = DateTime.Now;
+            DbContext.Set<Document>().Add(entity);
+        }
+
+        public override void Update(Document entity)
+        {
+            entity.UpdatedOn = DateTime.Now;
+            DbContext.Set<Document>().Attach(entity);
+            DbContext.Entry(entity).State = EntityState.Modified;
+        }
+
         public async Task<Document> GetDocumentForSyncSigefe(string documentId)
         {
             return await DbContext.Documents
@@ -61,7 +74,7 @@ namespace EspapMiddleware.DataLayer.Repositories
                                         && (string.IsNullOrEmpty(filters.MeId) || x.MEId == filters.MeId)
                                         && (!filters.SigefeSyncronized.HasValue || x.IsSynchronizedWithSigefe == filters.SigefeSyncronized)
                                         && (!filters.FeapSyncronized.HasValue || x.IsSynchronizedWithFEAP == filters.FeapSyncronized))
-                                .OrderByDescending(x => x.IssueDate)
+                                .OrderByDescending(x => x.CreatedOn)
                                 .Skip((filters.PageIndex - 1) * filters.PageSize).Take(filters.PageSize)
                                 .ToListAsync();
         }

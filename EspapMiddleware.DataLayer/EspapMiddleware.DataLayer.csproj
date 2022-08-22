@@ -56,6 +56,10 @@
     <Compile Include="Migrations\202208091932093_InitialDeploy.designer.cs">
       <DependentUpon>202208091932093_InitialDeploy.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202208221141290_Add_Documents_columns_CrestedOn_UpdatedOn.cs" />
+    <Compile Include="Migrations\202208221141290_Add_Documents_columns_CrestedOn_UpdatedOn.designer.cs">
+      <DependentUpon>202208221141290_Add_Documents_columns_CrestedOn_UpdatedOn.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\DocumenMessageRepository.cs" />
@@ -78,6 +82,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202208091932093_InitialDeploy.resx">
       <DependentUpon>202208091932093_InitialDeploy.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202208221141290_Add_Documents_columns_CrestedOn_UpdatedOn.resx">
+      <DependentUpon>202208221141290_Add_Documents_columns_CrestedOn_UpdatedOn.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
