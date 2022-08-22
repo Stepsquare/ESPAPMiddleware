@@ -134,6 +134,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         docToSync.MEId = docToSyncResult.id_me_fatura;
 
                         docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
+                        docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
 
                         if (docToSyncResult.state_id == "35")
                         {
