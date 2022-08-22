@@ -3,7 +3,7 @@
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class InitialDeploy : DbMigration
+    public partial class Initial_Deploy : DbMigration
     {
         public override void Up()
         {
@@ -58,6 +58,8 @@
                         ActionDate = c.DateTime(),
                         IsSynchronizedWithSigefe = c.Boolean(nullable: false),
                         IsSynchronizedWithFEAP = c.Boolean(nullable: false),
+                        CreatedOn = c.DateTime(nullable: false),
+                        UpdatedOn = c.DateTime(),
                     })
                 .PrimaryKey(t => t.DocumentId)
                 .ForeignKey("dbo.DocumentActions", t => t.ActionId)
