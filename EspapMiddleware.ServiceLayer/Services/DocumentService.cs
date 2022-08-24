@@ -180,6 +180,11 @@ namespace EspapMiddleware.ServiceLayer.Services
                         }
                         else
                         {
+                            documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                            documentToInsert.ActionDate = DateTime.UtcNow;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
+
                             var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(contract.referenceNumber,
                                                                                         contract.supplierFiscalId,
                                                                                         contract.SchoolYear,
@@ -228,13 +233,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                                     unitOfWork.Documents.Update(relatedDocument);
                                 }
                             }
-                            else
-                            {
-                                documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                documentToInsert.ActionDate = DateTime.UtcNow;
-
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
-                            }
                         }
                     }
                 }
@@ -256,7 +254,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var documentToUpdate = await unitOfWork.Documents.Find(x => x.DocumentId == contract.documentId);
+                var documentToUpdate = await unitOfWork.Documents.GetDocumentForSyncSigefe(contract.documentId);
 
                 if (documentToUpdate == null)
                     throw new DatabaseException("Documento não encontrado na BD.");

@@ -35,8 +35,7 @@ namespace EspapMiddleware.DataLayer.Repositories
         public async Task<Document> GetDocumentForSyncSigefe(string documentId)
         {
             return await DbContext.Documents
-                .Include(x => x.DocumentMessages)
-                .Include(x => x.RequestLogs)
+                .Include(x => x.DocumentLines)
                 .FirstOrDefaultAsync(x => x.DocumentId == documentId);
         }
 
