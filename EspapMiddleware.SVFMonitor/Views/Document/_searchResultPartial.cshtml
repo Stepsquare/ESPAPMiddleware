@@ -7,14 +7,14 @@
             <tbody>
                 <tr class="k-grid-header">
                     <th class="k-header">ID Documento</th>
+                    <th class="k-header">ID ME</th>
                     <th class="k-header">N.º Fatura</th>
-                    <th class="k-header">Data</th>
+                    <th class="k-header">Data de Criação</th>
                     <th class="k-header">NIF Fornecedor</th>
+                    <th class="k-header">N.º Compromisso</th>
                     <th class="k-header">Ano letivo</th>
                     <th class="k-header">Estado</th>
-                    <th class="k-header">N.º Compromisso</th>
                     <th class="k-header">Montante</th>
-                    <th class="k-header">ID ME</th>
                     <th class="k-header ig-xml-col">Detalhe</th>
                 </tr>
                 @if (Model.TotalCount != 0)
@@ -23,15 +23,24 @@
                     {
                         <tr>
                             <td>@doc.DocumentId</td>
+                            <td>@doc.MEId</td>
                             <td>@doc.ReferenceNumber</td>
-                            <td>@doc.IssueDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>@doc.CreatedOn.ToString("dd/MM/yyyy HH:mm:ss")</td>
                             <td>@doc.SupplierFiscalId</td>
+                            <td>@doc.CompromiseNumber</td>
                             <td>@doc.SchoolYear</td>
 
                             @switch (doc.StateId)
                             {
                                 case DocumentStateEnum.Iniciado:
-                                    <td><strong><i class="fas fa-play"></i> Iniciado</strong></td>
+                                    if (doc.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
+                                    {
+                                        <td><span class="ig-state-warning"><i class="fas fa-hourglass"></i> Aguarda Regularização</span></td>
+                                    }
+                                    else
+                                    {
+                                        <td><strong><i class="fas fa-play"></i> Iniciado</strong></td>
+                                    }
                                     break;
                                 case DocumentStateEnum.ValidadoConferido:
                                     <td><strong><i class="fas fa-check"></i> Validado</strong></td>
@@ -49,9 +58,7 @@
                                     break;
                             }
 
-                            <td>@doc.CompromiseNumber</td>
                             <td class="text-right">@(decimal.Parse(doc.TotalAmount, CultureInfo.InvariantCulture).ToString("C", CultureInfo.CreateSpecificCulture("pt-PT")))</td>
-                            <td>@doc.MEId</td>
                             <td><a class="btn ig-btn-round" href="@Url.Action("Detail","Document", new { id = doc.DocumentId } )"><i class="far fa-file-alt"></i></a></td>
                         </tr>
                     }

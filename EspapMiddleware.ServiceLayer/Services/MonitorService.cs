@@ -65,8 +65,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                     PageIndex = filters.PageIndex,
                     PageSize = filters.PageSize,
                     TotalCount = await unitOfWork.Documents.Count(x => (string.IsNullOrEmpty(filters.DocumentId) || x.DocumentId == filters.DocumentId)
-                                        && (!filters.FromDate.HasValue || x.IssueDate > filters.FromDate)
-                                        && (!filters.UntilDate.HasValue || x.IssueDate < filters.UntilDate)
+                                        && (!filters.FromDate.HasValue || x.CreatedOn > filters.FromDate)
+                                        && (!filters.UntilDate.HasValue || x.CreatedOn < filters.UntilDate)
                                         && (string.IsNullOrEmpty(filters.SupplierFiscalId) || x.SupplierFiscalId.Contains(filters.SupplierFiscalId))
                                         && (string.IsNullOrEmpty(filters.SchoolYear) || x.SchoolYear == filters.SchoolYear)
                                         && (string.IsNullOrEmpty(filters.CompromiseNumber) || x.CompromiseNumber == filters.CompromiseNumber)
@@ -111,6 +111,9 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 if (docToSync.IsSynchronizedWithSigefe)
                     throw new Exception("Documento já se encontra sincronizado.");
+
+                if(string.IsNullOrEmpty(docToSync.SchoolYear))
+                    docToSync.SchoolYear = _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
 
                 var docToSyncResult = await RequestSetDocFaturacao(docToSync);
 
