@@ -36,6 +36,7 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                 .Include(x => x.DocumentLines)
+                .Include(x => x.RelatedDocument)
                 .FirstOrDefaultAsync(x => x.DocumentId == documentId);
         }
 

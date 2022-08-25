@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -103,7 +104,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 return await unitOfWork.Documents.GetSchoolYears();
         }
 
-        public async Task<bool> SyncSigefe(string documentId)
+        public async Task SyncSigefe(string documentId)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
@@ -112,42 +113,86 @@ namespace EspapMiddleware.ServiceLayer.Services
                 if (docToSync.IsSynchronizedWithSigefe)
                     throw new Exception("Documento já se encontra sincronizado.");
 
-                if(string.IsNullOrEmpty(docToSync.SchoolYear))
-                    docToSync.SchoolYear = _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
+                if (string.IsNullOrEmpty(docToSync.SchoolYear))
+                {
+                    var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
+                    docToSync.SchoolYear = getFaseResponse.id_ano_letivo_atual;
+                }
 
                 var docToSyncResult = await RequestSetDocFaturacao(docToSync);
 
-                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                if (docToSyncResult == null)
                 {
-                    DocumentId = documentId,
-                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                    Date = DateTime.UtcNow,
-                    MessageCode = docToSyncResult != null ? docToSyncResult.cod_msg_fat : "500",
-                    MessageContent = docToSyncResult != null ? docToSyncResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
-                });
-
-                if (docToSyncResult != null)
+                    throw new Exception("Erro de comunicação com SIGeFE. Tentar mais tarde");
+                }
+                else
                 {
-                    if (docToSync.StateId == DocumentStateEnum.EmitidoPagamento)
+                    if (docToSync.TypeId == DocumentTypeEnum.Fatura)
                     {
-                        docToSync.IsSynchronizedWithSigefe = docToSyncResult != null && docToSyncResult.cod_msg_fat == "200";
-                    }
-                    else
-                    {
-                        docToSync.MEId = docToSyncResult.id_me_fatura;
-
-                        docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
-                        docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
-
-                        if (docToSyncResult.state_id == "35")
+                        if (docToSync.StateId == DocumentStateEnum.EmitidoPagamento)
                         {
-                            docToSync.StateId = DocumentStateEnum.ValidadoConferido;
-                            docToSync.StateDate = DateTime.UtcNow;
+                            docToSync.IsSynchronizedWithSigefe = docToSyncResult != null && docToSyncResult.cod_msg_fat == "200";
                         }
                         else
                         {
-                            docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                            docToSync.ActionDate = DateTime.UtcNow;
+                            docToSync.MEId = docToSyncResult.id_me_fatura;
+
+                            docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
+                            docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
+
+                            if (docToSyncResult.state_id == "35")
+                            {
+                                docToSync.StateId = DocumentStateEnum.ValidadoConferido;
+                                docToSync.StateDate = DateTime.UtcNow;
+                            }
+                            else
+                            {
+                                docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                docToSync.ActionDate = DateTime.UtcNow;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (docToSyncResult.cod_msg_fat == "490")
+                        {
+                            throw new Exception("Sincronização falhada. Sincronizar primeiro fatura associada.");
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(docToSync.RelatedDocumentId))
+                            {
+                                var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(docToSync.RelatedReferenceNumber,
+                                                                                                docToSync.SupplierFiscalId,
+                                                                                                docToSync.SchoolYear,
+                                                                                                docToSync.TypeId);
+
+                                if (relatedDocument != null)
+                                {
+                                    docToSync.RelatedDocumentId = relatedDocument.DocumentId;
+                                    docToSync.RelatedDocument = relatedDocument;
+                                }
+                            }
+
+                            docToSync.MEId = docToSyncResult.id_me_fatura;
+
+                            docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
+                            docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
+
+                            if (docToSyncResult.state_id == "35")
+                            {
+                                docToSync.StateId = DocumentStateEnum.Processado;
+                                docToSync.StateDate = DateTime.UtcNow;
+
+                                docToSync.RelatedDocument.StateId = DocumentStateEnum.Processado;
+                                docToSync.RelatedDocument.StateDate = DateTime.UtcNow;
+                                docToSync.RelatedDocument.IsSynchronizedWithFEAP = docToSync.IsSynchronizedWithFEAP;
+                            }
+                            else
+                            {
+                                docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                docToSync.ActionDate = DateTime.UtcNow;
+                            }
                         }
                     }
                 }
@@ -160,12 +205,10 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     throw new DatabaseException("Erro ao atualizar documento na BD.");
                 }
-
-                return docToSync.IsSynchronizedWithSigefe;
             }
         }
 
-        public async Task<bool> SyncFeap(string documentId)
+        public async Task SyncFeap(string documentId)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
@@ -178,7 +221,7 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 var lastSigefeMessage = await unitOfWork.DocumentMessages.GetLastSigefeMessage(documentId);
 
-                var setDocumentLog = await RequestSetDocument(docToSync, lastSigefeMessage != null ? lastSigefeMessage.MessageContent : null);
+                var setDocumentLog = await RequestSetDocument(docToSync, lastSigefeMessage?.MessageContent);
 
                 unitOfWork.RequestLogs.Add(setDocumentLog);
 
@@ -188,8 +231,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     throw new DatabaseException("Erro ao inserir Log de comunicação na BD.");
                 }
-
-                return setDocumentLog.Successful;
             }
         }
 

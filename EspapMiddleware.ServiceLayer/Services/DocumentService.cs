@@ -180,11 +180,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                         }
                         else
                         {
-                            documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                            documentToInsert.ActionDate = DateTime.UtcNow;
-
-                            unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
-
                             var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(contract.referenceNumber,
                                                                                         contract.supplierFiscalId,
                                                                                         contract.SchoolYear,
@@ -232,6 +227,13 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                                     unitOfWork.Documents.Update(relatedDocument);
                                 }
+                            }
+                            else
+                            {
+                                documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                documentToInsert.ActionDate = DateTime.UtcNow;
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
                             }
                         }
                     }

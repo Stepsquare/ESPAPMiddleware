@@ -63,18 +63,13 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         {
             try
             {
-                if (await _monitorServices.SyncFeap(id))
-                    return Json(new
-                    {
-                        statusCode = HttpStatusCode.OK,
-                        messages = new string[] { "Documento sicronizado com sucesso." }
-                    });
-                else
-                    return Json(new
-                    {
-                        statusCode = HttpStatusCode.InternalServerError,
-                        messages = new string[] { "Erro na sincronização com a FE-AP." }
-                    });
+                await _monitorServices.SyncFeap(id);
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Documento sicronizado com sucesso." }
+                });
             }
             catch (Exception ex)
             {
@@ -91,18 +86,13 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         {
             try
             {
-                if (await _monitorServices.SyncSigefe(id))
-                    return Json(new
-                    {
-                        statusCode = HttpStatusCode.OK,
-                        messages = new string[] { "Documento sicronizado com sucesso." }
-                    });
-                else
-                    return Json(new
-                    {
-                        statusCode = HttpStatusCode.InternalServerError,
-                        messages = new string[] { "Erro na sincronização com o SIGeFE." }
-                    });
+                await _monitorServices.SyncSigefe(id);
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Documento sicronizado com sucesso." }
+                });
             }
             catch (Exception ex)
             {
