@@ -116,7 +116,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 if (string.IsNullOrEmpty(docToSync.SchoolYear))
                 {
                     var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-                    docToSync.SchoolYear = getFaseResponse.id_ano_letivo_atual;
+                    docToSync.SchoolYear = getFaseResponse?.id_ano_letivo_atual;
                 }
 
                 var docToSyncResult = await RequestSetDocFaturacao(docToSync);
