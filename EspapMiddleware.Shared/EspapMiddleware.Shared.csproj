@@ -73,6 +73,7 @@
     <Compile Include="Interfaces\IRepositories\IRequestLogRepository.cs" />
     <Compile Include="Interfaces\IServices\IDocumentService.cs" />
     <Compile Include="Interfaces\IServices\IMonitorService.cs" />
+    <Compile Include="Interfaces\IServices\ISyncronizationService.cs" />
     <Compile Include="MonitorServiceModels\DocumentDetailLineFilter.cs" />
     <Compile Include="MonitorServiceModels\DocumentSearchFilters.cs" />
     <Compile Include="MonitorServiceModels\PaginationModels\PaginatedResult.cs" />

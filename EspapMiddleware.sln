@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.SVFMonitor"
 		{6D3BC2F4-78BF-4BB5-9EE2-55748017191E} = {6D3BC2F4-78BF-4BB5-9EE2-55748017191E}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspapMiddleware.SyncService", "EspapMiddleware.SyncService\EspapMiddleware.SyncService.csproj", "{3E462CEC-DE2F-4565-A283-DED88A6AE7EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{BFE45F55-26BD-48F7-ACB8-91BC99D3FFDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFE45F55-26BD-48F7-ACB8-91BC99D3FFDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFE45F55-26BD-48F7-ACB8-91BC99D3FFDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E462CEC-DE2F-4565-A283-DED88A6AE7EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E462CEC-DE2F-4565-A283-DED88A6AE7EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E462CEC-DE2F-4565-A283-DED88A6AE7EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E462CEC-DE2F-4565-A283-DED88A6AE7EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
