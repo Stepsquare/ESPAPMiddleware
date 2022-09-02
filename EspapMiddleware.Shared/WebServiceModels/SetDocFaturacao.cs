@@ -32,8 +32,8 @@ namespace EspapMiddleware.Shared.WebServiceModels
 
             public class linhaModel
             {
-                public int num_linha { get; set; }
-                public string id_linha { get; set; }
+                public string num_linha { get; set; }
+                public int id_linha { get; set; }
                 public string descricao_linha { get; set; }
                 public int qtd_linha { get; set; }
                 public decimal valor_linha { get; set; }

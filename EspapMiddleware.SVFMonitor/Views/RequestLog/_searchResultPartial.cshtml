@@ -19,7 +19,12 @@
                         <tr>
                             <td>@log.UniqueId</td>
                             <td>@log.RequestLogTypeId.ToString()</td>
-                            <td><a href="@Url.Action("Detail", "Document", new { id = log.DocumentId })"><i class="far fa-file-alt"></i> @log.DocumentId</a></td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(log.DocumentId))
+                                {
+                                    <a href="@Url.Action("Detail", "Document", new { id = log.DocumentId })"><i class="far fa-file-alt"></i> @log.DocumentId</a>
+                                }
+                            </td>
                             <td>@log.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
 
                             @if (!log.Successful)
