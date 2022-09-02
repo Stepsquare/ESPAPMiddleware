@@ -35,9 +35,7 @@ namespace EspapMiddleware.WcfService
         {
             try
             {
-#if DEBUG
-                request.SendDocumentMCIn.Validate();
-#endif
+                request.SendDocumentMCIn.ValidateCompromiseNumber();
 
                 if (request.SendDocumentMCIn.isAnUpdate)
                 {

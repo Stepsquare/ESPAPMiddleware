@@ -96,6 +96,7 @@ namespace EspapMiddleware.Shared.DataContracts
         public string SchoolYear { get; set; }
         public List<InvoiceLineModel> InvoiceLines { get; private set; }
 
+        [Obsolete("Validate is deprecated, please use ValidateCompromiseNumber instead.")]
         public void Validate()
         {
             List<string> errors = new List<string>();
@@ -158,6 +159,17 @@ namespace EspapMiddleware.Shared.DataContracts
 
             if (errors.Any())
                 throw new ContractValidationException(errors.ToArray());
+        }
+
+        public void ValidateCompromiseNumber()
+        {
+            if (string.IsNullOrEmpty(CompromiseNumber))
+                throw new ContractValidationException("Foi impossivel extrair o nº de compromisso do documento no ficheiro UBL fornecido.");
+
+            var megaTypologyList = new List<string> { "_M1", "_M2", "_M3", "_MS" };
+
+            if (!megaTypologyList.Any(s => CompromiseNumber.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) >= 0))
+                throw new ContractValidationException($"O Compromisso '{CompromiseNumber}' não está em conformidade com a tipologia do MEGA. Documento ignorado.");
         }
 
         private void ExtractFromUblFormat(XmlDocument document)

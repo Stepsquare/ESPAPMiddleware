@@ -1,4 +1,5 @@
-﻿using EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector;
+﻿using EspapMiddleware.ServiceLayer.FEAPServices_PP;
+using EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector;
 using EspapMiddleware.Shared.Entities;
 using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.Exceptions;
@@ -120,6 +121,15 @@ namespace EspapMiddleware.ServiceLayer.Services
                 }
 
                 var docToSyncResult = await RequestSetDocFaturacao(docToSync);
+
+                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                {
+                    DocumentId = docToSync.DocumentId,
+                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                    Date = DateTime.UtcNow,
+                    MessageCode = docToSyncResult != null ? docToSyncResult.cod_msg_fat : "500",
+                    MessageContent = docToSyncResult != null ? docToSyncResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
+                });
 
                 if (docToSyncResult == null)
                 {
