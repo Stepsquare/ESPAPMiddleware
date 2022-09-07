@@ -202,8 +202,8 @@ namespace EspapMiddleware.ServiceLayer.Services
             {
                 faturaToSend.linhas.Add(new SetDocFaturacao.fatura.linhaModel()
                 {
-                    id_linha = line.LineId,
-                    num_linha = line.StandardItemIdentification,
+                    id_linha = line.StandardItemIdentification,
+                    num_linha = line.LineId,
                     descricao_linha = line.Description,
                     qtd_linha = line.Quantity,
                     valor_linha = line.Value,
