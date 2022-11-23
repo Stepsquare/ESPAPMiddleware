@@ -76,7 +76,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                 return Json(new
                 {
                     statusCode = HttpStatusCode.InternalServerError,
-                    messages = new string[] { ex.Message }
+                    messages = new string[] { ex.GetBaseException().Message }
                 });
             }
         }
@@ -99,7 +99,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                 return Json(new
                 {
                     statusCode = HttpStatusCode.InternalServerError,
-                    messages = new string[] { ex.Message }
+                    messages = new string[] { ex.GetBaseException().Message }
                 });
             }
         }
