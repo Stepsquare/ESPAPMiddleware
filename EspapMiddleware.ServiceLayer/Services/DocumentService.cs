@@ -34,22 +34,6 @@ namespace EspapMiddleware.ServiceLayer.Services
             _unitOfWorkFactory = unitOfWorkFactory;
         }
 
-        public async Task<GetDocFaturacaoResponse> GetDocFaturacao(string nif = null, string id_doc_feap = null)
-        {
-            var headers = new Dictionary<string, string>()
-            {
-                { "id_ano_letivo", _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual }
-            };
-
-            if (!string.IsNullOrEmpty(nif))
-                headers.Add("nif", nif);
-
-            if (!string.IsNullOrEmpty(id_doc_feap))
-                headers.Add("id_doc_feap", id_doc_feap);
-
-            return await _genericRestRequestManager.Get<GetDocFaturacaoResponse>("getDocFaturacao", headers);
-        }
-
         public async Task AddFailedRequestLog(RequestLogTypeEnum type, Exception ex, Guid uniqueId, string documentId = null)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
@@ -267,22 +251,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     documentToUpdate.StateId = contract.stateId.Value;
                     documentToUpdate.StateDate = contract.stateDate.Value;
-
-                    if (contract.stateId == DocumentStateEnum.EmitidoPagamento)
-                    {
-                        var faturaResult = await RequestSetDocFaturacao(documentToUpdate);
-
-                        documentToUpdate.IsSynchronizedWithSigefe = faturaResult != null && faturaResult.cod_msg_fat == "200";
-
-                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
-                        {
-                            DocumentId = documentToUpdate.DocumentId,
-                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                            Date = DateTime.UtcNow,
-                            MessageCode = faturaResult != null ? faturaResult.cod_msg_fat : "500",
-                            MessageContent = faturaResult != null ? faturaResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
-                        });
-                    }
                 }
                 else if (contract.actionId.HasValue)
                 {

@@ -1,0 +1,81 @@
+﻿@model  PaginatedResult<string>
+
+
+<div class="panel panel-default ig-panel">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h4 class="ig-small-title">SINCRONIZAÇÃO DOCUMENTOS PAGOS</h4>
+            </div>
+            <div class="col-md-4 text-right form-group">
+                <button class="btn ig-btn-blue" onclick="syncPaidDocuments()" @(Model.TotalCount == 0 ? "disabled" : "") )><i class="fas fa-sync-alt"></i> Sincronizar</button>
+            </div>
+        </div>
+        @if (Model.TotalCount != 0)
+        {
+            <div class="ig-grid ig-grid-1l">
+                <div class="k-grid k-widget k-display-block k-editable">
+                    <table style="width:100%">
+                        <tbody>
+                            <tr class="k-grid-header">
+                                <th class="k-header">ID Documento</th>
+                                <th class="k-header ig-xml-col"></th>
+                            </tr>
+                            @foreach (var documentId in Model.Data)
+                            {
+                                <tr>
+                                    <td><a href="@Url.Action("Detail","Document", new { id = documentId } )"><i class="far fa-file-alt"></i> @documentId</a></td>
+                                    <td>
+                                        <a onclick="syncPaidDocuments('@documentId')" class="btn ig-btn-round" title="Sincronizar" href="javascript:void(0);">
+                                            <i class="fa fa-refresh"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            Html.RenderPartial("_paginationPartial", new PaginationPartialViewModel(Model.PageIndex, Model.PageSize, Model.TotalCount, "getPaidDocuments({0}, {1})") { });
+        }
+        else
+        {
+            <div class="ig-noresults ig-nr-outpanel">
+                <i class="fas fa-search"></i>
+                <div>Sem documentos por sincronizar.</div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function syncPaidDocuments(documentId) {
+        ShowLoadingModal();
+
+        $.ajax({
+            url: '@Url.Action("SyncPaidDocuments", "Home")',
+            type: "POST",
+            data: {
+                documentId: documentId,
+            },
+            success: function (data) {
+                if (data.statusCode == 200) {
+                    ShowSucessModal(data.messages, function () {
+                        location.reload();
+                    });
+                } else {
+                    ShowErrorModal(data.messages, function () {
+                        location.reload();
+                    });
+                }
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+</script>

@@ -131,6 +131,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\RequestLogController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -140,6 +141,7 @@
     <Compile Include="Ioc\MonitorServiceInstaller.cs" />
     <Compile Include="Ioc\WindsorControllerFactory.cs" />
     <Compile Include="Models\ComboBoxViewModel.cs" />
+    <Compile Include="Models\HomepageViewModel.cs" />
     <Compile Include="Models\PaginationPartialViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -148,6 +150,7 @@
     <Content Include="Content\htmlLayouts\SVF_DetalheDocumento.html" />
     <Content Include="Content\htmlLayouts\SVF_ListaDocumentos.html" />
     <Content Include="Content\htmlLayouts\SVF_ListaLogs.html" />
+    <Content Include="Content\htmlLayouts\SVF_Sincronizacao.html" />
     <Content Include="Content\images\favicon.ico" />
     <Content Include="Content\images\footer\logo-left.png" />
     <Content Include="Content\images\footer\logo-right.png" />
@@ -237,6 +240,8 @@
     <Content Include="Views\Shared\_paginationPartial.cshtml" />
     <Content Include="Views\Document\_searchResultPartial.cshtml" />
     <Content Include="Views\Document\_linesResultPartial.cshtml" />
+    <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\_paidDocumentsResultPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EspapMiddleware.ServiceLayer\EspapMiddleware.ServiceLayer.csproj">

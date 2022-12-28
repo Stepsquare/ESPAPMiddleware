@@ -12,7 +12,7 @@ namespace EspapMiddleware.Shared.Interfaces.IRepositories
         Task<IEnumerable<TEntity>> GetAll();
         Task<IEnumerable<TEntity>> GetFiltered(Expression<Func<TEntity, bool>> predicate);
         Task<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
-        Task<int> Count(Expression<Func<TEntity, bool>> predicate);
+        Task<int> Count(Expression<Func<TEntity, bool>> predicate = null);
         Task<bool> Any(Expression<Func<TEntity, bool>> predicate);
         void Add(TEntity entity);
         void AddRange(IEnumerable<TEntity> entities);

@@ -28,5 +28,13 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         Task SyncFeap(string documentId);
 
         #endregion
+
+        #region Homepage
+
+        Task<(int totalDocuments, int totalValidDocuments, int totalInvalidDocuments, int totalInvalidDocumentsRectified, int totalPaidDocuments)> GetGlobalStatus();
+        Task<PaginatedResult<string>> GetPaidDocsToSync(PaginatedSearchFilter filters);
+        Task SyncPaidDocuments(string documentId = null);
+
+        #endregion
     }
 }

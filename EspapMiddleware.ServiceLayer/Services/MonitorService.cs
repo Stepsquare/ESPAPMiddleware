@@ -247,7 +247,155 @@ namespace EspapMiddleware.ServiceLayer.Services
         #endregion
 
 
+        #region Homepage
+
+        public async Task<(int totalDocuments, int totalValidDocuments, int totalInvalidDocuments, int totalInvalidDocumentsRectified, int totalPaidDocuments)> GetGlobalStatus()
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var totalDocuments = await unitOfWork.Documents.Count();
+
+                var totalValidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.ValidadoConferido);
+
+                var totalInvalidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Iniciado
+                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização);
+
+                var totalInvalidDocumentsRectified = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Processado
+                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização);
+
+                var totalPaidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.EmitidoPagamento);
+
+                return (totalDocuments, totalValidDocuments, totalInvalidDocuments, totalInvalidDocumentsRectified, totalPaidDocuments);
+            }
+        }
+
+        public async Task<PaginatedResult<string>> GetPaidDocsToSync(PaginatedSearchFilter filters)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var paidDocsFromSigefe = await GetDocFaturacao("5");
+
+                if (paidDocsFromSigefe == null)
+                    throw new WebserviceException("Erro na chamada ao serviço de Faturação do SIGeFE.");
+
+                var result = new List<string>();
+
+                if (paidDocsFromSigefe != null)
+                    foreach (var doc in paidDocsFromSigefe.documentos)
+                    {
+                        if (await unitOfWork.Documents.Any(x => x.DocumentId == doc.id_doc_feap
+                                                             && x.StateId != DocumentStateEnum.EmitidoPagamento))
+                        {
+                            result.Add(doc.id_doc_feap);
+                        }
+                    }
+
+                return new PaginatedResult<string>()
+                {
+                    PageIndex = filters.PageIndex,
+                    PageSize = filters.PageSize,
+                    TotalCount = result.Count,
+                    Data = result.Skip((filters.PageIndex - 1) * filters.PageSize).Take(filters.PageSize),
+                }; ;
+            }
+        }
+
+        public async Task SyncPaidDocuments(string documentId = null) 
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                // Estado 5 --> Pago
+                var paidDocsFromSigefe = await GetDocFaturacao("5");
+
+                if (paidDocsFromSigefe == null)
+                    throw new WebserviceException("Erro na chamada ao serviço de Faturação do SIGeFE.");
+
+                if (documentId != null)
+                {
+                    if (!paidDocsFromSigefe.documentos.Any(x => x.id_doc_feap == documentId))
+                        throw new Exception("Documento não contemplado na lista de faturas pagas do SIGeFE.");
+
+                    var docToSync = await unitOfWork.Documents.Find(x => x.DocumentId == documentId
+                                                            && x.StateId != DocumentStateEnum.EmitidoPagamento);
+                    
+                    if (docToSync != null)
+                    {
+                        docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
+                        docToSync.StateDate = DateTime.UtcNow;
+                        docToSync.IsSynchronizedWithFEAP = false;
+
+
+                        unitOfWork.Documents.Update(docToSync);
+
+                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
+
+                        await unitOfWork.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        throw new Exception("Documento já sincronizado com FE-AP.");
+                    }
+                }
+                else
+                {
+                    var errors = new List<string>();
+
+                    foreach (var doc in paidDocsFromSigefe.documentos)
+                    {
+                        var docToSync = await unitOfWork.Documents.Find(x => x.DocumentId == doc.id_doc_feap
+                                                            && x.StateId != DocumentStateEnum.EmitidoPagamento);
+                        if (docToSync != null)
+                        {
+                            try
+                            {
+                                docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
+                                docToSync.StateDate = DateTime.UtcNow;
+                                docToSync.IsSynchronizedWithFEAP = false;
+
+
+                                unitOfWork.Documents.Update(docToSync);
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
+
+                                await unitOfWork.SaveChangesAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                errors.Add($"{doc.id_doc_feap} - {ex.GetBaseException().Message}");
+                            }
+                        }
+                    }
+
+                    if (errors.Count != 0)
+                        throw new SyncronizationException(errors.ToArray());
+                }
+            }
+        }
+
+        #endregion
+
+
         #region Private Methods
+
+        private async Task<GetDocFaturacaoResponse> GetDocFaturacao(string estado_doc, string nif = null, string id_doc_feap = null)
+        {
+            var headers = new Dictionary<string, string>();
+
+            var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
+
+            headers.Add("id_ano_letivo", getFaseResponse?.id_ano_letivo_atual);
+
+            headers.Add("estado_doc", estado_doc);
+
+            if (!string.IsNullOrEmpty(nif))
+                headers.Add("nif", nif);
+
+            if (!string.IsNullOrEmpty(id_doc_feap))
+                headers.Add("id_doc_feap", id_doc_feap);
+
+            return await _genericRestRequestManager.Get<GetDocFaturacaoResponse>("getDocFaturacao", headers);
+        }
+
         private async Task<RequestLog> RequestSetDocument(Document document, string reason = null)
         {
             var uniqueId = Guid.NewGuid();

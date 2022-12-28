@@ -60,9 +60,12 @@ namespace EspapMiddleware.DataLayer.Repositories
             return await DbContext.Set<TEntity>().Where(predicate).ToListAsync();
         }
 
-        public async Task<int> Count(Expression<Func<TEntity, bool>> predicate)
+        public async Task<int> Count(Expression<Func<TEntity, bool>> predicate = null)
         {
-            return await DbContext.Set<TEntity>().CountAsync(predicate);
+            if (predicate != null)
+                return await DbContext.Set<TEntity>().CountAsync(predicate);
+            else
+                return await DbContext.Set<TEntity>().CountAsync();
         }
 
         public async Task<bool> Any(Expression<Func<TEntity, bool>> predicate)

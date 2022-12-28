@@ -1,0 +1,79 @@
+﻿@model HomepageViewModel
+
+@{
+    ViewBag.Title = "Página Inicial";
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="ig-pagetitle">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>@ViewBag.Title</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default ig-panel ig-statistics-panel">
+    <div class="row">
+        <div class="panel-body">
+            <div class="col-md-2">
+                <h5 class="ig-dash-title">TOTAL DOCUMENTOS:</h5>
+                <h4>@Model.TotalDocuments documentos</h4>
+            </div>
+            <div class="col-md-2">
+                <h5 class="ig-dash-title">TOTAL DOCUMENTOS VALIDADOS:</h5>
+                <h4>@Model.TotalValidDocuments documentos</h4>
+            </div>
+            <div class="col-md-2">
+                <h5 class="ig-dash-title">TOTAL PAGOS:</h5>
+                <h4>@Model.TotalPaidDocuments documentos</h4>
+            </div>
+            <div class="col-md-3">
+                <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS:</h5>
+                <h4>@Model.TotalInvalidDocuments documentos</h4>
+            </div>
+            <div class="col-md-3">
+                <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS REGULARIZADOS:</h5>
+                <h4>@Model.TotalInvalidDocumentsRectified documentos</h4>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div id="result_container" class="col-md-12">
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        getPaidDocuments();
+    });
+
+    function getPaidDocuments(pageIndex, pageSize) {
+        ShowLoadingModal();
+
+        $.ajax({
+            url: '@Url.Action("GetPaidDocuments", "Home")',
+            type: "POST",
+            data: {
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            },
+            success: function (data) {
+                $('#result_container').html(data);
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+</script>

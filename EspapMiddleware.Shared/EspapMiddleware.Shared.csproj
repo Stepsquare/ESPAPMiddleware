@@ -62,6 +62,7 @@
     <Compile Include="Enums\RequestLogTypeEnum.cs" />
     <Compile Include="Exceptions\ContractValidationException.cs" />
     <Compile Include="Exceptions\DatabaseException.cs" />
+    <Compile Include="Exceptions\SincronizationException.cs" />
     <Compile Include="Exceptions\WebserviceException.cs" />
     <Compile Include="Interfaces\IConfiguration\IUnitOfWork.cs" />
     <Compile Include="Interfaces\IConfiguration\IUnitOfWorkFactory.cs" />
