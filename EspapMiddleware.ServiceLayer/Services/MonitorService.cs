@@ -320,16 +320,26 @@ namespace EspapMiddleware.ServiceLayer.Services
                     
                     if (docToSync != null)
                     {
-                        docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
-                        docToSync.StateDate = DateTime.UtcNow;
-                        docToSync.IsSynchronizedWithFEAP = false;
+                        var setDocumentRquestLog = await RequestSetDocumentPaid(docToSync);
+
+                        unitOfWork.RequestLogs.Add(setDocumentRquestLog);
+
+                        if (setDocumentRquestLog.Successful)
+                        {
+                            docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
+                            docToSync.StateDate = DateTime.UtcNow;
+                            docToSync.IsSynchronizedWithFEAP = false;
 
 
-                        unitOfWork.Documents.Update(docToSync);
-
-                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
+                            unitOfWork.Documents.Update(docToSync);
+                        }
 
                         await unitOfWork.SaveChangesAsync();
+
+                        if (!setDocumentRquestLog.Successful)
+                        {
+                            throw new Exception("Falha de comunicação com FEAP.");
+                        }
                     }
                     else
                     {
@@ -348,16 +358,26 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             try
                             {
-                                docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
-                                docToSync.StateDate = DateTime.UtcNow;
-                                docToSync.IsSynchronizedWithFEAP = false;
+                                var setDocumentRquestLog = await RequestSetDocumentPaid(docToSync);
+
+                                unitOfWork.RequestLogs.Add(setDocumentRquestLog);
+
+                                if (setDocumentRquestLog.Successful)
+                                {
+                                    docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
+                                    docToSync.StateDate = DateTime.UtcNow;
+                                    docToSync.IsSynchronizedWithFEAP = false;
 
 
-                                unitOfWork.Documents.Update(docToSync);
-
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
+                                    unitOfWork.Documents.Update(docToSync);
+                                }
 
                                 await unitOfWork.SaveChangesAsync();
+
+                                if (!setDocumentRquestLog.Successful)
+                                {
+                                    throw new Exception("Falha de comunicação com FEAP.");
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -394,6 +414,77 @@ namespace EspapMiddleware.ServiceLayer.Services
                 headers.Add("id_doc_feap", id_doc_feap);
 
             return await _genericRestRequestManager.Get<GetDocFaturacaoResponse>("getDocFaturacao", headers);
+        }
+
+        private async Task<RequestLog> RequestSetDocumentPaid(Document document)
+        {
+            var uniqueId = Guid.NewGuid();
+
+            try
+            {
+                using (var client = new FEAPServices_PP.FEAPServicesClient())
+                {
+                    client.Endpoint.Behaviors.Add(new EndpointBehavior(uniqueId.ToString()));
+
+                    var feapCredencials = (NameValueCollection)ConfigurationManager.GetSection("FEAPCredencials");
+
+                    client.ClientCredentials.UserName.UserName = feapCredencials["username"];
+                    client.ClientCredentials.UserName.Password = feapCredencials["password"];
+
+                    var serviceContextHeader = new FEAPServices_PP.ServiceContextHeader()
+                    {
+                        Application = "FaturacaoEletronica",
+                        ProcessId = document.DocumentId,
+                    };
+
+                    var setDocumentRequest = new FEAPServices_PP.SetDocumentRequest()
+                    {
+                        uniqueId = uniqueId.ToString(),
+                        documentId = document.DocumentId,
+                    };
+
+                    setDocumentRequest.stateIdSpecified = true;
+                    setDocumentRequest.stateId = (int)DocumentStateEnum.EmitidoPagamento;
+
+                    setDocumentRequest.paymentIssuedReference = document.MEId;
+                    setDocumentRequest.paymentIssuedReferenceSpecified1 = true;
+                    setDocumentRequest.paymentIssuedReferenceSpecified1Specified = true;
+
+                    setDocumentRequest.paymentIssuedDate = document.IssueDate;
+                    setDocumentRequest.paymentIssuedDateSpecified = true;
+                    setDocumentRequest.paymentIssuedDateSpecified1 = true;
+                    setDocumentRequest.paymentIssuedDateSpecified1Specified = true;
+
+                    setDocumentRequest.paymentReference = document.ReferenceNumber;
+                    setDocumentRequest.paymentReferenceSpecified1 = true;
+                    setDocumentRequest.paymentReferenceSpecified1Specified = true;
+
+                    await client.SetDocumentAsync(serviceContextHeader, setDocumentRequest);
+
+                    return new RequestLog()
+                    {
+                        UniqueId = uniqueId,
+                        RequestLogTypeId = RequestLogTypeEnum.SetDocument,
+                        DocumentId = document.DocumentId,
+                        Date = DateTime.UtcNow,
+                        Successful = true
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new RequestLog()
+                {
+                    UniqueId = uniqueId,
+                    RequestLogTypeId = RequestLogTypeEnum.SetDocument,
+                    DocumentId = document.DocumentId,
+                    Date = DateTime.UtcNow,
+                    Successful = false,
+                    ExceptionType = ex.GetBaseException().GetType().Name,
+                    ExceptionStackTrace = ex.GetBaseException().StackTrace,
+                    ExceptionMessage = ex.GetBaseException().Message
+                };
+            }
         }
 
         private async Task<RequestLog> RequestSetDocument(Document document, string reason = null)
