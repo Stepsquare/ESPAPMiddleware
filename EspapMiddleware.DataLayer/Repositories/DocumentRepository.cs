@@ -81,7 +81,7 @@ namespace EspapMiddleware.DataLayer.Repositories
 
         public async Task<IEnumerable<string>> GetSchoolYears()
         {
-            return await DbContext.Documents.OrderBy(x => x.SchoolYear).Select(x => x.SchoolYear).Distinct().ToListAsync();
+            return await DbContext.Documents.Select(x => x.SchoolYear).Distinct().ToListAsync();
         }
     }
 }

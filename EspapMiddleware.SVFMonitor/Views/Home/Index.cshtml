@@ -16,31 +16,23 @@
         </div>
     </div>
 </div>
-<div class="panel panel-default ig-panel ig-statistics-panel">
-    <div class="row">
-        <div class="panel-body">
-            <div class="col-md-2">
-                <h5 class="ig-dash-title">TOTAL DOCUMENTOS:</h5>
-                <h4>@Model.TotalDocuments documentos</h4>
+<div class="ig-tabs">
+    <ul class="nav nav-tabs" role="tablist">
+        @for (int i = 0; i < Model.SchoolYears.Length; i++)
+        {
+            <li role="presentation" class="@(i == Model.SchoolYears.Length - 1 ? "active" : "")">
+                <a href="#@Model.SchoolYears[i]" aria-controls="@Model.SchoolYears[i]" role="tab" data-toggle="tab">
+                    <span class="ig-axis-tab">@("20" + Model.SchoolYears[i].Insert(2, "/20"))</span>
+                </a>
+            </li>
+        }
+    </ul>
+    <div class="tab-content">
+        @for (int i = 0; i < Model.SchoolYears.Length; i++)
+        {
+            <div role="tabpanel" class="tab-pane @(i == Model.SchoolYears.Length - 1 ? "active" : "")" id="@Model.SchoolYears[i]">
             </div>
-            <div class="col-md-2">
-                <h5 class="ig-dash-title">TOTAL DOCUMENTOS VALIDADOS:</h5>
-                <h4>@Model.TotalValidDocuments documentos</h4>
-            </div>
-            <div class="col-md-2">
-                <h5 class="ig-dash-title">TOTAL PAGOS:</h5>
-                <h4>@Model.TotalPaidDocuments documentos</h4>
-            </div>
-            <div class="col-md-3">
-                <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS:</h5>
-                <h4>@Model.TotalInvalidDocuments documentos</h4>
-            </div>
-            <div class="col-md-3">
-                <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS REGULARIZADOS:</h5>
-                <h4>@Model.TotalInvalidDocumentsRectified documentos</h4>
-            </div>
-
-        </div>
+        }
     </div>
 </div>
 
@@ -52,8 +44,30 @@
 
 <script>
     $(document).ready(function () {
+        refreshGlobalStatus();
+
         getPaidDocuments();
+
+        $('.ig-tabs .nav-tabs a').on('shown.bs.tab', function () {
+            refreshGlobalStatus();
+        });
     });
+
+    function refreshGlobalStatus() {
+        $.ajax({
+            url: '@Url.Action("GetGlobalStatus", "Home")',
+            type: "POST",
+            data: {
+                anoLetivo: $('.tab-content .active').prop('id'),
+            },
+            success: function (data) {
+                $('.tab-content .active').html(data);
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            }
+        });
+    }
 
     function getPaidDocuments(pageIndex, pageSize) {
         ShowLoadingModal();

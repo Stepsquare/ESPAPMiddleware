@@ -249,21 +249,24 @@ namespace EspapMiddleware.ServiceLayer.Services
 
         #region Homepage
 
-        public async Task<(int totalDocuments, int totalValidDocuments, int totalInvalidDocuments, int totalInvalidDocumentsRectified, int totalPaidDocuments)> GetGlobalStatus()
+        public async Task<(int totalDocuments, int totalValidDocuments, int totalInvalidDocuments, int totalInvalidDocumentsRectified, int totalPaidDocuments)> GetGlobalStatus(string anoLetivo)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var totalDocuments = await unitOfWork.Documents.Count();
+                var totalDocuments = await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo);
 
-                var totalValidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.ValidadoConferido);
+                var totalValidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.ValidadoConferido && x.SchoolYear == anoLetivo);
 
                 var totalInvalidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Iniciado
-                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização);
+                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
+                                                                               && x.SchoolYear == anoLetivo);
 
                 var totalInvalidDocumentsRectified = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Processado
-                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização);
+                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
+                                                                               && x.SchoolYear == anoLetivo);
 
-                var totalPaidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.EmitidoPagamento);
+                var totalPaidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.EmitidoPagamento
+                                                                            && x.SchoolYear == anoLetivo);
 
                 return (totalDocuments, totalValidDocuments, totalInvalidDocuments, totalInvalidDocumentsRectified, totalPaidDocuments);
             }
@@ -273,7 +276,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var paidDocsFromSigefe = await GetDocFaturacao("5");
+                var paidDocsFromSigefe = await GetDocFaturacao("4");
 
                 if (paidDocsFromSigefe == null)
                     throw new WebserviceException("Erro na chamada ao serviço de Faturação do SIGeFE.");
@@ -304,8 +307,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                // Estado 5 --> Pago
-                var paidDocsFromSigefe = await GetDocFaturacao("5");
+                var paidDocsFromSigefe = await GetDocFaturacao("4");
 
                 if (paidDocsFromSigefe == null)
                     throw new WebserviceException("Erro na chamada ao serviço de Faturação do SIGeFE.");

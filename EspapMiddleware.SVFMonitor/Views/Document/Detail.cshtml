@@ -54,7 +54,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="control-label">Ano Letivo:</label>
-                        <p>@Model.SchoolYear</p>
+                        <p>@("20" + Model.SchoolYear.Insert(2, "/20"))</p>
                     </div>
                     <div class="col-md-2">
                         <label class="control-label">N.º Compromisso:</label>

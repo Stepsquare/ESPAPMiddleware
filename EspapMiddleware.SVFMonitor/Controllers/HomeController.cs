@@ -25,15 +25,11 @@ namespace EspapMiddleware.SVFMonitor.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var statistics = await _monitorServices.GetGlobalStatus();
+            var anosLetivos = await _monitorServices.GetSchoolYears();
 
             var model = new HomepageViewModel
             {
-                TotalDocuments = statistics.totalDocuments,
-                TotalValidDocuments = statistics.totalValidDocuments,
-                TotalInvalidDocuments = statistics.totalInvalidDocuments,
-                TotalInvalidDocumentsRectified = statistics.totalInvalidDocumentsRectified,
-                TotalPaidDocuments = statistics.totalPaidDocuments
+                SchoolYears = anosLetivos.ToArray()
             };
 
             return View(model);
@@ -42,6 +38,23 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         #endregion
 
         #region Requests
+
+        [HttpPost]
+        public async Task<PartialViewResult> GetGlobalStatus(string anoLetivo)
+        {
+            var statistics = await _monitorServices.GetGlobalStatus(anoLetivo);
+
+            var model = new HomepageStatusPartialViewModel
+            {
+                TotalDocuments = statistics.totalDocuments,
+                TotalValidDocuments = statistics.totalValidDocuments,
+                TotalInvalidDocuments = statistics.totalInvalidDocuments,
+                TotalInvalidDocumentsRectified = statistics.totalInvalidDocumentsRectified,
+                TotalPaidDocuments = statistics.totalPaidDocuments
+            };
+
+            return PartialView("_homepageStatusPartial", model);
+        }
 
         [HttpPost]
         public async Task<PartialViewResult> GetPaidDocuments(PaginatedSearchFilter filters)

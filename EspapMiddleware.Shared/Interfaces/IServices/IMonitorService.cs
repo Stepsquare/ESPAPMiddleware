@@ -31,7 +31,7 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 
         #region Homepage
 
-        Task<(int totalDocuments, int totalValidDocuments, int totalInvalidDocuments, int totalInvalidDocumentsRectified, int totalPaidDocuments)> GetGlobalStatus();
+        Task<(int totalDocuments, int totalValidDocuments, int totalInvalidDocuments, int totalInvalidDocumentsRectified, int totalPaidDocuments)> GetGlobalStatus(string anoLetivo);
         Task<PaginatedResult<string>> GetPaidDocsToSync(PaginatedSearchFilter filters);
         Task SyncPaidDocuments(string documentId = null);
 

@@ -138,7 +138,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
             return Json(schoolYears.Select(e => new ComboBoxViewModel()
             {
                 Id = e,
-                Description = e
+                Description = "20" + e.Insert(2, "/20")
             }), JsonRequestBehavior.AllowGet);
         }
 
