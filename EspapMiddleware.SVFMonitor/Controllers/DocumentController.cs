@@ -104,6 +104,52 @@ namespace EspapMiddleware.SVFMonitor.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<JsonResult> ResetSigefeSync(string id)
+        {
+            try
+            {
+                await _monitorServices.ResetSigefeSync(id);
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Documento desvinculado com sucesso." }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError,
+                    messages = new string[] { ex.GetBaseException().Message }
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ReturnDocument(string id, string reason)
+        {
+            try
+            {
+                await _monitorServices.ReturnDocument(id, reason);
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Documento devolvido com sucesso." }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError,
+                    messages = new string[] { ex.GetBaseException().Message }
+                });
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult> DownloadUbl(string id)
         {

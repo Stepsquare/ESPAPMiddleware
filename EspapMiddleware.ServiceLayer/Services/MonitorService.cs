@@ -244,6 +244,59 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
+        public async Task ReturnDocument(string documentId, string reason)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var docToReturn = await unitOfWork.Documents.Find(x => x.DocumentId == documentId);
+
+                if (docToReturn.StateId != DocumentStateEnum.Iniciado)
+                    throw new Exception("Não é possivél devolver o documento.");
+
+                docToReturn.StateId = DocumentStateEnum.Devolvido;
+                docToReturn.StateDate = DateTime.UtcNow;
+
+                var setDocumentLog = await RequestSetDocument(docToReturn, reason);
+
+                unitOfWork.RequestLogs.Add(setDocumentLog);
+
+                docToReturn.IsSynchronizedWithFEAP = setDocumentLog.Successful;
+                
+                unitOfWork.Documents.Update(docToReturn);
+
+                var result = await unitOfWork.SaveChangesAsync();
+
+                if (result == 0)
+                {
+                    throw new DatabaseException("Erro ao inserir Log de comunicação na BD.");
+                }
+            }
+        }
+
+        public async Task ResetSigefeSync(string documentId)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var docToReset = await unitOfWork.Documents.Find(x => x.DocumentId == documentId);
+
+                if (docToReset.StateId != DocumentStateEnum.Iniciado)
+                    throw new Exception(string.Format("Não é possível desvincular o Documento do SIGEFE no estado {0}.", docToReset.StateId.ToString()));
+
+                docToReset.IsSynchronizedWithSigefe = false;
+                docToReset.MEId = null;
+                docToReset.StateId = DocumentStateEnum.Iniciado;
+
+                unitOfWork.Documents.Update(docToReset);
+
+                var result = await unitOfWork.SaveChangesAsync();
+
+                if (result == 0)
+                {
+                    throw new DatabaseException("Erro ao inserir Log de comunicação na BD.");
+                }
+            }
+        }
+
         #endregion
 
 
@@ -516,13 +569,16 @@ namespace EspapMiddleware.ServiceLayer.Services
                         documentId = document.DocumentId,
                     };
 
-                    if (document.StateId == DocumentStateEnum.ValidadoConferido || document.StateId == DocumentStateEnum.Processado)
+                    if (document.StateId == DocumentStateEnum.ValidadoConferido || document.StateId == DocumentStateEnum.Processado || document.StateId == DocumentStateEnum.Devolvido)
                     {
                         setDocumentRequest.documentNumbersSpecified1Specified = true;
                         setDocumentRequest.documentNumbersSpecified1 = true;
                         setDocumentRequest.documentNumbers = new string[] { document.MEId };
                         setDocumentRequest.stateIdSpecified = true;
                         setDocumentRequest.stateId = (int)document.StateId;
+
+                        if(document.StateId == DocumentStateEnum.Devolvido)
+                            setDocumentRequest.reason = reason;
 
                         if (document.StateId == DocumentStateEnum.Processado)
                         {

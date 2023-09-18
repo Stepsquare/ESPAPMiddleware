@@ -31,7 +31,7 @@
         <h4 class="ig-small-title">DADOS DO DOCUMENTO:</h4>
         <div class="panel panel-default ig-panel">
             <div class="panel-body">
-                <div class="row ">
+                <div class="row">
                     <div class="col-md-4">
                         <label class="control-label">ID Documento</label>
                         <p>@Model.DocumentId</p>
@@ -54,7 +54,7 @@
                     </div>
                     <div class="col-md-2">
                         <label class="control-label">Ano Letivo:</label>
-                        <p>@("20" + Model.SchoolYear.Insert(2, "/20"))</p>
+                        <p>@(!string.IsNullOrEmpty(Model.SchoolYear) ? "20" + Model.SchoolYear.Insert(2, "/20") : "")</p>
                     </div>
                     <div class="col-md-2">
                         <label class="control-label">N.º Compromisso:</label>
@@ -104,6 +104,12 @@
                         </div>
                     }
                 </div>
+                <a id="return_doc_btn" class="ig-sec-link" href="javascript:void(0);">
+                    <i class="fas fa-reply"></i> Devolver
+                </a>
+                <a id="reset_doc_btn" class="ig-sec-link" href="javascript:void(0);">
+                    <i class="fas fa-undo"></i> Desvincular SIGEFE
+                </a>
             </div>
         </div>
 
@@ -297,6 +303,19 @@
 <script>
     $(document).ready(function () {
         getDocumentLines();
+
+        $("#return_doc_btn").on("click", function () {
+            ShowConfirm(function () {
+                returnDocument();
+            }, "Devolver Documento", "Tem a certeza que pretende devolver o documento?")
+        });
+
+        $("#reset_doc_btn").on("click", function () {
+            ShowConfirm(function () {
+                resetSigefeSync();
+            }, "Desvincular Documento", "Tem a certeza que pretende desvincular o documento com a plataforma SIGEFE?")
+        });
+
     });
 
     function getDocumentLines(pageIndex, pageSize) {
@@ -322,6 +341,65 @@
         });
     }
 
+    function returnDocument() {
+        ShowLoadingModal();
+
+        $.ajax({
+            url: '@Url.Action("ReturnDocument", "Document")',
+            type: "POST",
+            data: {
+                id: "@Model.DocumentId",
+                reason: $("#return_reason").val()
+            },
+            success: function (data) {
+                if (data.statusCode == 200) {
+                    ShowSucessModal(data.messages, function () {
+                        location.reload();
+                    });
+                } else {
+                    ShowErrorModal(data.messages, function () {
+                        location.reload();
+                    });
+                }
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+
+    function resetSigefeSync() {
+        ShowLoadingModal();
+
+        $.ajax({
+            url: '@Url.Action("ResetSigefeSync", "Document")',
+            type: "POST",
+            data: {
+                id: "@Model.DocumentId"
+            },
+            success: function (data) {
+                if (data.statusCode == 200) {
+                    ShowSucessModal(data.messages, function () {
+                        location.reload();
+                    });
+                } else {
+                    ShowErrorModal(data.messages, function () {
+                        location.reload();
+                    });
+                }
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+
     function syncFeap() {
         ShowLoadingModal();
 
@@ -329,7 +407,7 @@
             url: '@Url.Action("SyncFeap", "Document")',
             type: "POST",
             data: {
-                id: "@Model.DocumentId",
+                id: "@Model.DocumentId"
             },
             success: function (data) {
                 if (data.statusCode == 200) {

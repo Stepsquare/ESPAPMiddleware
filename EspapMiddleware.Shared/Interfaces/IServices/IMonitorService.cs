@@ -26,6 +26,8 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         Task<IEnumerable<string>> GetSchoolYears();
         Task SyncSigefe(string documentId);
         Task SyncFeap(string documentId);
+        Task ReturnDocument(string documentId, string reason);
+        Task ResetSigefeSync(string documentId);
 
         #endregion
 
