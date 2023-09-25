@@ -23,9 +23,11 @@ namespace EspapMiddleware.DataLayer.Repositories
             return await DbContext.RequestLogs
                                 .Where(x => (!filters.UniqueId.HasValue || x.UniqueId == filters.UniqueId)
                                     && (!filters.Type.HasValue || x.RequestLogTypeId == filters.Type)
+                                    && (string.IsNullOrEmpty(filters.ReferenceNumber) || x.ReferenceNumber.Contains(filters.ReferenceNumber))
+                                    && (string.IsNullOrEmpty(filters.SupplierFiscalId) || x.SupplierFiscalId.Contains(filters.SupplierFiscalId))
                                     && (!filters.IsSuccessFul.HasValue || x.Successful == filters.IsSuccessFul)
-                                    && (!filters.FromDate.HasValue || x.Date > filters.FromDate)
-                                    && (!filters.UntilDate.HasValue || x.Date < filters.UntilDate))
+                                    && (!filters.FromDate.HasValue || x.Date >= filters.FromDate)
+                                    && (!filters.UntilDate.HasValue || x.Date <= filters.UntilDate))
                                 .OrderByDescending(x => x.Date)
                                 .Skip((filters.PageIndex - 1) * filters.PageSize).Take(filters.PageSize)
                                 .ToListAsync();

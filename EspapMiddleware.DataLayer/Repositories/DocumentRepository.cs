@@ -64,11 +64,12 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(filters.DocumentId) || x.DocumentId == filters.DocumentId)
-                                        && (!filters.FromDate.HasValue || x.CreatedOn > filters.FromDate)
-                                        && (!filters.UntilDate.HasValue || x.CreatedOn < filters.UntilDate)
+                                        && (!filters.FromDate.HasValue || x.CreatedOn >= filters.FromDate)
+                                        && (!filters.UntilDate.HasValue || x.CreatedOn <= filters.UntilDate)
                                         && (string.IsNullOrEmpty(filters.SupplierFiscalId) || x.SupplierFiscalId.Contains(filters.SupplierFiscalId))
                                         && (string.IsNullOrEmpty(filters.SchoolYear) || x.SchoolYear == filters.SchoolYear)
                                         && (string.IsNullOrEmpty(filters.CompromiseNumber) || x.CompromiseNumber == filters.CompromiseNumber)
+                                        && (string.IsNullOrEmpty(filters.ReferenceNumber) || x.ReferenceNumber == filters.ReferenceNumber)
                                         && (!filters.State.HasValue || x.StateId == filters.State)
                                         && (!filters.Type.HasValue || x.TypeId == filters.Type)
                                         && (string.IsNullOrEmpty(filters.MeId) || x.MEId == filters.MeId)

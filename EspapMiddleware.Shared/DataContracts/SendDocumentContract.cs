@@ -96,7 +96,7 @@ namespace EspapMiddleware.Shared.DataContracts
         public string SchoolYear { get; set; }
         public List<InvoiceLineModel> InvoiceLines { get; private set; }
 
-        [Obsolete("Validate is deprecated, please use ValidateCompromiseNumber instead.")]
+        [Obsolete("Validate is deprecated, please use webservice validation instead.")]
         public void Validate()
         {
             List<string> errors = new List<string>();
@@ -112,7 +112,7 @@ namespace EspapMiddleware.Shared.DataContracts
 
             foreach (var line in InvoiceLines)
             {
-                if (string.IsNullOrEmpty(line.StandardItemIdentification)) 
+                if (string.IsNullOrEmpty(line.StandardItemIdentification))
                     errors.Add($"A linha {line.Id} do documento não tem identificador ISBN válido no ficheiro UBL fornecido.");
             }
 
@@ -161,6 +161,7 @@ namespace EspapMiddleware.Shared.DataContracts
                 throw new ContractValidationException(errors.ToArray());
         }
 
+        [Obsolete("ValidateCompromiseNumber is deprecated, please use webservice validation instead.")]
         public void ValidateCompromiseNumber()
         {
             if (string.IsNullOrEmpty(CompromiseNumber))
@@ -184,16 +185,22 @@ namespace EspapMiddleware.Shared.DataContracts
             switch (this.documentType)
             {
                 case DocumentTypeEnum.NotaCrédito:
-                    
+
                     nsmgr.AddNamespace("ubl", "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2");
 
                     TotalAmount = document.SelectSingleNode("//ubl:CreditNote/cac:LegalMonetaryTotal/cbc:PayableAmount", nsmgr)?.InnerText;
+
                     CompromiseNumber = document.SelectSingleNode("//ubl:CreditNote/cbc:AccountingCost", nsmgr)?.InnerText;
+                    if (string.IsNullOrWhiteSpace(CompromiseNumber))
+                        CompromiseNumber = document.SelectSingleNode("//ubl:CreditNote/cac:OrderReference/cbc:ID", nsmgr)?.InnerText;
 
                     RelatedReferenceNumber = document.SelectSingleNode("//ubl:CreditNote/cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID", nsmgr)?.InnerText;
 
                     foreach (XmlNode line in document.SelectNodes("//ubl:CreditNote/cac:CreditNoteLine", nsmgr))
                     {
+                        if (string.IsNullOrWhiteSpace(CompromiseNumber) && line["cbc:AccountingCost"] != null)
+                            CompromiseNumber = line["cbc:AccountingCost"].InnerText;
+
                         InvoiceLines.Add(new InvoiceLineModel()
                         {
                             Id = line["cbc:ID"]?.InnerText,
@@ -210,10 +217,16 @@ namespace EspapMiddleware.Shared.DataContracts
                     nsmgr.AddNamespace("ubl", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2");
 
                     TotalAmount = document.SelectSingleNode("//ubl:Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount", nsmgr)?.InnerText;
+
                     CompromiseNumber = document.SelectSingleNode("//ubl:Invoice/cbc:AccountingCost", nsmgr)?.InnerText;
+                    if (string.IsNullOrWhiteSpace(CompromiseNumber))
+                        CompromiseNumber = document.SelectSingleNode("//ubl:Invoice/cac:OrderReference/cbc:ID", nsmgr)?.InnerText;
 
                     foreach (XmlNode line in document.SelectNodes("//ubl:Invoice/cac:InvoiceLine", nsmgr))
                     {
+                        if (string.IsNullOrWhiteSpace(CompromiseNumber) && line["cbc:AccountingCost"] != null)
+                            CompromiseNumber = line["cbc:AccountingCost"].InnerText;
+
                         InvoiceLines.Add(new InvoiceLineModel()
                         {
                             Id = line["cbc:ID"]?.InnerText,

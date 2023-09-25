@@ -14,6 +14,7 @@ namespace EspapMiddleware.Shared.MonitorServiceModels
         public DateTime? FromDate { get; set; }
         public DateTime? UntilDate { get; set; }
         public string SupplierFiscalId { get; set; }
+        public string ReferenceNumber { get; set; }
         public string SchoolYear { get; set; }
         public string CompromiseNumber { get; set; }
         public DocumentTypeEnum? Type { get; set; }

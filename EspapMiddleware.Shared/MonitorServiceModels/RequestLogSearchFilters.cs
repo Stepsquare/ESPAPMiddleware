@@ -12,6 +12,8 @@ namespace EspapMiddleware.Shared.MonitorServiceModels
     {
         public Guid? UniqueId { get; set; }
         public RequestLogTypeEnum? Type { get; set; }
+        public string SupplierFiscalId { get; set; }
+        public string ReferenceNumber { get; set; }
         public bool? IsSuccessFul { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? UntilDate { get; set; }

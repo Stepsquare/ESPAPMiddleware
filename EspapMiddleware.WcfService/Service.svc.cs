@@ -35,8 +35,6 @@ namespace EspapMiddleware.WcfService
         {
             try
             {
-                request.SendDocumentMCIn.ValidateCompromiseNumber();
-
                 if (request.SendDocumentMCIn.isAnUpdate)
                 {
                     _service.UpdateDocument(request.SendDocumentMCIn).GetAwaiter().GetResult();
@@ -48,7 +46,7 @@ namespace EspapMiddleware.WcfService
             }
             catch (Exception ex)
             {
-                _service.AddFailedRequestLog(RequestLogTypeEnum.SendDocument, ex, request.SendDocumentMCIn.uniqueId, request.SendDocumentMCIn.documentId);
+                _service.AddFailedRequestLog(RequestLogTypeEnum.SendDocument, ex, request.SendDocumentMCIn.uniqueId, request.SendDocumentMCIn.supplierFiscalId, request.SendDocumentMCIn.referenceNumber, request.SendDocumentMCIn.documentId);
 
                 throw ex;
             }
@@ -62,7 +60,7 @@ namespace EspapMiddleware.WcfService
             }
             catch (Exception ex)
             {
-                _service.AddFailedRequestLog(RequestLogTypeEnum.SetDocumentResult, ex, request.SetDocumentResultMCIn.uniqueId, request.SetDocumentResultMCIn.documentId);
+                _service.AddFailedRequestLog(RequestLogTypeEnum.SetDocumentResult, ex, request.SetDocumentResultMCIn.uniqueId, request.SetDocumentResultMCIn.supplierFiscalId, request.SetDocumentResultMCIn.referenceNumber, request.SetDocumentResultMCIn.documentId);
 
                 throw ex;
             }

@@ -12,6 +12,8 @@ namespace EspapMiddleware.Shared.Entities
         public Guid UniqueId { get; set; }
         public RequestLogTypeEnum RequestLogTypeId { get; set; }
         public string DocumentId { get; set; }
+        public string SupplierFiscalId { get; set; }
+        public string ReferenceNumber { get; set; }
         public DateTime Date { get; set; }
         public bool Successful { get; set; }
         public string ExceptionType { get; set; }

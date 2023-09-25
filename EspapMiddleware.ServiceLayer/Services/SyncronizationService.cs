@@ -301,6 +301,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                         UniqueId = uniqueId,
                         RequestLogTypeId = RequestLogTypeEnum.SetDocument,
                         DocumentId = docToSync.DocumentId,
+                        SupplierFiscalId = docToSync.SupplierFiscalId,
+                        ReferenceNumber = docToSync.ReferenceNumber,
                         Date = DateTime.UtcNow,
                         Successful = true
                     };
@@ -313,6 +315,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                     UniqueId = uniqueId,
                     RequestLogTypeId = RequestLogTypeEnum.SetDocument,
                     DocumentId = docToSync.DocumentId,
+                    SupplierFiscalId = docToSync.SupplierFiscalId,
+                    ReferenceNumber = docToSync.ReferenceNumber,
                     Date = DateTime.UtcNow,
                     Successful = false,
                     ExceptionType = ex.GetBaseException().GetType().Name,

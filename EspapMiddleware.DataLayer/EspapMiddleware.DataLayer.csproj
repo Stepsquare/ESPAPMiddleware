@@ -52,9 +52,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context\EspapMiddlewareDbContext.cs" />
-    <Compile Include="Migrations\202208221228109_Initial_Deploy.cs" />
-    <Compile Include="Migrations\202208221228109_Initial_Deploy.designer.cs">
-      <DependentUpon>202208221228109_Initial_Deploy.cs</DependentUpon>
+    <Compile Include="Migrations\202309181530474_Initial_Deploy.cs" />
+    <Compile Include="Migrations\202309181530474_Initial_Deploy.designer.cs">
+      <DependentUpon>202309181530474_Initial_Deploy.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.cs" />
+    <Compile Include="Migrations\202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.designer.cs">
+      <DependentUpon>202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,8 +80,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202208221228109_Initial_Deploy.resx">
-      <DependentUpon>202208221228109_Initial_Deploy.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202309181530474_Initial_Deploy.resx">
+      <DependentUpon>202309181530474_Initial_Deploy.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.resx">
+      <DependentUpon>202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

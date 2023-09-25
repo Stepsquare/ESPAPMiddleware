@@ -6,7 +6,8 @@
             <tbody>
                 <tr class="k-grid-header">
                     <th class="k-header">ID Único</th>
-                    <th class="k-header">Tipo pedido:</th>
+                    <th class="k-header">Tipo pedido</th>
+                    <th class="k-header">NIF</th>
                     <th class="k-header">Documento</th>
                     <th class="k-header">Data chamada</th>
                     <th class="k-header">Estado</th>
@@ -19,10 +20,15 @@
                         <tr>
                             <td>@log.UniqueId</td>
                             <td>@log.RequestLogTypeId.ToString()</td>
+                            <td>@log.SupplierFiscalId</td>
                             <td>
                                 @if (!string.IsNullOrEmpty(log.DocumentId))
                                 {
                                     <a href="@Url.Action("Detail", "Document", new { id = log.DocumentId })"><i class="far fa-file-alt"></i> @log.DocumentId</a>
+                                }
+                                else
+                                {
+                                    @log.ReferenceNumber
                                 }
                             </td>
                             <td>@log.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>

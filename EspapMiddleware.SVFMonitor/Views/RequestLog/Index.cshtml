@@ -19,16 +19,16 @@
     <div class="col-md-12">
         <div class="panel panel-default ig-panel">
             <div class="panel-body">
-                <div class="row ">
+                <div class="row">
                     <div class="col-md-3 form-group">
-                        <label class="control-label">ID Único</label>
+                        <label class="control-label">ID Único:</label>
                         <input id="uniqueId_search" type="text" class="form-control" />
                     </div>
-                    <div class="col-md-2 form-group">
+                    <div class="col-md-3 form-group">
                         <label class="control-label">Tipo pedido:</label>
                         <input type="text" id="log_type_search" class="form-control" />
                     </div>
-                    <div class="col-md-2 form-group">
+                    <div class="col-md-3 form-group">
                         <label class="control-label">Estado:</label>
                         <select id="successful_search" class="form-control">
                             <option value="">Todos</option>
@@ -41,7 +41,17 @@
                         <div class="ig-k-datepicker" id="date_range_search">
                         </div>
                     </div>
-                    <div class="col-md-2 form-group">
+                </div>
+                <div class="row">
+                    <div class="col-md-3 form-group">
+                        <label class="control-label">Nif:</label>
+                        <input id="supplierFiscalId_search" type="text" class="form-control" />
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label class="control-label">Documento:</label>
+                        <input id="referenceNumber_search" type="text" class="form-control" />
+                    </div>
+                    <div class="col-md-3 col-md-offset-3 form-group">
                         <label class="control-label">&nbsp;</label>
                         <button onclick="searchLogs()" type="button" class="btn ig-btn-green btn-block">
                             <i class="fas fa-search"></i> Pesquisar logs
@@ -55,7 +65,7 @@
 
 <div class="row">
     <div id="result_container" class="col-md-12">
-        
+
     </div>
 </div>
 
@@ -100,6 +110,8 @@
                 uniqueId: $("#uniqueId_search").val(),
                 type: $("#log_type_search").data("kendoComboBox").value(),
                 isSuccessFul: $("#successful_search").val(),
+                supplierFiscalId: $("#supplierFiscalId_search").val(),
+                referenceNumber: $("#referenceNumber_search").val(),
                 fromDate: dateRange != null && dateRange.start != null ? dateRange.start.toISOString() : null,
                 untilDate: dateRange != null && dateRange.end != null ? dateRange.end.toISOString() : null,
                 pageIndex: pageIndex,

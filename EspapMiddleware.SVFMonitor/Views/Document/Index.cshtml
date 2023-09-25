@@ -19,8 +19,8 @@
         <div class="panel panel-default ig-panel">
             <div class="panel-body">
                 <div class="row">
-                    <div class="col-md-2 form-group">
-                        <label class="control-label">ID Documento</label>
+                    <div class="col-md-4 form-group">
+                        <label class="control-label">ID Documento:</label>
                         <input id="document_id_search" type="text" class="form-control" />
                     </div>
                     <div class="col-md-2 form-group">
@@ -32,8 +32,18 @@
                         <input id="compromise_search" type="text" class="form-control">
                     </div>
                     <div class="col-md-2 form-group">
+                        <label class="control-label">N.º Fatura:</label>
+                        <input id="reference_number_search" type="text" class="form-control">
+                    </div>
+                    <div class="col-md-2 form-group">
                         <label class="control-label">ID ME:</label>
                         <input id="me_id_search" type="text" class="form-control">
+                    </div>
+
+                    <div class="col-md-4 form-group ig-k-datepicker">
+                        <label class="control-label">Data de criação entre:</label>
+                        <div id="date_range_search">
+                        </div>
                     </div>
                     <div class="col-md-2 form-group">
                         <label class="control-label">Sincronizado FE-AP:</label>
@@ -52,10 +62,6 @@
                         </select>
                     </div>
                     <div class="col-md-2 form-group">
-                        <label class="control-label">Ano letivo:</label>
-                        <input type="text" id="school_year_search" class="form-control" />
-                    </div>
-                    <div class="col-md-2 form-group">
                         <label class="control-label">Tipo de documento:</label>
                         <input type="text" id="doc_type_search" class="form-control" />
                     </div>
@@ -63,13 +69,13 @@
                         <label class="control-label">Estado:</label>
                         <input type="text" id="doc_state_search" class="form-control" />
                     </div>
-
-                    <div class="col-md-4 form-group ig-k-datepicker">
-                        <label class="control-label">Data de criação entre:</label>
-                        <div id="date_range_search">
-                        </div>
-                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-2 form-group">
+                        <label class="control-label">Ano letivo:</label>
+                        <input type="text" id="school_year_search" class="form-control" />
+                    </div>
+                    <div class="col-md-2 col-md-offset-8 form-group">
                         <label class="control-label">&nbsp;</label>
                         <button onclick="searchDocuments()" type="button" class="btn ig-btn-green btn-block">
                             <i class="fas fa-search"></i> Pesquisar documentos
@@ -157,6 +163,7 @@
                 supplierFiscalId: $("#supplier_fiscal_id_search").val(),
                 schoolYear: $("#school_year_search").val(),
                 compromiseNumber: $("#compromise_search").val(),
+                referenceNumber: $("#reference_number_search").val(),
                 type: $("#doc_type_search").data("kendoComboBox").value(),
                 state: $("#doc_state_search").data("kendoComboBox").value(),
                 meId: $("#me_id_search").val(),
@@ -168,7 +175,8 @@
             success: function (data) {
                 $('#result_container').html(data);
             },
-            error: function () {
+            error: function (err) {
+                $('#result_container').html(err.responseText);
                 ShowErrorModal(["Ocorreu um erro."]);
             },
             complete: function () {

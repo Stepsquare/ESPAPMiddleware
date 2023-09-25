@@ -42,9 +42,11 @@ namespace EspapMiddleware.ServiceLayer.Services
                     PageSize = filters.PageSize,
                     TotalCount = await unitOfWork.RequestLogs.Count(x => (!filters.UniqueId.HasValue || x.UniqueId == filters.UniqueId)
                                                                     && (!filters.Type.HasValue || x.RequestLogTypeId == filters.Type)
+                                                                    && (string.IsNullOrEmpty(filters.ReferenceNumber) || x.ReferenceNumber.Contains(filters.ReferenceNumber))
+                                                                    && (string.IsNullOrEmpty(filters.SupplierFiscalId) || x.SupplierFiscalId.Contains(filters.SupplierFiscalId))
                                                                     && (!filters.IsSuccessFul.HasValue || x.Successful == filters.IsSuccessFul)
-                                                                    && (!filters.FromDate.HasValue || x.Date > filters.FromDate)
-                                                                    && (!filters.UntilDate.HasValue || x.Date < filters.UntilDate)),
+                                                                    && (!filters.FromDate.HasValue || x.Date >= filters.FromDate)
+                                                                    && (!filters.UntilDate.HasValue || x.Date <= filters.UntilDate)),
                     Data = await unitOfWork.RequestLogs.GetFilteredPaginated(filters)
                 };
         }
@@ -67,11 +69,12 @@ namespace EspapMiddleware.ServiceLayer.Services
                     PageIndex = filters.PageIndex,
                     PageSize = filters.PageSize,
                     TotalCount = await unitOfWork.Documents.Count(x => (string.IsNullOrEmpty(filters.DocumentId) || x.DocumentId == filters.DocumentId)
-                                        && (!filters.FromDate.HasValue || x.CreatedOn > filters.FromDate)
-                                        && (!filters.UntilDate.HasValue || x.CreatedOn < filters.UntilDate)
+                                        && (!filters.FromDate.HasValue || x.CreatedOn >= filters.FromDate)
+                                        && (!filters.UntilDate.HasValue || x.CreatedOn <= filters.UntilDate)
                                         && (string.IsNullOrEmpty(filters.SupplierFiscalId) || x.SupplierFiscalId.Contains(filters.SupplierFiscalId))
                                         && (string.IsNullOrEmpty(filters.SchoolYear) || x.SchoolYear == filters.SchoolYear)
                                         && (string.IsNullOrEmpty(filters.CompromiseNumber) || x.CompromiseNumber == filters.CompromiseNumber)
+                                        && (string.IsNullOrEmpty(filters.ReferenceNumber) || x.ReferenceNumber == filters.ReferenceNumber)
                                         && (!filters.State.HasValue || x.StateId == filters.State)
                                         && (!filters.Type.HasValue || x.TypeId == filters.Type)
                                         && (string.IsNullOrEmpty(filters.MeId) || x.MEId == filters.MeId)
@@ -521,6 +524,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                         UniqueId = uniqueId,
                         RequestLogTypeId = RequestLogTypeEnum.SetDocument,
                         DocumentId = document.DocumentId,
+                        SupplierFiscalId = document.SupplierFiscalId,
+                        ReferenceNumber = document.ReferenceNumber,
                         Date = DateTime.UtcNow,
                         Successful = true
                     };
@@ -534,6 +539,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                     RequestLogTypeId = RequestLogTypeEnum.SetDocument,
                     DocumentId = document.DocumentId,
                     Date = DateTime.UtcNow,
+                    SupplierFiscalId = document.SupplierFiscalId,
+                    ReferenceNumber = document.ReferenceNumber,
                     Successful = false,
                     ExceptionType = ex.GetBaseException().GetType().Name,
                     ExceptionStackTrace = ex.GetBaseException().StackTrace,
@@ -623,6 +630,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                         UniqueId = uniqueId,
                         RequestLogTypeId = RequestLogTypeEnum.SetDocument,
                         DocumentId = document.DocumentId,
+                        SupplierFiscalId = document.SupplierFiscalId,
+                        ReferenceNumber = document.ReferenceNumber,
                         Date = DateTime.UtcNow,
                         Successful = true
                     };
@@ -635,6 +644,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                     UniqueId = uniqueId,
                     RequestLogTypeId = RequestLogTypeEnum.SetDocument,
                     DocumentId = document.DocumentId,
+                    SupplierFiscalId = document.SupplierFiscalId,
+                    ReferenceNumber = document.ReferenceNumber,
                     Date = DateTime.UtcNow,
                     Successful = false,
                     ExceptionType = ex.GetBaseException().GetType().Name,
