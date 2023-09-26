@@ -1,26 +1,85 @@
 ﻿@model HomepageStatusPartialViewModel
 
-<div class="row">
-        <div class="col-md-2">
-            <h5 class="ig-dash-title">TOTAL DOCUMENTOS:</h5>
-            <h4>@Model.TotalDocuments documentos</h4>
+    <div class="panel panel-default ig-panel ig-statistics-panel ig-svf-statistics">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-15">
+                    <h5 class="ig-dash-title">TOTAL DOCUMENTOS:</h5>
+                    <div class="ig-svf-synccont">
+                        @if (Model.TotalDocumentsNotSyncFeap != 0)
+                        {
+                            <a class="btn ig-btn-round" title="Sincronizar todos os documentos" href="javascript:void(0);" onclick="syncDocuments()">
+                                <i class="fa fa-refresh"></i>
+                            </a>
+                        }
+                        <div class="ig-svf-statedocs">
+                            <h4>@Model.TotalDocuments documentos</h4>
+                            <p>@Model.TotalDocumentsNotSyncFeap por sincronizar com FEAP</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-15">
+                    <h5 class="ig-dash-title">TOTAL DOCUMENTOS VALIDADOS:</h5>
+                    <div class="ig-svf-synccont">
+                        @if (Model.TotalValidDocumentsNotSyncFeap != 0)
+                        {
+                            <a class="btn ig-btn-round" title="Sincronizar documentos validados" href="javascript:void(0);" onclick="syncDocuments('@DocumentStateEnum.ValidadoConferido')">
+                                <i class="fa fa-refresh"></i>
+                            </a>
+                        }
+                        <div class="ig-svf-statedocs">
+                            <h4>@Model.TotalValidDocuments documentos</h4>
+                            <p>@Model.TotalValidDocumentsNotSyncFeap por sincronizar com FEAP</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-15">
+                    <h5 class="ig-dash-title">TOTAL PAGOS:</h5>
+                    <div class="ig-svf-synccont">
+                        @if (Model.TotalPaidDocumentsNotSyncFeap != 0)
+                        {
+                            <a class="btn ig-btn-round" title="Sincronizar documentos pagos" href="javascript:void(0);" onclick="syncDocuments('@DocumentStateEnum.EmitidoPagamento')">
+                                <i class="fa fa-refresh"></i>
+                            </a>
+                        }
+                        <div class="ig-svf-statedocs">
+                            <h4>@Model.TotalPaidDocuments documentos</h4>
+                            <p>@Model.TotalPaidDocumentsNotSyncFeap por sincronizar com FEAP</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-15">
+                    <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS:</h5>
+                    <div class="ig-svf-synccont">
+                        @if (Model.TotalInvalidDocumentsNotSyncFeap != 0)
+                        {
+                            <a class="btn ig-btn-round" title="Sincronizar documentos invalidados" href="javascript:void(0);" onclick="syncDocuments('@DocumentStateEnum.Iniciado', '@DocumentActionEnum.SolicitaçãoDocumentoRegularização')">
+                                <i class="fa fa-refresh"></i>
+                            </a>
+                        }
+                        <div class="ig-svf-statedocs">
+                            <h4>@Model.TotalInvalidDocuments documentos</h4>
+                            <p>@Model.TotalInvalidDocumentsNotSyncFeap por sincronizar com FEAP</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-15">
+                    <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS REGULARIZADOS:</h5>
+                    <div class="ig-svf-synccont">
+                        @if (Model.TotalInvalidDocumentsRectifiedNotSyncFeap != 0)
+                        {
+                            <a class="btn ig-btn-round" title="Sincronizar documentos invalidadados regularizados" href="javascript:void(0);" onclick="syncDocuments('@DocumentStateEnum.Processado')">
+                                <i class="fa fa-refresh"></i>
+                            </a>
+                        }
+                        <div class="ig-svf-statedocs">
+                            <h4>@Model.TotalInvalidDocumentsRectified documentos</h4>
+                            <p>@Model.TotalInvalidDocumentsRectifiedNotSyncFeap por sincronizar com FEAP</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-2">
-            <h5 class="ig-dash-title">TOTAL DOCUMENTOS VALIDADOS:</h5>
-            <h4>@Model.TotalValidDocuments documentos</h4>
-        </div>
-        <div class="col-md-2">
-            <h5 class="ig-dash-title">TOTAL PAGOS:</h5>
-            <h4>@Model.TotalPaidDocuments documentos</h4>
-        </div>
-        <div class="col-md-3">
-            <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS:</h5>
-            <h4>@Model.TotalInvalidDocuments documentos</h4>
-        </div>
-        <div class="col-md-3">
-            <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS REGULARIZADOS:</h5>
-            <h4>@Model.TotalInvalidDocumentsRectified documentos</h4>
-        </div>
-</div>
+    </div>
 
 

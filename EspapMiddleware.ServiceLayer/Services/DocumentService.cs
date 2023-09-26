@@ -45,7 +45,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     DocumentId = await unitOfWork.Documents.Any(x => x.DocumentId == documentId) ? documentId : null,
                     SupplierFiscalId = supplierFiscalId,
                     ReferenceNumber = referenceNumber,
-                    Date = DateTime.UtcNow,
+                    Date = DateTime.Now,
                     Successful = false,
                     ExceptionType = ex.GetBaseException().GetType().Name,
                     ExceptionStackTrace = ex.GetBaseException().StackTrace,
@@ -80,7 +80,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     SupplierFiscalId = contract.supplierFiscalId,
                     ReferenceNumber = contract.referenceNumber,
                     Successful = true,
-                    Date = DateTime.UtcNow
+                    Date = DateTime.Now
                 };
 
                 documentToInsert = new Document();
@@ -110,7 +110,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             DocumentId = contract.documentId,
                             MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                            Date = DateTime.UtcNow,
+                            Date = DateTime.Now,
                             MessageCode = setDocFaturacaoResult != null ? setDocFaturacaoResult.messages.FirstOrDefault(x => x.cod_msg == "429")?.cod_msg : "500",
                             MessageContent = setDocFaturacaoResult != null ? setDocFaturacaoResult.messages.FirstOrDefault(x => x.cod_msg == "429")?.msg : "Falha de comunicação. Reenviar pedido mais tarde."
                         });
@@ -123,7 +123,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             DocumentId = contract.documentId,
                             MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                            Date = DateTime.UtcNow,
+                            Date = DateTime.Now,
                             MessageCode = documentToInsertResult.cod_msg_fat,
                             MessageContent = documentToInsertResult.msg_fat
                         });
@@ -138,13 +138,13 @@ namespace EspapMiddleware.ServiceLayer.Services
                             if (documentToInsertResult.state_id == "35")
                             {
                                 documentToInsert.StateId = DocumentStateEnum.Processado;
-                                documentToInsert.StateDate = DateTime.UtcNow;
+                                documentToInsert.StateDate = DateTime.Now;
                                 unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
 
                                 if (relatedDocument != null)
                                 {
                                     relatedDocument.StateId = DocumentStateEnum.Processado;
-                                    relatedDocument.StateDate = DateTime.UtcNow;
+                                    relatedDocument.StateDate = DateTime.Now;
                                     unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
 
                                     unitOfWork.Documents.Update(relatedDocument);
@@ -153,7 +153,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                             else if (documentToInsertResult.state_id == "22")
                             {
                                 documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                documentToInsert.ActionDate = DateTime.UtcNow;
+                                documentToInsert.ActionDate = DateTime.Now;
 
                                 unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
                             }
@@ -175,7 +175,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             DocumentId = contract.documentId,
                             MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                            Date = DateTime.UtcNow,
+                            Date = DateTime.Now,
                             MessageCode = setDocFaturacaoResult != null ? setDocFaturacaoResult.messages.FirstOrDefault(x => x.cod_msg == "429")?.cod_msg : "500",
                             MessageContent = setDocFaturacaoResult != null ? setDocFaturacaoResult.messages.FirstOrDefault(x => x.cod_msg == "429")?.msg : "Falha de comunicação. Reenviar pedido mais tarde."
                         });
@@ -188,7 +188,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             DocumentId = contract.documentId,
                             MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                            Date = DateTime.UtcNow,
+                            Date = DateTime.Now,
                             MessageCode = documentToInsertResult.cod_msg_fat,
                             MessageContent = documentToInsertResult.msg_fat
                         });
@@ -201,7 +201,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         if (documentToInsertResult.state_id == "35")
                         {
                             documentToInsert.StateId = DocumentStateEnum.ValidadoConferido;
-                            documentToInsert.StateDate = DateTime.UtcNow;
+                            documentToInsert.StateDate = DateTime.Now;
 
                             unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
                         }
@@ -226,7 +226,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                                     {
                                         DocumentId = relatedDocument.DocumentId,
                                         MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                                        Date = DateTime.UtcNow,
+                                        Date = DateTime.Now,
                                         MessageCode = relatedDocumentResult.cod_msg_fat,
                                         MessageContent = relatedDocumentResult.msg_fat
                                     });
@@ -239,17 +239,17 @@ namespace EspapMiddleware.ServiceLayer.Services
                                     if (relatedDocumentResult.state_id == "35")
                                     {
                                         documentToInsert.StateId = DocumentStateEnum.Processado;
-                                        documentToInsert.StateDate = DateTime.UtcNow;
+                                        documentToInsert.StateDate = DateTime.Now;
                                         unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
 
                                         relatedDocument.StateId = DocumentStateEnum.Processado;
-                                        relatedDocument.StateDate = DateTime.UtcNow;
+                                        relatedDocument.StateDate = DateTime.Now;
                                         unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
                                     }
                                     else
                                     {
                                         relatedDocument.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                        relatedDocument.ActionDate = DateTime.UtcNow;
+                                        relatedDocument.ActionDate = DateTime.Now;
 
                                         unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument, relatedDocumentResult.reason));
                                     }
@@ -262,7 +262,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                                     {
                                         DocumentId = relatedDocument.DocumentId,
                                         MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                                        Date = DateTime.UtcNow,
+                                        Date = DateTime.Now,
                                         MessageCode = relatedSetDocFaturacaoResult != null ? relatedSetDocFaturacaoResult.messages.FirstOrDefault().cod_msg : "500",
                                         MessageContent = relatedSetDocFaturacaoResult != null ? relatedSetDocFaturacaoResult.messages.FirstOrDefault().msg : "Falha de comunicação. Reenviar pedido mais tarde."
                                     });
@@ -271,7 +271,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                             else
                             {
                                 documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                documentToInsert.ActionDate = DateTime.UtcNow;
+                                documentToInsert.ActionDate = DateTime.Now;
 
                                 unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
                             }
@@ -324,7 +324,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     SupplierFiscalId = documentToUpdate.SupplierFiscalId,
                     ReferenceNumber = documentToUpdate.ReferenceNumber,
                     Successful = true,
-                    Date = DateTime.UtcNow
+                    Date = DateTime.Now
                 });
 
                 var result = await unitOfWork.SaveChangesAsync();
@@ -355,7 +355,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             DocumentId = contract.documentId,
                             MessageTypeId = DocumentMessageTypeEnum.FEAP,
-                            Date = DateTime.UtcNow,
+                            Date = DateTime.Now,
                             MessageCode = message.code,
                             MessageContent = message.description
                         });
@@ -367,7 +367,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     {
                         DocumentId = contract.documentId,
                         MessageTypeId = DocumentMessageTypeEnum.FEAP,
-                        Date = DateTime.UtcNow,
+                        Date = DateTime.Now,
                         MessageContent = "Documento atualizado com sucesso."
                     });
                 }
@@ -382,7 +382,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     SupplierFiscalId = documentToUpdate.SupplierFiscalId,
                     ReferenceNumber = documentToUpdate.ReferenceNumber,
                     Successful = true,
-                    Date = DateTime.UtcNow
+                    Date = DateTime.Now
                 });
 
                 var result = await unitOfWork.SaveChangesAsync();
@@ -446,12 +446,12 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             setDocumentRequest.commitmentSpecified1Specified = true;
                             setDocumentRequest.commitmentSpecified1 = true;
-                            setDocumentRequest.commitment = document.CompromiseNumber;
+                            setDocumentRequest.commitment = !string.IsNullOrEmpty(document.CompromiseNumber) ? document.CompromiseNumber : "N/A";
 
                             setDocumentRequest.postingDateSpecified1Specified = true;
                             setDocumentRequest.postingDateSpecified1 = true;
                             setDocumentRequest.postingDateSpecified = true;
-                            setDocumentRequest.postingDate = DateTime.UtcNow;
+                            setDocumentRequest.postingDate = DateTime.Now;
                         }
                     }
                     else if (document.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
@@ -487,7 +487,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         DocumentId = document.DocumentId,
                         SupplierFiscalId = document.SupplierFiscalId,
                         ReferenceNumber = document.ReferenceNumber,
-                        Date = DateTime.UtcNow,
+                        Date = DateTime.Now,
                         Successful = true
                     };
                 }
@@ -501,7 +501,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     DocumentId = document.DocumentId,
                     SupplierFiscalId = document.SupplierFiscalId,
                     ReferenceNumber = document.ReferenceNumber,
-                    Date = DateTime.UtcNow,
+                    Date = DateTime.Now,
                     Successful = false,
                     ExceptionType = ex.GetBaseException().GetType().Name,
                     ExceptionStackTrace = ex.GetBaseException().StackTrace,

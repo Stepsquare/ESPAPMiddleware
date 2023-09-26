@@ -84,5 +84,13 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents.Where(x => !string.IsNullOrEmpty(x.SchoolYear)).Select(x => x.SchoolYear).Distinct().ToListAsync();
         }
+
+        public async Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null)
+        {
+            return await DbContext.Documents.Where(x => x.SchoolYear == anoLetivo
+                                                    && !x.IsSynchronizedWithFEAP
+                                                    && (!stateId.HasValue || x.StateId == stateId.Value)
+                                                    && (!actionId.HasValue || x.ActionId == actionId)).ToListAsync();
+        }
     }
 }

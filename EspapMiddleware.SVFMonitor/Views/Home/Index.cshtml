@@ -69,6 +69,39 @@
         });
     }
 
+    function syncDocuments(stateId, actionId) {
+        ShowConfirm(function () {
+            ShowLoadingModal();
+
+            $.ajax({
+                url: '@Url.Action("SyncDocuments", "Home")',
+                type: "POST",
+                data: {
+                    stateId: stateId,
+                    actionId: actionId,
+                    anoLetivo: $('.tab-content .active').prop('id'),
+                },
+                success: function (data) {
+                    if (data.statusCode == 200) {
+                        ShowSucessModal(data.messages, function () {
+                            refreshGlobalStatus();
+                        });
+                    } else {
+                        ShowErrorModal(data.messages, function () {
+                            refreshGlobalStatus();
+                        });
+                    }
+                },
+                error: function () {
+                    ShowErrorModal(["Ocorreu um erro."]);
+                },
+                complete: function () {
+                    HideLoadingModal();
+                }
+            });
+        }, "Sincronizar Documentos", "Tem a certeza que pretende sincronizar os documentos?")
+    }
+
     function getPaidDocuments(pageIndex, pageSize) {
         ShowLoadingModal();
 

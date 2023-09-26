@@ -18,6 +18,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static EspapMiddleware.Shared.WebServiceModels.GetDocFaturacaoResponse;
 
 namespace EspapMiddleware.ServiceLayer.Services
 {
@@ -129,7 +130,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     DocumentId = docToSync.DocumentId,
                     MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                    Date = DateTime.UtcNow,
+                    Date = DateTime.Now,
                     MessageCode = docToSyncResult != null ? docToSyncResult.cod_msg_fat : "500",
                     MessageContent = docToSyncResult != null ? docToSyncResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
                 });
@@ -156,12 +157,12 @@ namespace EspapMiddleware.ServiceLayer.Services
                             if (docToSyncResult.state_id == "35")
                             {
                                 docToSync.StateId = DocumentStateEnum.ValidadoConferido;
-                                docToSync.StateDate = DateTime.UtcNow;
+                                docToSync.StateDate = DateTime.Now;
                             }
                             else
                             {
                                 docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                docToSync.ActionDate = DateTime.UtcNow;
+                                docToSync.ActionDate = DateTime.Now;
                             }
                         }
                     }
@@ -195,16 +196,16 @@ namespace EspapMiddleware.ServiceLayer.Services
                             if (docToSyncResult.state_id == "35")
                             {
                                 docToSync.StateId = DocumentStateEnum.Processado;
-                                docToSync.StateDate = DateTime.UtcNow;
+                                docToSync.StateDate = DateTime.Now;
 
                                 docToSync.RelatedDocument.StateId = DocumentStateEnum.Processado;
-                                docToSync.RelatedDocument.StateDate = DateTime.UtcNow;
+                                docToSync.RelatedDocument.StateDate = DateTime.Now;
                                 docToSync.RelatedDocument.IsSynchronizedWithFEAP = docToSync.IsSynchronizedWithFEAP;
                             }
                             else
                             {
                                 docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                docToSync.ActionDate = DateTime.UtcNow;
+                                docToSync.ActionDate = DateTime.Now;
                             }
                         }
                     }
@@ -257,14 +258,14 @@ namespace EspapMiddleware.ServiceLayer.Services
                     throw new Exception("Não é possivél devolver o documento.");
 
                 docToReturn.StateId = DocumentStateEnum.Devolvido;
-                docToReturn.StateDate = DateTime.UtcNow;
+                docToReturn.StateDate = DateTime.Now;
 
                 var setDocumentLog = await RequestSetDocument(docToReturn, reason);
 
                 unitOfWork.RequestLogs.Add(setDocumentLog);
 
                 docToReturn.IsSynchronizedWithFEAP = setDocumentLog.Successful;
-                
+
                 unitOfWork.Documents.Update(docToReturn);
 
                 var result = await unitOfWork.SaveChangesAsync();
@@ -281,9 +282,6 @@ namespace EspapMiddleware.ServiceLayer.Services
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
                 var docToReset = await unitOfWork.Documents.Find(x => x.DocumentId == documentId);
-
-                if (docToReset.StateId != DocumentStateEnum.Iniciado)
-                    throw new Exception(string.Format("Não é possível desvincular o Documento do SIGEFE no estado {0}.", docToReset.StateId.ToString()));
 
                 docToReset.IsSynchronizedWithSigefe = false;
                 docToReset.MEId = null;
@@ -305,26 +303,90 @@ namespace EspapMiddleware.ServiceLayer.Services
 
         #region Homepage
 
-        public async Task<(int totalDocuments, int totalValidDocuments, int totalInvalidDocuments, int totalInvalidDocumentsRectified, int totalPaidDocuments)> GetGlobalStatus(string anoLetivo)
+        public async Task<(int totalDocuments, int totalDocumentsNotSyncFeap, int totalValidDocuments, int totalValidDocumentsNotSyncFeap, int totalInvalidDocuments, int totalInvalidDocumentsNotSyncFeap, int totalInvalidDocumentsRectified, int totalInvalidDocumentsRectifiedNotSyncFeap, int totalPaidDocuments, int totalPaidDocumentsNotSyncFeap)> GetGlobalStatus(string anoLetivo)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
                 var totalDocuments = await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo);
 
+                var totalDocumentsNotSyncFeap = await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo && !x.IsSynchronizedWithFEAP);
+
+
                 var totalValidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.ValidadoConferido && x.SchoolYear == anoLetivo);
+
+                var totalValidDocumentsNotSyncFeap = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.ValidadoConferido && x.SchoolYear == anoLetivo && !x.IsSynchronizedWithFEAP);
+
 
                 var totalInvalidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Iniciado
                                                                                && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
                                                                                && x.SchoolYear == anoLetivo);
 
+                var totalInvalidDocumentsNotSyncFeap = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Iniciado
+                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
+                                                                               && x.SchoolYear == anoLetivo
+                                                                               && !x.IsSynchronizedWithFEAP);
+
+
                 var totalInvalidDocumentsRectified = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Processado
                                                                                && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
                                                                                && x.SchoolYear == anoLetivo);
 
+                var totalInvalidDocumentsRectifiedNotSyncFeap = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Processado
+                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
+                                                                               && x.SchoolYear == anoLetivo
+                                                                               && !x.IsSynchronizedWithFEAP);
+
+
                 var totalPaidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.EmitidoPagamento
                                                                             && x.SchoolYear == anoLetivo);
 
-                return (totalDocuments, totalValidDocuments, totalInvalidDocuments, totalInvalidDocumentsRectified, totalPaidDocuments);
+                var totalPaidDocumentsNotSyncFeap = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.EmitidoPagamento
+                                                                            && x.SchoolYear == anoLetivo
+                                                                            && !x.IsSynchronizedWithFEAP);
+
+                return (totalDocuments, totalDocumentsNotSyncFeap, totalValidDocuments, totalValidDocumentsNotSyncFeap, totalInvalidDocuments, totalInvalidDocumentsNotSyncFeap, totalInvalidDocumentsRectified, totalInvalidDocumentsRectifiedNotSyncFeap, totalPaidDocuments, totalPaidDocumentsNotSyncFeap);
+            }
+        }
+
+        public async Task SyncAllDocumentsFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var errors = new List<string>();
+
+                var docsToSync = await unitOfWork.Documents.GetDocumentsToSyncFeap(anoLetivo, stateId, actionId);
+
+                foreach (var doc in docsToSync)
+                {
+                    try
+                    {
+                        var lastSigefeMessage = await unitOfWork.DocumentMessages.GetLastSigefeMessage(doc.DocumentId);
+
+                        var setDocumentRquestLog = await RequestSetDocument(doc, lastSigefeMessage?.MessageContent);
+
+                        unitOfWork.RequestLogs.Add(setDocumentRquestLog);
+
+                        if (!setDocumentRquestLog.Successful)
+                        {
+                            throw new Exception("Falha de comunicação com FEAP.");
+                        }
+                        else
+                        {
+                            doc.IsSynchronizedWithFEAP = false;
+
+                            unitOfWork.Documents.Update(doc);
+
+                            await unitOfWork.SaveChangesAsync();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"{doc.DocumentId} - {ex.GetBaseException().Message}");
+                    }
+                }
+
+                if (errors.Count != 0)
+                    throw new SyncronizationException(errors.ToArray());
             }
         }
 
@@ -359,7 +421,7 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
-        public async Task SyncPaidDocuments(string documentId = null) 
+        public async Task SyncPaidDocuments(string documentId = null)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
@@ -375,7 +437,7 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                     var docToSync = await unitOfWork.Documents.Find(x => x.DocumentId == documentId
                                                             && x.StateId != DocumentStateEnum.EmitidoPagamento);
-                    
+
                     if (docToSync != null)
                     {
                         var setDocumentRquestLog = await RequestSetDocumentPaid(docToSync);
@@ -385,7 +447,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         if (setDocumentRquestLog.Successful)
                         {
                             docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
-                            docToSync.StateDate = DateTime.UtcNow;
+                            docToSync.StateDate = DateTime.Now;
                             docToSync.IsSynchronizedWithFEAP = false;
 
 
@@ -423,7 +485,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                                 if (setDocumentRquestLog.Successful)
                                 {
                                     docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
-                                    docToSync.StateDate = DateTime.UtcNow;
+                                    docToSync.StateDate = DateTime.Now;
                                     docToSync.IsSynchronizedWithFEAP = false;
 
 
@@ -526,7 +588,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         DocumentId = document.DocumentId,
                         SupplierFiscalId = document.SupplierFiscalId,
                         ReferenceNumber = document.ReferenceNumber,
-                        Date = DateTime.UtcNow,
+                        Date = DateTime.Now,
                         Successful = true
                     };
                 }
@@ -538,7 +600,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     UniqueId = uniqueId,
                     RequestLogTypeId = RequestLogTypeEnum.SetDocument,
                     DocumentId = document.DocumentId,
-                    Date = DateTime.UtcNow,
+                    Date = DateTime.Now,
                     SupplierFiscalId = document.SupplierFiscalId,
                     ReferenceNumber = document.ReferenceNumber,
                     Successful = false,
@@ -584,20 +646,38 @@ namespace EspapMiddleware.ServiceLayer.Services
                         setDocumentRequest.stateIdSpecified = true;
                         setDocumentRequest.stateId = (int)document.StateId;
 
-                        if(document.StateId == DocumentStateEnum.Devolvido)
+                        if (document.StateId == DocumentStateEnum.Devolvido)
                             setDocumentRequest.reason = reason;
 
                         if (document.StateId == DocumentStateEnum.Processado)
                         {
                             setDocumentRequest.commitmentSpecified1Specified = true;
                             setDocumentRequest.commitmentSpecified1 = true;
-                            setDocumentRequest.commitment = document.CompromiseNumber;
+                            setDocumentRequest.commitment = !string.IsNullOrEmpty(document.CompromiseNumber) ? document.CompromiseNumber : "N/A";
 
                             setDocumentRequest.postingDateSpecified1Specified = true;
                             setDocumentRequest.postingDateSpecified1 = true;
                             setDocumentRequest.postingDateSpecified = true;
-                            setDocumentRequest.postingDate = DateTime.UtcNow;
+                            setDocumentRequest.postingDate = DateTime.Now;
                         }
+                    }
+                    else if (document.StateId == DocumentStateEnum.EmitidoPagamento)
+                    {
+                        setDocumentRequest.stateIdSpecified = true;
+                        setDocumentRequest.stateId = (int)DocumentStateEnum.EmitidoPagamento;
+
+                        setDocumentRequest.paymentIssuedReference = document.MEId;
+                        setDocumentRequest.paymentIssuedReferenceSpecified1 = true;
+                        setDocumentRequest.paymentIssuedReferenceSpecified1Specified = true;
+
+                        setDocumentRequest.paymentIssuedDate = document.IssueDate;
+                        setDocumentRequest.paymentIssuedDateSpecified = true;
+                        setDocumentRequest.paymentIssuedDateSpecified1 = true;
+                        setDocumentRequest.paymentIssuedDateSpecified1Specified = true;
+
+                        setDocumentRequest.paymentReference = document.ReferenceNumber;
+                        setDocumentRequest.paymentReferenceSpecified1 = true;
+                        setDocumentRequest.paymentReferenceSpecified1Specified = true;
                     }
                     else if (document.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
                     {
@@ -632,7 +712,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         DocumentId = document.DocumentId,
                         SupplierFiscalId = document.SupplierFiscalId,
                         ReferenceNumber = document.ReferenceNumber,
-                        Date = DateTime.UtcNow,
+                        Date = DateTime.Now,
                         Successful = true
                     };
                 }
@@ -646,7 +726,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     DocumentId = document.DocumentId,
                     SupplierFiscalId = document.SupplierFiscalId,
                     ReferenceNumber = document.ReferenceNumber,
-                    Date = DateTime.UtcNow,
+                    Date = DateTime.Now,
                     Successful = false,
                     ExceptionType = ex.GetBaseException().GetType().Name,
                     ExceptionStackTrace = ex.GetBaseException().StackTrace,

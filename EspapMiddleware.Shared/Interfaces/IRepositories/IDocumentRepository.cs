@@ -16,5 +16,7 @@ namespace EspapMiddleware.Shared.Interfaces.IRepositories
         Task<Document> GetDocumentForDetail(string documentId);
         Task<IEnumerable<Document>> GetFilteredPaginated(DocumentSearchFilters filters);
         Task<IEnumerable<string>> GetSchoolYears();
+        Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null);
+
     }
 }

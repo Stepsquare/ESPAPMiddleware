@@ -1,4 +1,5 @@
-﻿using EspapMiddleware.Shared.Interfaces.IServices;
+﻿using EspapMiddleware.Shared.Enums;
+using EspapMiddleware.Shared.Interfaces.IServices;
 using EspapMiddleware.Shared.MonitorServiceModels;
 using EspapMiddleware.Shared.MonitorServiceModels.PaginationModels;
 using EspapMiddleware.SVFMonitor.Models;
@@ -47,13 +48,42 @@ namespace EspapMiddleware.SVFMonitor.Controllers
             var model = new HomepageStatusPartialViewModel
             {
                 TotalDocuments = statistics.totalDocuments,
+                TotalDocumentsNotSyncFeap = statistics.totalDocumentsNotSyncFeap,
                 TotalValidDocuments = statistics.totalValidDocuments,
+                TotalValidDocumentsNotSyncFeap = statistics.totalValidDocumentsNotSyncFeap,
                 TotalInvalidDocuments = statistics.totalInvalidDocuments,
+                TotalInvalidDocumentsNotSyncFeap = statistics.totalInvalidDocumentsNotSyncFeap,
                 TotalInvalidDocumentsRectified = statistics.totalInvalidDocumentsRectified,
-                TotalPaidDocuments = statistics.totalPaidDocuments
+                TotalInvalidDocumentsRectifiedNotSyncFeap = statistics.totalInvalidDocumentsRectifiedNotSyncFeap,
+                TotalPaidDocuments = statistics.totalPaidDocuments,
+                TotalPaidDocumentsNotSyncFeap = statistics.totalPaidDocumentsNotSyncFeap
             };
 
             return PartialView("_homepageStatusPartial", model);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> SyncDocuments(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null)
+        {
+            try
+            {
+                await _monitorServices.SyncAllDocumentsFeap(anoLetivo, stateId, actionId);
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { string.Format("Documentos no estado {0} sicronizados com sucesso.", stateId.ToString()) }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError,
+                    messages = new string[] { ex.GetBaseException().Message }
+                });
+            }
+            
         }
 
         [HttpPost]

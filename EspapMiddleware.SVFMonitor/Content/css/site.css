@@ -4368,6 +4368,33 @@ tr.ig-additional-row div div {
 th.k-header.ig-xml-col {
     width: 45px;
 }
+.ig-svf-statistics h5.ig-dash-title {
+    white-space: inherit;
+    min-height: 32px;
+}
+
+.ig-svf-statistics.ig-statistics-panel p {
+    float: left;
+    margin-top: 0;
+    margin-bottom: 0 !important;
+}
+
+.ig-svf-statistics.ig-statistics-panel h4 {
+    margin-bottom: 0;
+}
+
+.ig-svf-container .ig-svf-statistics {
+    margin-bottom: 0;
+}
+.ig-svf-synccont {
+    display: flex;
+    align-items: center;
+}
+
+.ig-svf-synccont a.btn.ig-btn-round {
+    margin: 0 10px 0 0;
+    padding: 0 10px;
+}
 /*COL-MD-15*/
 .col-xs-15,
 .col-sm-15,

@@ -20,6 +20,7 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 
 
         #region Documents
+
         Task<PaginatedResult<Document>> DocumentSearch(DocumentSearchFilters filters);
         Task<Document> GetDocumentDetail(string documentId);
         Task<PaginatedResult<DocumentLine>> GetDocumentLinesForDetail(DocumentDetailLineFilter filters);
@@ -33,7 +34,8 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 
         #region Homepage
 
-        Task<(int totalDocuments, int totalValidDocuments, int totalInvalidDocuments, int totalInvalidDocumentsRectified, int totalPaidDocuments)> GetGlobalStatus(string anoLetivo);
+        Task<(int totalDocuments, int totalDocumentsNotSyncFeap, int totalValidDocuments, int totalValidDocumentsNotSyncFeap, int totalInvalidDocuments, int totalInvalidDocumentsNotSyncFeap, int totalInvalidDocumentsRectified, int totalInvalidDocumentsRectifiedNotSyncFeap, int totalPaidDocuments, int totalPaidDocumentsNotSyncFeap)> GetGlobalStatus(string anoLetivo);
+        Task SyncAllDocumentsFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null);
         Task<PaginatedResult<string>> GetPaidDocsToSync(PaginatedSearchFilter filters);
         Task SyncPaidDocuments(string documentId = null);
 
