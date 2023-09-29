@@ -124,6 +124,8 @@ namespace EspapMiddleware.DataLayer.Repositories
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
                                         && !x.IsSynchronizedWithSigefe
+                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && m.MessageCode == "490")
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE 
                                                                     && (m.MessageCode == "500" || m.MessageCode == "429")))
                                 .OrderByDescending(x => x.CreatedOn)
@@ -138,9 +140,11 @@ namespace EspapMiddleware.DataLayer.Repositories
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
                                         && !x.IsSynchronizedWithSigefe
+                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && m.MessageCode == "490")
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
                                                                     && (m.MessageCode == "500" || m.MessageCode == "429")))
-                                .Include(x => x.DocumentMessages)
+                                .Include(x => x.DocumentLines)
                                 .ToListAsync();
         }
 
@@ -149,6 +153,8 @@ namespace EspapMiddleware.DataLayer.Repositories
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
                                         && !x.IsSynchronizedWithSigefe
+                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && m.MessageCode == "490")
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
                                                                     && (m.MessageCode == "500" || m.MessageCode == "429")))
                                 .CountAsync();
