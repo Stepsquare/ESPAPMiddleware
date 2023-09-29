@@ -537,11 +537,17 @@ namespace EspapMiddleware.ServiceLayer.Services
 
             obj.DocumentLines = new List<DocumentLine>();
 
+            int currentIteration = 0;
+
             foreach (var line in contract.InvoiceLines)
             {
+                currentIteration++;
+
+                bool success = int.TryParse(line.Id, out int lineId);
+
                 obj.DocumentLines.Add(new DocumentLine()
                 {
-                    LineId = int.Parse(line.Id),
+                    LineId = success ? lineId : currentIteration,
                     DocumentId = contract.documentId,
                     Description = line.Name,
                     StandardItemIdentification = line.StandardItemIdentification,

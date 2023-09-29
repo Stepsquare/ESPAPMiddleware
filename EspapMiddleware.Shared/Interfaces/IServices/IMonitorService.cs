@@ -36,6 +36,8 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 
         Task<(int totalDocuments, int totalDocumentsNotSyncFeap, int totalValidDocuments, int totalValidDocumentsNotSyncFeap, int totalInvalidDocuments, int totalInvalidDocumentsNotSyncFeap, int totalInvalidDocumentsRectified, int totalInvalidDocumentsRectifiedNotSyncFeap, int totalPaidDocuments, int totalPaidDocumentsNotSyncFeap)> GetGlobalStatus(string anoLetivo);
         Task SyncAllDocumentsFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null);
+        Task<PaginatedResult<Document>> GetDocsToSyncSigefe(PaginatedSearchFilter filters);
+        Task SyncDocumentsSigefe(string documentId = null);
         Task<PaginatedResult<string>> GetPaidDocsToSync(PaginatedSearchFilter filters);
         Task SyncPaidDocuments(string documentId = null);
 
