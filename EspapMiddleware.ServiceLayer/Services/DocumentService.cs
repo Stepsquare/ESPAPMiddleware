@@ -252,6 +252,11 @@ namespace EspapMiddleware.ServiceLayer.Services
                                         relatedDocument.ActionDate = DateTime.Now;
 
                                         unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument, relatedDocumentResult.reason));
+
+                                        documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                        documentToInsert.ActionDate = DateTime.Now;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
                                     }
 
                                     unitOfWork.Documents.Update(relatedDocument);

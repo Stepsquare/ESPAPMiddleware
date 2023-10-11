@@ -684,9 +684,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                                         docToSync.RelatedDocument.StateDate = DateTime.Now;
                                         docToSync.RelatedDocument.IsSynchronizedWithFEAP = docToSync.IsSynchronizedWithFEAP;
 
-                                        var setDocumentLogRelatedDocument = await RequestSetDocument(docToSync.RelatedDocument, docToSyncResult.msg_fat);
-
-                                        unitOfWork.RequestLogs.Add(setDocumentLogRelatedDocument);
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync.RelatedDocument, docToSyncResult.msg_fat));
                                     }
                                     else
                                     {
@@ -699,12 +697,12 @@ namespace EspapMiddleware.ServiceLayer.Services
                             }
 
                             unitOfWork.Documents.Update(docToSync);
-
-                            var result = await unitOfWork.SaveChangesAsync();
-
-                            if (result == 0)
-                                throw new DatabaseException("Erro ao atualizar documento na BD.");
                         }
+
+                        var result = await unitOfWork.SaveChangesAsync();
+
+                        if (result == 0)
+                            throw new DatabaseException("Erro ao atualizar documento na BD.");
                     }
                 }
             }
@@ -937,7 +935,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     var serviceContextHeader = new FEAPServices_PP.ServiceContextHeader()
                     {
                         Application = "FaturacaoEletronica",
-                        ProcessId = document.DocumentId,
+                        ProcessId = document.DocumentId
                     };
 
                     var setDocumentRequest = new FEAPServices_PP.SetDocumentRequest()
