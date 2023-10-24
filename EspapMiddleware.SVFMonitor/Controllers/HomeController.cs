@@ -117,6 +117,37 @@ namespace EspapMiddleware.SVFMonitor.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<PartialViewResult> GetDocsToSyncSigefe(PaginatedSearchFilter filters)
+        {
+            var model = await _monitorServices.GetDocsToSyncSigefe(filters);
+
+            return PartialView("_docsToSyncSigefeResultPartial", model);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> SyncDocumentsSigefe(string documentId)
+        {
+            try
+            {
+                await _monitorServices.SyncDocumentsSigefe(documentId);
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Documentos sicronizados com sucesso." }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError,
+                    messages = new string[] { ex.GetBaseException().Message }
+                });
+            }
+        }
+
         #endregion
     }
 }

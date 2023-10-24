@@ -2650,6 +2650,10 @@ th.k-header.ig-propcol {
     width: 115px;
 }
 
+th.ig-col-shrink {
+    width:  1%;
+}
+
 .ig-budgetpropgrid .input-group-addon {
     padding: 6px 8px;
 }

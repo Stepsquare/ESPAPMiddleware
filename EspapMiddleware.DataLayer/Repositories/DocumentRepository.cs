@@ -3,6 +3,7 @@ using EspapMiddleware.Shared.Entities;
 using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.Interfaces.IRepositories;
 using EspapMiddleware.Shared.MonitorServiceModels;
+using EspapMiddleware.Shared.MonitorServiceModels.PaginationModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -91,6 +92,72 @@ namespace EspapMiddleware.DataLayer.Repositories
                                                     && !x.IsSynchronizedWithFEAP
                                                     && (!stateId.HasValue || x.StateId == stateId.Value)
                                                     && (!actionId.HasValue || x.ActionId == actionId)).ToListAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetPaginatedPaidDocsToSync(string[] documentIds, PaginatedSearchFilter filters)
+        {
+            return await DbContext.Documents
+                                .Where(x => documentIds.Contains(x.DocumentId) && x.StateId != DocumentStateEnum.EmitidoPagamento)
+                                .OrderByDescending(x => x.CreatedOn)
+                                .Skip((filters.PageIndex - 1) * filters.PageSize)
+                                .Take(filters.PageSize)
+                                .Select(x => x.DocumentId)
+                                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Document>> GetPaidDocsToSync(string[] documentIds)
+        {
+            return await DbContext.Documents
+                                .Where(x => documentIds.Contains(x.DocumentId) && x.StateId != DocumentStateEnum.EmitidoPagamento)
+                                .ToListAsync();
+        }
+
+        public async Task<int> GetPaidDocsToSyncCount(string[] documentIds)
+        {
+            return await DbContext.Documents
+                                .Where(x => documentIds.Contains(x.DocumentId) && x.StateId != DocumentStateEnum.EmitidoPagamento)
+                                .CountAsync();
+        }
+
+        public async Task<IEnumerable<Document>> GetPaginatedDocsToSyncSigefe(string anoLetivo, PaginatedSearchFilter filters)
+        {
+            return await DbContext.Documents
+                                .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
+                                        && !x.IsSynchronizedWithSigefe
+                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && m.MessageCode == "490")
+                                        && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE 
+                                                                    && (m.MessageCode == "500" || m.MessageCode == "429")))
+                                .OrderByDescending(x => x.CreatedOn)
+                                .Include(x => x.DocumentMessages)
+                                .Skip((filters.PageIndex - 1) * filters.PageSize)
+                                .Take(filters.PageSize)
+                                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Document>> GetDocsToSyncSigefe(string anoLetivo)
+        {
+            return await DbContext.Documents
+                                .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
+                                        && !x.IsSynchronizedWithSigefe
+                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && m.MessageCode == "490")
+                                        && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && (m.MessageCode == "500" || m.MessageCode == "429")))
+                                .Include(x => x.DocumentLines)
+                                .ToListAsync();
+        }
+
+        public async Task<int> GetDocsToSyncSigefeCount(string anoLetivo)
+        {
+            return await DbContext.Documents
+                                .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
+                                        && !x.IsSynchronizedWithSigefe
+                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && m.MessageCode == "490")
+                                        && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && (m.MessageCode == "500" || m.MessageCode == "429")))
+                                .CountAsync();
         }
     }
 }

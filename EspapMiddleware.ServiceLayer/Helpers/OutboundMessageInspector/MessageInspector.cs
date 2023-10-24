@@ -25,6 +25,8 @@ namespace EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector
 
         public object BeforeSendRequest(ref Message request, IClientChannel channel)
         {
+            request.Headers.MessageId = new System.Xml.UniqueId(Guid.NewGuid());
+
             FileManager.SaveFile("SetDocument", request?.ToString(), _uniqueId);
 
             return null;

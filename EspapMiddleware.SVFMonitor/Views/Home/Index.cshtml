@@ -37,7 +37,10 @@
 </div>
 
 <div class="row">
-    <div id="result_container" class="col-md-12">
+    <div id="paid_sync_result_container" class="col-md-12">
+
+    </div>
+    <div id="sigefe_sync_result_container" class="col-md-12">
 
     </div>
 </div>
@@ -113,7 +116,25 @@
                 pageSize: pageSize
             },
             success: function (data) {
-                $('#result_container').html(data);
+                $('#paid_sync_result_container').html(data);
+                getToSyncSigefeDocuments();
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            }
+        });
+    }
+
+    function getToSyncSigefeDocuments(pageIndex, pageSize) {
+        $.ajax({
+            url: '@Url.Action("GetDocsToSyncSigefe", "Home")',
+            type: "POST",
+            data: {
+                pageIndex: pageIndex,
+                pageSize: pageSize
+            },
+            success: function (data) {
+                $('#sigefe_sync_result_container').html(data);
             },
             error: function () {
                 ShowErrorModal(["Ocorreu um erro."]);

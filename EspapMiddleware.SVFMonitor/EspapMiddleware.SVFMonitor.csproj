@@ -244,6 +244,7 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Home\_paidDocumentsResultPartial.cshtml" />
     <Content Include="Views\Home\_homepageStatusPartial.cshtml" />
+    <Content Include="Views\Home\_docsToSyncSigefeResultPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EspapMiddleware.ServiceLayer\EspapMiddleware.ServiceLayer.csproj">
