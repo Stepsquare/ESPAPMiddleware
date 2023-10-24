@@ -4345,6 +4345,10 @@ th.k-header.ig-colreqs-value {
 .alert.ig-rec-payment-alert {
     margin-bottom: 5px;
 }
+.ig-stats-btn .badge {
+    background: #fff;
+    color: #2f3e53;
+}
 /*svf*/
 .ig-grid .k-grid tr.ig-additional-row td {
     padding: 0;
@@ -4368,24 +4372,17 @@ tr.ig-additional-row div div {
 th.k-header.ig-xml-col {
     width: 45px;
 }
-.ig-svf-statistics h5.ig-dash-title {
-    white-space: inherit;
-    min-height: 32px;
-}
 
-.ig-svf-statistics.ig-statistics-panel p {
+.ig-svf-statedocs p {
     float: left;
     margin-top: 0;
     margin-bottom: 0 !important;
 }
 
-.ig-svf-statistics.ig-statistics-panel h4 {
-    margin-bottom: 0;
+.ig-svf-statedocs h4 {
+    margin-bottom: 5px;
 }
 
-.ig-svf-container .ig-svf-statistics {
-    margin-bottom: 0;
-}
 .ig-svf-synccont {
     display: flex;
     align-items: center;
@@ -4394,6 +4391,45 @@ th.k-header.ig-xml-col {
 .ig-svf-synccont a.btn.ig-btn-round {
     margin: 0 10px 0 0;
     padding: 0 10px;
+}
+
+.ig-doctype-container {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: solid 1px #e1e1e1;
+    justify-content: space-between;
+}
+
+    .ig-doctype-container .ig-svf-statedocs {
+        flex-direction: row;
+        display: flex;
+        text-align: right;
+    }
+
+        .ig-doctype-container .ig-svf-statedocs .ig-svf-docdata {
+            display: flex;
+            flex-direction: column;
+        }
+
+    .ig-doctype-container:first-child {
+        padding-top: 5px;
+    }
+
+    .ig-doctype-container:last-child {
+        padding-bottom: 5px;
+        border: none;
+    }
+.ig-svf-statedocs {
+    display: flex;
+    min-height:105px;
+    flex-direction: column;
+}
+.ig-stats-btn{
+    margin-top:10px;
+}
+.ig-svf-statistics .col-md-3{
+    min-height:155px;
 }
 /*COL-MD-15*/
 .col-xs-15,
