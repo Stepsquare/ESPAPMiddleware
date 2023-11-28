@@ -1,4 +1,5 @@
-﻿using EspapMiddleware.ServiceLayer.FEAPServices_PP;
+﻿using EspapMiddleware.DataLayer.UnitOfWork;
+using EspapMiddleware.ServiceLayer.FEAPServices_PP;
 using EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector;
 using EspapMiddleware.Shared.Entities;
 using EspapMiddleware.Shared.Enums;
@@ -124,91 +125,103 @@ namespace EspapMiddleware.ServiceLayer.Services
                     docToSync.SchoolYear = getFaseResponse?.id_ano_letivo_atual;
                 }
 
-                var docToSyncResult = await RequestSetDocFaturacao(docToSync);
+                var setDocFaturacaoResponse = await RequestSetDocFaturacao(docToSync);
 
-                unitOfWork.DocumentMessages.Add(new DocumentMessage()
-                {
-                    DocumentId = docToSync.DocumentId,
-                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                    Date = DateTime.Now,
-                    MessageCode = docToSyncResult != null ? docToSyncResult.cod_msg_fat : "500",
-                    MessageContent = docToSyncResult != null ? docToSyncResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
-                });
-
-                if (docToSyncResult == null)
-                {
+                //FALHA DE COMUNICAÇÃO
+                if (setDocFaturacaoResponse == null)
                     throw new Exception("Erro de comunicação com SIGeFE. Tentar mais tarde");
-                }
-                else
+
+                //CHAMADA WEBSERVICE BEM SUCEDIDA
+                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "200"))
                 {
-                    if (docToSync.TypeId == DocumentTypeEnum.Fatura)
+                    var docToSyncResult = setDocFaturacaoResponse.faturas.FirstOrDefault();
+
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
                     {
-                        if (docToSync.StateId == DocumentStateEnum.EmitidoPagamento)
-                        {
-                            docToSync.IsSynchronizedWithSigefe = docToSyncResult != null && docToSyncResult.cod_msg_fat == "200";
-                        }
-                        else
-                        {
-                            docToSync.MEId = docToSyncResult.id_me_fatura;
+                        DocumentId = docToSync.DocumentId,
+                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                        Date = DateTime.Now,
+                        MessageCode = docToSyncResult.cod_msg_fat,
+                        MessageContent = docToSyncResult.msg_fat
+                    });
 
-                            docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
-                            docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
+                    docToSync.MEId = docToSyncResult.id_me_fatura;
 
+                    //ATUALIZAR COMPROMISSO COM O VALOR TRATADO
+                    if (!string.IsNullOrEmpty(docToSyncResult.num_compromisso))
+                        docToSync.CompromiseNumber = docToSyncResult.num_compromisso;
+
+                    docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
+                    docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
+
+                    switch (docToSync.TypeId)
+                    {
+                        case DocumentTypeEnum.Fatura:
                             if (docToSyncResult.state_id == "35")
                             {
                                 docToSync.StateId = DocumentStateEnum.ValidadoConferido;
                                 docToSync.StateDate = DateTime.Now;
+
                             }
-                            else
+                            else if (docToSyncResult.state_id == "22")
                             {
                                 docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
                                 docToSync.ActionDate = DateTime.Now;
                             }
-                        }
-                    }
-                    else
-                    {
-                        if (docToSyncResult.cod_msg_fat == "490")
-                        {
-                            throw new Exception("Sincronização falhada. Sincronizar primeiro fatura associada.");
-                        }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(docToSync.RelatedDocumentId))
-                            {
-                                var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(docToSync.RelatedReferenceNumber,
-                                                                                                docToSync.SupplierFiscalId,
-                                                                                                docToSync.SchoolYear,
-                                                                                                docToSync.TypeId);
 
-                                if (relatedDocument != null)
+                            break;
+                        case DocumentTypeEnum.NotaCrédito:
+                            if (docToSyncResult.cod_msg_fat != "490")
+                            {
+                                docToSync.RelatedReferenceNumber = docToSyncResult.num_doc_rel;
+                                docToSync.RelatedDocumentId = docToSyncResult.id_doc_feap_rel;
+
+                                if (docToSyncResult.state_id == "35")
                                 {
-                                    docToSync.RelatedDocumentId = relatedDocument.DocumentId;
-                                    docToSync.RelatedDocument = relatedDocument;
+                                    docToSync.StateId = DocumentStateEnum.Processado;
+                                    docToSync.StateDate = DateTime.Now;
+
+                                    var relatedDocumentToupdate = await unitOfWork.Documents.Find(x => x.DocumentId == docToSync.RelatedDocumentId);
+
+                                    if (relatedDocumentToupdate != null)
+                                    {
+                                        relatedDocumentToupdate.StateId = DocumentStateEnum.Processado;
+                                        relatedDocumentToupdate.StateDate = DateTime.Now;
+                                        relatedDocumentToupdate.IsSynchronizedWithFEAP = false;
+
+                                        unitOfWork.Documents.Update(relatedDocumentToupdate);
+                                    }
+                                }
+                                else if (docToSyncResult.state_id == "22")
+                                {
+                                    docToSync.StateId = DocumentStateEnum.Devolvido;
+                                    docToSync.ActionDate = DateTime.Now;
                                 }
                             }
 
-                            docToSync.MEId = docToSyncResult.id_me_fatura;
+                            break;
+                        case DocumentTypeEnum.NotaDébito:
+                            docToSync.StateId = DocumentStateEnum.Devolvido;
+                            docToSync.ActionDate = DateTime.Now;
 
-                            docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
-                            docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
-
-                            if (docToSyncResult.state_id == "35")
-                            {
-                                docToSync.StateId = DocumentStateEnum.Processado;
-                                docToSync.StateDate = DateTime.Now;
-
-                                docToSync.RelatedDocument.StateId = DocumentStateEnum.Processado;
-                                docToSync.RelatedDocument.StateDate = DateTime.Now;
-                                docToSync.RelatedDocument.IsSynchronizedWithFEAP = docToSync.IsSynchronizedWithFEAP;
-                            }
-                            else
-                            {
-                                docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                docToSync.ActionDate = DateTime.Now;
-                            }
-                        }
+                            docToSync.IsSynchronizedWithSigefe = true;
+                            docToSync.IsSynchronizedWithFEAP = false;
+                            
+                            break;
+                        default:
+                            break;
                     }
+                }
+                else
+                {
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = docToSync.DocumentId,
+                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                        Date = DateTime.Now,
+                        MessageCode = setDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
+                        MessageContent = setDocFaturacaoResponse.messages.FirstOrDefault()?.msg
+                    });
                 }
 
                 unitOfWork.Documents.Update(docToSync);
@@ -235,9 +248,7 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 var lastSigefeMessage = await unitOfWork.DocumentMessages.GetLastSigefeMessage(documentId);
 
-                var setDocumentLog = await RequestSetDocument(docToSync, lastSigefeMessage?.MessageContent);
-
-                unitOfWork.RequestLogs.Add(setDocumentLog);
+                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, lastSigefeMessage?.MessageContent));
 
                 var result = await unitOfWork.SaveChangesAsync();
 
@@ -254,17 +265,15 @@ namespace EspapMiddleware.ServiceLayer.Services
             {
                 var docToReturn = await unitOfWork.Documents.Find(x => x.DocumentId == documentId);
 
-                if (docToReturn.StateId != DocumentStateEnum.Iniciado)
-                    throw new Exception("Não é possivél devolver o documento.");
+                if (docToReturn.StateId == DocumentStateEnum.Devolvido 
+                    || docToReturn.StateId == DocumentStateEnum.EmitidoPagamento)
+                    throw new Exception("Não é possível devolver o documento.");
 
                 docToReturn.StateId = DocumentStateEnum.Devolvido;
                 docToReturn.StateDate = DateTime.Now;
+                docToReturn.IsSynchronizedWithFEAP = false;
 
-                var setDocumentLog = await RequestSetDocument(docToReturn, reason);
-
-                unitOfWork.RequestLogs.Add(setDocumentLog);
-
-                docToReturn.IsSynchronizedWithFEAP = setDocumentLog.Successful;
+                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToReturn, reason));
 
                 unitOfWork.Documents.Update(docToReturn);
 
@@ -286,6 +295,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 docToReset.IsSynchronizedWithSigefe = false;
                 docToReset.MEId = null;
                 docToReset.StateId = DocumentStateEnum.Iniciado;
+                docToReset.ActionId = null;
 
                 unitOfWork.Documents.Update(docToReset);
 
@@ -303,81 +313,53 @@ namespace EspapMiddleware.ServiceLayer.Services
 
         #region Homepage
 
-        public async Task<(int totalDocuments, int totalDocumentsNotSyncFeap, int totalValidDocuments, int totalValidDocumentsNotSyncFeap, int totalInvalidDocuments, int totalInvalidDocumentsNotSyncFeap, int totalInvalidDocumentsRectified, int totalInvalidDocumentsRectifiedNotSyncFeap, int totalPaidDocuments, int totalPaidDocumentsNotSyncFeap)> GetGlobalStatus(string anoLetivo)
+        public async Task<string> GetCurrentSchoolYear()
         {
-            using (var unitOfWork = _unitOfWorkFactory.Create())
-            {
-                var totalDocuments = await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo);
+            var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
 
-                var totalDocumentsNotSyncFeap = await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo && !x.IsSynchronizedWithFEAP);
-
-
-                var totalValidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.ValidadoConferido && x.SchoolYear == anoLetivo);
-
-                var totalValidDocumentsNotSyncFeap = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.ValidadoConferido && x.SchoolYear == anoLetivo && !x.IsSynchronizedWithFEAP);
-
-
-                var totalInvalidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Iniciado
-                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
-                                                                               && x.SchoolYear == anoLetivo);
-
-                var totalInvalidDocumentsNotSyncFeap = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Iniciado
-                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
-                                                                               && x.SchoolYear == anoLetivo
-                                                                               && !x.IsSynchronizedWithFEAP);
-
-
-                var totalInvalidDocumentsRectified = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Processado
-                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
-                                                                               && x.SchoolYear == anoLetivo);
-
-                var totalInvalidDocumentsRectifiedNotSyncFeap = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.Processado
-                                                                               && x.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização
-                                                                               && x.SchoolYear == anoLetivo
-                                                                               && !x.IsSynchronizedWithFEAP);
-
-
-                var totalPaidDocuments = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.EmitidoPagamento
-                                                                            && x.SchoolYear == anoLetivo);
-
-                var totalPaidDocumentsNotSyncFeap = await unitOfWork.Documents.Count(x => x.StateId == DocumentStateEnum.EmitidoPagamento
-                                                                            && x.SchoolYear == anoLetivo
-                                                                            && !x.IsSynchronizedWithFEAP);
-
-                return (totalDocuments, totalDocumentsNotSyncFeap, totalValidDocuments, totalValidDocumentsNotSyncFeap, totalInvalidDocuments, totalInvalidDocumentsNotSyncFeap, totalInvalidDocumentsRectified, totalInvalidDocumentsRectifiedNotSyncFeap, totalPaidDocuments, totalPaidDocumentsNotSyncFeap);
-            }
+            return getFaseResponse?.id_ano_letivo_atual;
         }
 
-        public async Task SyncAllDocumentsFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null)
+        public async Task<int> GetTotalDocument(string anoLetivo, bool? isSynchronizedWithFEAP = null)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+                return await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo && (!isSynchronizedWithFEAP.HasValue || x.IsSynchronizedWithFEAP == isSynchronizedWithFEAP.Value));
+        }
+
+        public async Task<int> GetTotalDocumentsByType(string anoLetivo, DocumentTypeEnum typeId, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+                return await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo
+                                                        && x.TypeId == typeId
+                                                        && (!actionId.HasValue || x.ActionId == actionId.Value)
+                                                        && (!stateId.HasValue || x.StateId == stateId.Value));
+        }
+
+        public async Task SyncAllDocumentsFeap(string anoLetivo)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
                 var errors = new List<string>();
 
-                var docsToSync = await unitOfWork.Documents.GetDocumentsToSyncFeap(anoLetivo, stateId, actionId);
+                var docsToSync = await unitOfWork.Documents.GetDocumentsToSyncFeap(anoLetivo);
 
                 foreach (var doc in docsToSync)
                 {
                     try
                     {
-                        var lastSigefeMessage = await unitOfWork.DocumentMessages.GetLastSigefeMessage(doc.DocumentId);
+                        var lastSigefeMessage = doc.DocumentMessages
+                                                    .Where(x => x.MessageTypeId == DocumentMessageTypeEnum.SIGeFE)
+                                                    .OrderByDescending(x => x.Date)
+                                                    .FirstOrDefault()?.MessageContent;
 
-                        var setDocumentRquestLog = await RequestSetDocument(doc, lastSigefeMessage?.MessageContent);
+                        var setDocumentRequestLog = await RequestSetDocument(doc, lastSigefeMessage);
 
-                        unitOfWork.RequestLogs.Add(setDocumentRquestLog);
+                        unitOfWork.RequestLogs.Add(setDocumentRequestLog);
 
-                        if (!setDocumentRquestLog.Successful)
-                        {
+                        await unitOfWork.SaveChangesAsync();
+
+                        if (!setDocumentRequestLog.Successful)
                             throw new Exception("Falha de comunicação com FEAP.");
-                        }
-                        else
-                        {
-                            doc.IsSynchronizedWithFEAP = false;
-
-                            unitOfWork.Documents.Update(doc);
-
-                            await unitOfWork.SaveChangesAsync();
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -418,297 +400,155 @@ namespace EspapMiddleware.ServiceLayer.Services
                 if (getFaseResponse == null)
                     throw new Exception("Ano letivo não disponível.");
 
-                if (!string.IsNullOrEmpty(documentId))
+                var docsToSyncSigefe = await unitOfWork.Documents.GetDocsToSyncSigefe(getFaseResponse.id_ano_letivo_atual, documentId);
+
+                var errors = new List<string>();
+
+                foreach (var docToSync in docsToSyncSigefe)
                 {
-                    var docToSync = await unitOfWork.Documents.GetDocumentForSyncSigefe(documentId);
-
-                    var docToSyncResult = await RequestSetDocFaturacao(docToSync);
-
-                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    try
                     {
-                        DocumentId = docToSync.DocumentId,
-                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                        Date = DateTime.Now,
-                        MessageCode = docToSyncResult != null ? docToSyncResult.cod_msg_fat : "500",
-                        MessageContent = docToSyncResult != null ? docToSyncResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
-                    });
+                        docToSync.SchoolYear = getFaseResponse.id_ano_letivo_atual;
 
-                    if (docToSyncResult != null)
-                    {
-                        if (docToSync.TypeId == DocumentTypeEnum.Fatura)
+                        var setDocFaturacaoResponse = await RequestSetDocFaturacao(docToSync);
+
+                        //FALHA DE COMUNICAÇÃO
+                        if (setDocFaturacaoResponse == null)
                         {
-                            docToSync.MEId = docToSyncResult.id_me_fatura;
-
-                            docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
-                            docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
-
-                            if (docToSyncResult.state_id == "35")
+                            unitOfWork.DocumentMessages.Add(new DocumentMessage()
                             {
-                                docToSync.StateId = DocumentStateEnum.ValidadoConferido;
-                                docToSync.StateDate = DateTime.Now;
-
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
-                            }
-                            else
-                            {
-                                var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(docToSync.RelatedReferenceNumber,
-                                                                                                    docToSync.SupplierFiscalId,
-                                                                                                    docToSync.SchoolYear,
-                                                                                                    docToSync.TypeId);
-
-                                if (relatedDocument != null)
-                                {
-                                    relatedDocument.RelatedDocumentId = docToSync.DocumentId;
-
-                                    var relatedSetDocFaturacaoResult = await RequestSetDocFaturacao(relatedDocument);
-
-                                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
-                                    {
-                                        DocumentId = relatedDocument.DocumentId,
-                                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                                        Date = DateTime.Now,
-                                        MessageCode = relatedSetDocFaturacaoResult != null ? relatedSetDocFaturacaoResult.cod_msg_fat : "500",
-                                        MessageContent = relatedSetDocFaturacaoResult != null ? relatedSetDocFaturacaoResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
-                                    });
-
-                                    if (relatedSetDocFaturacaoResult != null)
-                                    {
-                                        relatedDocument.MEId = relatedSetDocFaturacaoResult.id_me_fatura;
-
-                                        relatedDocument.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(relatedSetDocFaturacaoResult.id_me_fatura);
-                                        relatedDocument.IsSynchronizedWithFEAP = !relatedDocument.IsSynchronizedWithSigefe;
-
-                                        if (relatedSetDocFaturacaoResult.state_id == "35")
-                                        {
-                                            docToSync.StateId = DocumentStateEnum.Processado;
-                                            docToSync.StateDate = DateTime.Now;
-                                            unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
-
-                                            relatedDocument.StateId = DocumentStateEnum.Processado;
-                                            relatedDocument.StateDate = DateTime.Now;
-                                            unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
-                                        }
-                                        else
-                                        {
-                                            relatedDocument.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                            relatedDocument.ActionDate = DateTime.Now;
-
-                                            unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument, relatedSetDocFaturacaoResult.reason));
-                                        }
-
-                                        unitOfWork.Documents.Update(relatedDocument);
-                                    }
-                                }
-                                else
-                                {
-                                    docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                    docToSync.ActionDate = DateTime.Now;
-
-                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.msg_fat));
-                                }
-                            }
+                                DocumentId = docToSync.DocumentId,
+                                MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                Date = DateTime.Now,
+                                MessageCode = "500",
+                                MessageContent = "Falha de comunicação. Reenviar pedido mais tarde."
+                            });
                         }
                         else
                         {
-                            if (docToSyncResult.cod_msg_fat != "490")
+                            //CHAMADA WEBSERVICE BEM SUCEDIDA
+                            if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "200"))
                             {
-                                if (string.IsNullOrEmpty(docToSync.RelatedDocumentId))
-                                {
-                                    var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(docToSync.RelatedReferenceNumber,
-                                                                                                    docToSync.SupplierFiscalId,
-                                                                                                    docToSync.SchoolYear,
-                                                                                                    docToSync.TypeId);
+                                var docToSyncResult = setDocFaturacaoResponse.faturas.FirstOrDefault();
 
-                                    if (relatedDocument != null)
-                                    {
-                                        docToSync.RelatedDocumentId = relatedDocument.DocumentId;
-                                        docToSync.RelatedDocument = relatedDocument;
-                                    }
-                                }
+                                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                                {
+                                    DocumentId = docToSync.DocumentId,
+                                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                    Date = DateTime.Now,
+                                    MessageCode = docToSyncResult.cod_msg_fat,
+                                    MessageContent = docToSyncResult.msg_fat
+                                });
 
                                 docToSync.MEId = docToSyncResult.id_me_fatura;
+
+                                if (!string.IsNullOrEmpty(docToSyncResult.num_compromisso))
+                                    docToSync.CompromiseNumber = docToSyncResult.num_compromisso;
 
                                 docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
                                 docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
 
-                                if (docToSyncResult.state_id == "35")
+                                switch (docToSync.TypeId)
                                 {
-                                    docToSync.StateId = DocumentStateEnum.Processado;
-                                    docToSync.StateDate = DateTime.Now;
+                                    case DocumentTypeEnum.Fatura:
+                                        if (docToSyncResult.state_id == "35")
+                                        {
+                                            docToSync.StateId = DocumentStateEnum.ValidadoConferido;
+                                            docToSync.StateDate = DateTime.Now;
 
-                                    docToSync.RelatedDocument.StateId = DocumentStateEnum.Processado;
-                                    docToSync.RelatedDocument.StateDate = DateTime.Now;
-                                    docToSync.RelatedDocument.IsSynchronizedWithFEAP = docToSync.IsSynchronizedWithFEAP;
+                                            unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
+                                        }
+                                        else if (docToSyncResult.state_id == "22")
+                                        {
+                                            docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                            docToSync.ActionDate = DateTime.Now;
 
-                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync.RelatedDocument, docToSyncResult.msg_fat));
+                                            unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.reason));
+                                        }
+
+                                        break;
+                                    case DocumentTypeEnum.NotaCrédito:
+                                        if (docToSyncResult.cod_msg_fat != "490")
+                                        {
+                                            docToSync.RelatedReferenceNumber = docToSyncResult.num_doc_rel;
+                                            docToSync.RelatedDocumentId = docToSyncResult.id_doc_feap_rel;
+
+                                            if (docToSyncResult.state_id == "35")
+                                            {
+                                                docToSync.StateId = DocumentStateEnum.Processado;
+                                                docToSync.StateDate = DateTime.Now;
+
+                                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
+
+                                                var relatedDocumentToupdate = await unitOfWork.Documents.Find(x => x.DocumentId == docToSync.RelatedDocumentId);
+
+                                                if (relatedDocumentToupdate != null)
+                                                {
+                                                    relatedDocumentToupdate.StateId = DocumentStateEnum.Processado;
+                                                    relatedDocumentToupdate.StateDate = DateTime.Now;
+                                                    relatedDocumentToupdate.IsSynchronizedWithFEAP = false;
+
+                                                    unitOfWork.Documents.Update(relatedDocumentToupdate);
+
+                                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocumentToupdate));
+                                                }
+                                            }
+                                            else if (docToSyncResult.state_id == "22")
+                                            {
+                                                docToSync.StateId = DocumentStateEnum.Devolvido;
+                                                docToSync.ActionDate = DateTime.Now;
+
+                                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.reason));
+                                            }
+                                        }
+
+                                        break;
+                                    case DocumentTypeEnum.NotaDébito:
+                                        docToSync.IsSynchronizedWithSigefe = true;
+                                        docToSync.IsSynchronizedWithFEAP = false;
+
+                                        docToSync.StateId = DocumentStateEnum.Devolvido;
+                                        docToSync.ActionDate = DateTime.Now;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.reason));
+
+                                        break;
+                                    default:
+                                        break;
                                 }
-                                else
+                            }
+                            else
+                            {
+                                unitOfWork.DocumentMessages.Add(new DocumentMessage()
                                 {
-                                    docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                    docToSync.ActionDate = DateTime.Now;
-                                }
-
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.msg_fat));
+                                    DocumentId = docToSync.DocumentId,
+                                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                    Date = DateTime.Now,
+                                    MessageCode = setDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
+                                    MessageContent = setDocFaturacaoResponse.messages.FirstOrDefault()?.msg
+                                });
                             }
                         }
 
                         unitOfWork.Documents.Update(docToSync);
-                    }
-
-                    var result = await unitOfWork.SaveChangesAsync();
-
-                    if (result == 0)
-                        throw new DatabaseException("Erro ao atualizar documento na BD.");
-                }
-                else
-                {
-                    var docsToSyncSigefe = await unitOfWork.Documents.GetDocsToSyncSigefe(getFaseResponse.id_ano_letivo_atual);
-
-                    foreach (var docToSync in docsToSyncSigefe)
-                    {
-                        var docToSyncResult = await RequestSetDocFaturacao(docToSync);
-
-                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
-                        {
-                            DocumentId = docToSync.DocumentId,
-                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                            Date = DateTime.Now,
-                            MessageCode = docToSyncResult != null ? docToSyncResult.cod_msg_fat : "500",
-                            MessageContent = docToSyncResult != null ? docToSyncResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
-                        });
-
-                        if (docToSyncResult != null)
-                        {
-                            if (docToSync.TypeId == DocumentTypeEnum.Fatura)
-                            {
-                                docToSync.MEId = docToSyncResult.id_me_fatura;
-
-                                docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
-                                docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
-
-                                if (docToSyncResult.state_id == "35")
-                                {
-                                    docToSync.StateId = DocumentStateEnum.ValidadoConferido;
-                                    docToSync.StateDate = DateTime.Now;
-
-                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
-                                }
-                                else
-                                {
-                                    var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(docToSync.RelatedReferenceNumber,
-                                                                                                    docToSync.SupplierFiscalId,
-                                                                                                    docToSync.SchoolYear,
-                                                                                                    docToSync.TypeId);
-
-                                    if (relatedDocument != null)
-                                    {
-                                        relatedDocument.RelatedDocumentId = docToSync.DocumentId;
-
-                                        var relatedSetDocFaturacaoResult = await RequestSetDocFaturacao(relatedDocument);
-
-                                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
-                                        {
-                                            DocumentId = relatedDocument.DocumentId,
-                                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                                            Date = DateTime.Now,
-                                            MessageCode = relatedSetDocFaturacaoResult != null ? relatedSetDocFaturacaoResult.cod_msg_fat : "500",
-                                            MessageContent = relatedSetDocFaturacaoResult != null ? relatedSetDocFaturacaoResult.msg_fat : "Falha de comunicação. Reenviar pedido mais tarde."
-                                        });
-
-                                        if (relatedSetDocFaturacaoResult != null)
-                                        {
-                                            relatedDocument.MEId = relatedSetDocFaturacaoResult.id_me_fatura;
-
-                                            relatedDocument.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(relatedSetDocFaturacaoResult.id_me_fatura);
-                                            relatedDocument.IsSynchronizedWithFEAP = !relatedDocument.IsSynchronizedWithSigefe;
-
-                                            if (relatedSetDocFaturacaoResult.state_id == "35")
-                                            {
-                                                docToSync.StateId = DocumentStateEnum.Processado;
-                                                docToSync.StateDate = DateTime.Now;
-                                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
-
-                                                relatedDocument.StateId = DocumentStateEnum.Processado;
-                                                relatedDocument.StateDate = DateTime.Now;
-                                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
-                                            }
-                                            else
-                                            {
-                                                relatedDocument.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                                relatedDocument.ActionDate = DateTime.Now;
-
-                                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument, relatedSetDocFaturacaoResult.reason));
-                                            }
-
-                                            unitOfWork.Documents.Update(relatedDocument);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                        docToSync.ActionDate = DateTime.Now;
-
-                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.msg_fat));
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (docToSyncResult.cod_msg_fat != "490")
-                                {
-                                    if (string.IsNullOrEmpty(docToSync.RelatedDocumentId))
-                                    {
-                                        var relatedDocument = await unitOfWork.Documents.GetRelatedDocument(docToSync.RelatedReferenceNumber,
-                                                                                                        docToSync.SupplierFiscalId,
-                                                                                                        docToSync.SchoolYear,
-                                                                                                        docToSync.TypeId);
-
-                                        if (relatedDocument != null)
-                                        {
-                                            docToSync.RelatedDocumentId = relatedDocument.DocumentId;
-                                            docToSync.RelatedDocument = relatedDocument;
-                                        }
-                                    }
-
-                                    docToSync.MEId = docToSyncResult.id_me_fatura;
-
-                                    docToSync.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(docToSyncResult.id_me_fatura);
-                                    docToSync.IsSynchronizedWithFEAP = !docToSync.IsSynchronizedWithSigefe;
-
-                                    if (docToSyncResult.state_id == "35")
-                                    {
-                                        docToSync.StateId = DocumentStateEnum.Processado;
-                                        docToSync.StateDate = DateTime.Now;
-
-                                        docToSync.RelatedDocument.StateId = DocumentStateEnum.Processado;
-                                        docToSync.RelatedDocument.StateDate = DateTime.Now;
-                                        docToSync.RelatedDocument.IsSynchronizedWithFEAP = docToSync.IsSynchronizedWithFEAP;
-
-                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync.RelatedDocument, docToSyncResult.msg_fat));
-                                    }
-                                    else
-                                    {
-                                        docToSync.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
-                                        docToSync.ActionDate = DateTime.Now;
-                                    }
-
-                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.msg_fat));
-                                }
-                            }
-
-                            unitOfWork.Documents.Update(docToSync);
-                        }
 
                         var result = await unitOfWork.SaveChangesAsync();
 
                         if (result == 0)
                             throw new DatabaseException("Erro ao atualizar documento na BD.");
                     }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"{docToSync.DocumentId} - {ex.GetBaseException().Message}");
+                    }
                 }
+
+                if (errors.Count != 0)
+                    throw new SyncronizationException(errors.ToArray());
             }
         }
 
-        public async Task<PaginatedResult<string>> GetPaidDocsToSync(PaginatedSearchFilter filters)
+        public async Task<int> GetTotalPaidDocsToSync()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
@@ -719,17 +559,11 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 var documentIds = GetDocFaturacaoResponse.documentos.Select(x => x.id_doc_feap).ToArray();
 
-                return new PaginatedResult<string>()
-                {
-                    PageIndex = filters.PageIndex,
-                    PageSize = filters.PageSize,
-                    TotalCount = await unitOfWork.Documents.GetPaidDocsToSyncCount(documentIds),
-                    Data = await unitOfWork.Documents.GetPaginatedPaidDocsToSync(documentIds, filters)
-                };
+                return await unitOfWork.Documents.GetPaidDocsToSyncCount(documentIds);
             }
         }
 
-        public async Task SyncPaidDocuments(string documentId = null)
+        public async Task SyncPaidDocuments()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
@@ -738,83 +572,226 @@ namespace EspapMiddleware.ServiceLayer.Services
                 if (GetDocFaturacaoResponse == null)
                     throw new WebserviceException("Erro na chamada ao serviço de Faturação do SIGeFE.");
 
-                if (documentId != null)
+                var errors = new List<string>();
+
+                var documentIds = GetDocFaturacaoResponse.documentos.Select(x => x.id_doc_feap).ToArray();
+
+                var paidDocsToSync = await unitOfWork.Documents.GetPaidDocsToSync(documentIds);
+
+                foreach (var document in paidDocsToSync)
                 {
-                    if (!GetDocFaturacaoResponse.documentos.Any(x => x.id_doc_feap == documentId))
-                        throw new Exception("Documento não contemplado na lista de faturas pagas do SIGeFE.");
-
-                    var docToSync = await unitOfWork.Documents.Find(x => x.DocumentId == documentId
-                                                            && x.StateId != DocumentStateEnum.EmitidoPagamento);
-
-                    if (docToSync != null)
+                    try
                     {
-                        var setDocumentRquestLog = await RequestSetDocumentPaid(docToSync);
+                        document.StateId = DocumentStateEnum.EmitidoPagamento;
+                        document.StateDate = DateTime.Now;
+                        document.IsSynchronizedWithFEAP = false;
 
-                        unitOfWork.RequestLogs.Add(setDocumentRquestLog);
+                        unitOfWork.Documents.Update(document);
 
-                        if (setDocumentRquestLog.Successful)
-                        {
-                            docToSync.StateId = DocumentStateEnum.EmitidoPagamento;
-                            docToSync.StateDate = DateTime.Now;
-                            docToSync.IsSynchronizedWithFEAP = false;
+                        var setDocumentRequestLog = await RequestSetDocument(document);
 
-                            unitOfWork.Documents.Update(docToSync);
-                        }
+                        unitOfWork.RequestLogs.Add(setDocumentRequestLog);
 
                         await unitOfWork.SaveChangesAsync();
 
-                        if (!setDocumentRquestLog.Successful)
+                        if (!setDocumentRequestLog.Successful)
                         {
                             throw new Exception("Falha de comunicação com FEAP.");
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        throw new Exception("Documento já sincronizado com FE-AP.");
+                        errors.Add($"{document.DocumentId} - {ex.GetBaseException().Message}");
                     }
                 }
-                else
+
+                if (errors.Count != 0)
+                    throw new SyncronizationException(errors.ToArray());
+            }
+        }
+
+        public async Task<int> GetTotalCreditNotesToReprocess()
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
+
+                return await unitOfWork.Documents.GetCreditNotesToReprocessCount(getFaseResponse.id_ano_letivo_atual);
+            }
+        }
+
+        public async Task ReprocessCreditNotes()
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
+
+                if (getFaseResponse == null)
+                    throw new Exception("Ano letivo não disponível.");
+
+                var docsToReprocess = await unitOfWork.Documents.GetCreditNotesToReprocess(getFaseResponse.id_ano_letivo_atual);
+
+                var errors = new List<string>();
+
+                foreach (var docToReprocess in docsToReprocess)
                 {
-                    var errors = new List<string>();
-
-                    var documentIds = GetDocFaturacaoResponse.documentos.Select(x => x.id_doc_feap).ToArray();
-
-                    var paidDocsToSync = await unitOfWork.Documents.GetPaidDocsToSync(documentIds);
-
-                    foreach (var document in paidDocsToSync)
+                    try
                     {
-                        try
+                        var setDocFaturacaoResponse = await RequestSetDocFaturacao(docToReprocess);
+
+                        //FALHA DE COMUNICAÇÃO
+                        if (setDocFaturacaoResponse == null)
                         {
-                            var setDocumentRquestLog = await RequestSetDocumentPaid(document);
-
-                            unitOfWork.RequestLogs.Add(setDocumentRquestLog);
-
-                            if (setDocumentRquestLog.Successful)
+                            unitOfWork.DocumentMessages.Add(new DocumentMessage()
                             {
-                                document.StateId = DocumentStateEnum.EmitidoPagamento;
-                                document.StateDate = DateTime.Now;
-                                document.IsSynchronizedWithFEAP = false;
+                                DocumentId = docToReprocess.DocumentId,
+                                MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                Date = DateTime.Now,
+                                MessageCode = "500",
+                                MessageContent = "Falha de comunicação. Reenviar pedido mais tarde."
+                            });
+                        }
+                        else
+                        {
+                            //CHAMADA WEBSERVICE BEM SUCEDIDA
+                            if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "200"))
+                            {
+                                var docToReprocessResult = setDocFaturacaoResponse.faturas.FirstOrDefault();
+
+                                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                                {
+                                    DocumentId = docToReprocess.DocumentId,
+                                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                    Date = DateTime.Now,
+                                    MessageCode = docToReprocessResult.cod_msg_fat,
+                                    MessageContent = docToReprocessResult.msg_fat
+                                });
+
+                                docToReprocess.MEId = docToReprocessResult.id_me_fatura;
+
+                                if (!string.IsNullOrEmpty(docToReprocessResult.num_compromisso))
+                                    docToReprocess.CompromiseNumber = docToReprocessResult.num_compromisso;
+
+                                docToReprocess.IsSynchronizedWithSigefe = true;
+                                docToReprocess.IsSynchronizedWithFEAP = false;
 
 
-                                unitOfWork.Documents.Update(document);
+                                if (docToReprocessResult.cod_msg_fat == "490")
+                                {
+                                    docToReprocess.StateId = DocumentStateEnum.Devolvido;
+                                    docToReprocess.ActionDate = DateTime.Now;
+
+                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(docToReprocess, docToReprocessResult.msg_fat));
+                                }
+                                else
+                                {
+                                    docToReprocess.RelatedReferenceNumber = docToReprocessResult.num_doc_rel;
+                                    docToReprocess.RelatedDocumentId = docToReprocessResult.id_doc_feap_rel;
+
+                                    if (docToReprocessResult.state_id == "35")
+                                    {
+                                        docToReprocess.StateId = DocumentStateEnum.Processado;
+                                        docToReprocess.StateDate = DateTime.Now;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToReprocess));
+
+                                        var relatedDocumentToupdate = await unitOfWork.Documents.Find(x => x.DocumentId == docToReprocess.RelatedDocumentId);
+
+                                        if (relatedDocumentToupdate != null)
+                                        {
+                                            relatedDocumentToupdate.StateId = DocumentStateEnum.Processado;
+                                            relatedDocumentToupdate.StateDate = DateTime.Now;
+                                            relatedDocumentToupdate.IsSynchronizedWithFEAP = false;
+
+                                            unitOfWork.Documents.Update(relatedDocumentToupdate);
+
+                                            unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocumentToupdate));
+                                        }
+                                    }
+                                    else if (docToReprocessResult.state_id == "22")
+                                    {
+                                        docToReprocess.StateId = DocumentStateEnum.Devolvido;
+                                        docToReprocess.ActionDate = DateTime.Now;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToReprocess, docToReprocessResult.reason));
+                                    }
+                                }
                             }
-
-                            await unitOfWork.SaveChangesAsync();
-
-                            if (!setDocumentRquestLog.Successful)
+                            else
                             {
-                                throw new Exception("Falha de comunicação com FEAP.");
+                                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                                {
+                                    DocumentId = docToReprocess.DocumentId,
+                                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                    Date = DateTime.Now,
+                                    MessageCode = setDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
+                                    MessageContent = setDocFaturacaoResponse.messages.FirstOrDefault()?.msg
+                                });
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            errors.Add($"{document.DocumentId} - {ex.GetBaseException().Message}");
-                        }
+
+                        unitOfWork.Documents.Update(docToReprocess);
+
+                        var result = await unitOfWork.SaveChangesAsync();
+
+                        if (result == 0)
+                            throw new DatabaseException("Erro ao atualizar documento na BD.");
                     }
-
-                    if (errors.Count != 0)
-                        throw new SyncronizationException(errors.ToArray());
+                    catch (Exception ex)
+                    {
+                        errors.Add($"{docToReprocess.DocumentId} - {ex.GetBaseException().Message}");
+                    }
                 }
+
+                if (errors.Count != 0)
+                    throw new SyncronizationException(errors.ToArray());
+            }
+        }
+
+        public async Task ReturnDebitNotes()
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
+
+                if (getFaseResponse == null)
+                    throw new Exception("Ano letivo não disponível.");
+
+                var debitNotesToReturn = await unitOfWork.Documents.GetFiltered(x => x.SchoolYear == getFaseResponse.id_ano_letivo_atual
+                                                                            && x.StateId == DocumentStateEnum.Iniciado
+                                                                            && x.TypeId == DocumentTypeEnum.NotaDébito);
+                
+                var errors = new List<string>();
+
+                foreach (var debitNoteToReturn in debitNotesToReturn)
+                {
+                    try
+                    {
+                        debitNoteToReturn.StateId = DocumentStateEnum.Devolvido;
+                        debitNoteToReturn.StateDate = DateTime.Now;
+
+                        debitNoteToReturn.IsSynchronizedWithSigefe = true;
+                        debitNoteToReturn.IsSynchronizedWithFEAP = false;
+
+                        var setDocumentRequestLog = await RequestSetDocument(debitNoteToReturn, "Documentos do tipo Nota de Débito não são compativeis com o programa MEGA.");
+                        
+                        unitOfWork.RequestLogs.Add(setDocumentRequestLog);
+
+                        unitOfWork.Documents.Update(debitNoteToReturn);
+
+                        var result = await unitOfWork.SaveChangesAsync();
+
+                        if (!setDocumentRequestLog.Successful)
+                            throw new Exception("Falha de comunicação com FEAP.");
+                    }
+                    catch (Exception ex)
+                    {
+                        errors.Add($"{debitNoteToReturn.DocumentId} - {ex.GetBaseException().Message}");
+                    }
+                }
+
+                if (errors.Count != 0)
+                    throw new SyncronizationException(errors.ToArray());
             }
         }
 
@@ -840,81 +817,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                 headers.Add("id_doc_feap", id_doc_feap);
 
             return await _genericRestRequestManager.Get<GetDocFaturacaoResponse>("getDocFaturacao", headers);
-        }
-
-        private async Task<RequestLog> RequestSetDocumentPaid(Document document)
-        {
-            var uniqueId = Guid.NewGuid();
-
-            try
-            {
-                using (var client = new FEAPServices_PP.FEAPServicesClient())
-                {
-                    client.Endpoint.Behaviors.Add(new EndpointBehavior(uniqueId.ToString()));
-
-                    var feapCredencials = (NameValueCollection)ConfigurationManager.GetSection("FEAPCredencials");
-
-                    client.ClientCredentials.UserName.UserName = feapCredencials["username"];
-                    client.ClientCredentials.UserName.Password = feapCredencials["password"];
-
-                    var serviceContextHeader = new FEAPServices_PP.ServiceContextHeader()
-                    {
-                        Application = "FaturacaoEletronica",
-                        ProcessId = document.DocumentId,
-                    };
-
-                    var setDocumentRequest = new FEAPServices_PP.SetDocumentRequest()
-                    {
-                        uniqueId = uniqueId.ToString(),
-                        documentId = document.DocumentId,
-                    };
-
-                    setDocumentRequest.stateIdSpecified = true;
-                    setDocumentRequest.stateId = (int)DocumentStateEnum.EmitidoPagamento;
-
-                    setDocumentRequest.paymentIssuedReference = document.MEId;
-                    setDocumentRequest.paymentIssuedReferenceSpecified1 = true;
-                    setDocumentRequest.paymentIssuedReferenceSpecified1Specified = true;
-
-                    setDocumentRequest.paymentIssuedDate = document.IssueDate;
-                    setDocumentRequest.paymentIssuedDateSpecified = true;
-                    setDocumentRequest.paymentIssuedDateSpecified1 = true;
-                    setDocumentRequest.paymentIssuedDateSpecified1Specified = true;
-
-                    setDocumentRequest.paymentReference = document.ReferenceNumber;
-                    setDocumentRequest.paymentReferenceSpecified1 = true;
-                    setDocumentRequest.paymentReferenceSpecified1Specified = true;
-
-                    await client.SetDocumentAsync(serviceContextHeader, setDocumentRequest);
-
-                    return new RequestLog()
-                    {
-                        UniqueId = uniqueId,
-                        RequestLogTypeId = RequestLogTypeEnum.SetDocument,
-                        DocumentId = document.DocumentId,
-                        SupplierFiscalId = document.SupplierFiscalId,
-                        ReferenceNumber = document.ReferenceNumber,
-                        Date = DateTime.Now,
-                        Successful = true
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                return new RequestLog()
-                {
-                    UniqueId = uniqueId,
-                    RequestLogTypeId = RequestLogTypeEnum.SetDocument,
-                    DocumentId = document.DocumentId,
-                    Date = DateTime.Now,
-                    SupplierFiscalId = document.SupplierFiscalId,
-                    ReferenceNumber = document.ReferenceNumber,
-                    Successful = false,
-                    ExceptionType = ex.GetBaseException().GetType().Name,
-                    ExceptionStackTrace = ex.GetBaseException().StackTrace,
-                    ExceptionMessage = ex.GetBaseException().Message
-                };
-            }
         }
 
         private async Task<RequestLog> RequestSetDocument(Document document, string reason = null)
@@ -944,19 +846,49 @@ namespace EspapMiddleware.ServiceLayer.Services
                         documentId = document.DocumentId,
                     };
 
-                    if (document.StateId == DocumentStateEnum.ValidadoConferido || document.StateId == DocumentStateEnum.Processado || document.StateId == DocumentStateEnum.Devolvido)
+                    switch (document.StateId)
                     {
-                        setDocumentRequest.documentNumbersSpecified1Specified = true;
-                        setDocumentRequest.documentNumbersSpecified1 = true;
-                        setDocumentRequest.documentNumbers = new string[] { document.MEId };
-                        setDocumentRequest.stateIdSpecified = true;
-                        setDocumentRequest.stateId = (int)document.StateId;
+                        case DocumentStateEnum.Iniciado:
+                            if (document.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
+                            {
+                                setDocumentRequest.actionIdSpecified = true;
+                                setDocumentRequest.actionId = (int)document.ActionId;
+                                setDocumentRequest.regularizationSpecified = true;
 
-                        if (document.StateId == DocumentStateEnum.Devolvido)
-                            setDocumentRequest.reason = reason;
+                                switch (document.TypeId)
+                                {
+                                    case DocumentTypeEnum.Fatura:
+                                        setDocumentRequest.regularization = 2;
+                                        break;
+                                    case DocumentTypeEnum.NotaCrédito:
+                                        setDocumentRequest.regularization = 3;
+                                        break;
+                                    case DocumentTypeEnum.NotaDébito:
+                                        setDocumentRequest.regularization = 2;
+                                        break;
+                                    default:
+                                        break;
+                                }
 
-                        if (document.StateId == DocumentStateEnum.Processado)
-                        {
+                                setDocumentRequest.reason = reason;
+                            }
+                            break;
+                        case DocumentStateEnum.ValidadoConferido:
+                            setDocumentRequest.stateIdSpecified = true;
+                            setDocumentRequest.stateId = (int)document.StateId;
+
+                            setDocumentRequest.documentNumbersSpecified1Specified = true;
+                            setDocumentRequest.documentNumbersSpecified1 = true;
+                            setDocumentRequest.documentNumbers = new string[] { document.MEId };
+                            break;
+                        case DocumentStateEnum.Processado:
+                            setDocumentRequest.stateIdSpecified = true;
+                            setDocumentRequest.stateId = (int)document.StateId;
+
+                            setDocumentRequest.documentNumbersSpecified1Specified = true;
+                            setDocumentRequest.documentNumbersSpecified1 = true;
+                            setDocumentRequest.documentNumbers = new string[] { document.MEId };
+
                             setDocumentRequest.commitmentSpecified1Specified = true;
                             setDocumentRequest.commitmentSpecified1 = true;
                             setDocumentRequest.commitment = !string.IsNullOrEmpty(document.CompromiseNumber) ? document.CompromiseNumber : "N/A";
@@ -965,48 +897,32 @@ namespace EspapMiddleware.ServiceLayer.Services
                             setDocumentRequest.postingDateSpecified1 = true;
                             setDocumentRequest.postingDateSpecified = true;
                             setDocumentRequest.postingDate = DateTime.Now;
-                        }
-                    }
-                    else if (document.StateId == DocumentStateEnum.EmitidoPagamento)
-                    {
-                        setDocumentRequest.stateIdSpecified = true;
-                        setDocumentRequest.stateId = (int)DocumentStateEnum.EmitidoPagamento;
+                            break;
+                        case DocumentStateEnum.EmitidoPagamento:
+                            setDocumentRequest.stateIdSpecified = true;
+                            setDocumentRequest.stateId = (int)document.StateId;
 
-                        setDocumentRequest.paymentIssuedReference = document.MEId;
-                        setDocumentRequest.paymentIssuedReferenceSpecified1 = true;
-                        setDocumentRequest.paymentIssuedReferenceSpecified1Specified = true;
+                            setDocumentRequest.paymentIssuedReference = document.MEId;
+                            setDocumentRequest.paymentIssuedReferenceSpecified1 = true;
+                            setDocumentRequest.paymentIssuedReferenceSpecified1Specified = true;
 
-                        setDocumentRequest.paymentIssuedDate = document.IssueDate;
-                        setDocumentRequest.paymentIssuedDateSpecified = true;
-                        setDocumentRequest.paymentIssuedDateSpecified1 = true;
-                        setDocumentRequest.paymentIssuedDateSpecified1Specified = true;
+                            setDocumentRequest.paymentIssuedDate = document.IssueDate;
+                            setDocumentRequest.paymentIssuedDateSpecified = true;
+                            setDocumentRequest.paymentIssuedDateSpecified1 = true;
+                            setDocumentRequest.paymentIssuedDateSpecified1Specified = true;
 
-                        setDocumentRequest.paymentReference = document.ReferenceNumber;
-                        setDocumentRequest.paymentReferenceSpecified1 = true;
-                        setDocumentRequest.paymentReferenceSpecified1Specified = true;
-                    }
-                    else if (document.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
-                    {
-                        setDocumentRequest.actionIdSpecified = true;
-                        setDocumentRequest.actionId = (int)document.ActionId;
-                        setDocumentRequest.regularizationSpecified = true;
+                            setDocumentRequest.paymentReference = document.ReferenceNumber;
+                            setDocumentRequest.paymentReferenceSpecified1 = true;
+                            setDocumentRequest.paymentReferenceSpecified1Specified = true;
+                            break;
+                        case DocumentStateEnum.Devolvido:
+                            setDocumentRequest.stateIdSpecified = true;
+                            setDocumentRequest.stateId = (int)document.StateId;
 
-                        switch (document.TypeId)
-                        {
-                            case DocumentTypeEnum.Fatura:
-                                setDocumentRequest.regularization = 2;
-                                break;
-                            case DocumentTypeEnum.NotaCrédito:
-                                setDocumentRequest.regularization = 3;
-                                break;
-                            case DocumentTypeEnum.NotaDébito:
-                                setDocumentRequest.regularization = 2;
-                                break;
-                            default:
-                                break;
-                        }
-
-                        setDocumentRequest.reason = reason;
+                            setDocumentRequest.reason = reason;
+                            break;
+                        default:
+                            break;
                     }
 
                     await client.SetDocumentAsync(serviceContextHeader, setDocumentRequest);
@@ -1041,7 +957,7 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
-        private async Task<SetDocFaturacaoResponse.fatura> RequestSetDocFaturacao(Document document)
+        private async Task<SetDocFaturacaoResponse> RequestSetDocFaturacao(Document document)
         {
             var setDocFaturacaoObj = new SetDocFaturacao();
 
@@ -1049,17 +965,7 @@ namespace EspapMiddleware.ServiceLayer.Services
 
             var setDocFaturacaoResult = await _genericRestRequestManager.Post<SetDocFaturacaoResponse, SetDocFaturacao>("setDocFaturacao", setDocFaturacaoObj);
 
-            if (setDocFaturacaoResult == null)
-                return null;
-
-            if (setDocFaturacaoResult.messages.Any(x => x.cod_msg == "200"))
-            {
-                return setDocFaturacaoResult.faturas.FirstOrDefault();
-            }
-            else
-            {
-                throw new WebserviceException(setDocFaturacaoResult.messages.Select(x => x.msg).ToArray());
-            }
+            return setDocFaturacaoResult;
         }
 
         private void FillWithContract(in Document document, ref SetDocFaturacao obj)

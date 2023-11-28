@@ -41,7 +41,7 @@ namespace EspapMiddleware.WcfService
                 }
                 else
                 {
-                    _service.AddDocument(request.SendDocumentMCIn).GetAwaiter().GetResult();
+                    _service.AddDocumentV2(request.SendDocumentMCIn).GetAwaiter().GetResult();
                 }
             }
             catch (Exception ex)

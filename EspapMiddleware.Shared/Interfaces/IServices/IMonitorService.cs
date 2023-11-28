@@ -18,7 +18,6 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 
         #endregion
 
-
         #region Documents
 
         Task<PaginatedResult<Document>> DocumentSearch(DocumentSearchFilters filters);
@@ -34,12 +33,17 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 
         #region Homepage
 
-        Task<(int totalDocuments, int totalDocumentsNotSyncFeap, int totalValidDocuments, int totalValidDocumentsNotSyncFeap, int totalInvalidDocuments, int totalInvalidDocumentsNotSyncFeap, int totalInvalidDocumentsRectified, int totalInvalidDocumentsRectifiedNotSyncFeap, int totalPaidDocuments, int totalPaidDocumentsNotSyncFeap)> GetGlobalStatus(string anoLetivo);
-        Task SyncAllDocumentsFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null);
+        Task<string> GetCurrentSchoolYear();
+        Task<int> GetTotalDocument(string anoLetivo, bool? isSynchronizedWithFEAP = null);
+        Task<int> GetTotalDocumentsByType(string anoLetivo, DocumentTypeEnum typeId, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null);
+        Task SyncAllDocumentsFeap(string anoLetivo);
         Task<PaginatedResult<Document>> GetDocsToSyncSigefe(PaginatedSearchFilter filters);
         Task SyncDocumentsSigefe(string documentId = null);
-        Task<PaginatedResult<string>> GetPaidDocsToSync(PaginatedSearchFilter filters);
-        Task SyncPaidDocuments(string documentId = null);
+        Task<int> GetTotalPaidDocsToSync();
+        Task SyncPaidDocuments();
+        Task<int> GetTotalCreditNotesToReprocess();
+        Task ReprocessCreditNotes();
+        Task ReturnDebitNotes();
 
         #endregion
     }

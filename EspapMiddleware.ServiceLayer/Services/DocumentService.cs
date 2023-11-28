@@ -61,6 +61,165 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
+        public async Task AddDocumentV2(SendDocumentContract contract)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                if (await unitOfWork.Documents.Any(x => x.DocumentId == contract.documentId))
+                    throw new DatabaseException("Documento já inserido na BD. Ativar flag \"isUpdate\" para atualizar.");
+
+                contract.SchoolYear = _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
+
+                var documentToInsert = new Document();
+
+                FillWithContract(in contract, ref documentToInsert);
+
+                var setDocFaturacaoResponse = await RequestSetDocFaturacao(documentToInsert);
+
+                //FALHA DE COMUNICAÇÃO
+                if (setDocFaturacaoResponse == null)
+                {
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = contract.documentId,
+                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                        Date = DateTime.Now,
+                        MessageCode = "500",
+                        MessageContent = "Falha de comunicação. Reenviar pedido mais tarde."
+                    });
+                }
+                else
+                {
+                    //CHAMADA WEBSERVICE BEM SUCEDIDA
+                    if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "200"))
+                    {
+                        var documentToInsertResult = setDocFaturacaoResponse.faturas.FirstOrDefault();
+
+                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                        {
+                            DocumentId = contract.documentId,
+                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                            Date = DateTime.Now,
+                            MessageCode = documentToInsertResult.cod_msg_fat,
+                            MessageContent = documentToInsertResult.msg_fat
+                        });
+
+                        documentToInsert.MEId = documentToInsertResult.id_me_fatura;
+
+                        if (!string.IsNullOrEmpty(documentToInsertResult.num_compromisso))
+                            documentToInsert.CompromiseNumber = documentToInsertResult.num_compromisso;
+
+                        documentToInsert.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(documentToInsertResult.id_me_fatura);
+                        documentToInsert.IsSynchronizedWithFEAP = !documentToInsert.IsSynchronizedWithSigefe;
+
+                        switch (documentToInsert.TypeId)
+                        {
+                            case DocumentTypeEnum.Fatura:
+                                if (documentToInsertResult.state_id == "35")
+                                {
+                                    documentToInsert.StateId = DocumentStateEnum.ValidadoConferido;
+                                    documentToInsert.StateDate = DateTime.Now;
+
+                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
+                                }
+                                else if (documentToInsertResult.state_id == "22")
+                                {
+                                    documentToInsert.ActionId = DocumentActionEnum.SolicitaçãoDocumentoRegularização;
+                                    documentToInsert.ActionDate = DateTime.Now;
+
+                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
+                                }
+
+                                break;
+                            case DocumentTypeEnum.NotaCrédito:
+                                if (documentToInsertResult.cod_msg_fat != "490")
+                                {
+                                    documentToInsert.RelatedReferenceNumber = documentToInsertResult.num_doc_rel;
+                                    documentToInsert.RelatedDocumentId = documentToInsertResult.id_doc_feap_rel;
+
+                                    if (documentToInsertResult.state_id == "35")
+                                    {
+                                        documentToInsert.StateId = DocumentStateEnum.Processado;
+                                        documentToInsert.StateDate = DateTime.Now;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert));
+
+                                        var relatedDocumentToUpdate = await unitOfWork.Documents.Find(x => x.DocumentId == documentToInsert.RelatedDocumentId);
+
+                                        if (relatedDocumentToUpdate != null)
+                                        {
+                                            relatedDocumentToUpdate.StateId = DocumentStateEnum.Processado;
+                                            relatedDocumentToUpdate.StateDate = DateTime.Now;
+                                            relatedDocumentToUpdate.IsSynchronizedWithFEAP = false;
+
+                                            unitOfWork.Documents.Update(relatedDocumentToUpdate);
+
+                                            unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocumentToUpdate));
+                                        }
+                                    }
+                                    else if (documentToInsertResult.state_id == "22")
+                                    {
+                                        documentToInsert.StateId = DocumentStateEnum.Devolvido;
+                                        documentToInsert.ActionDate = DateTime.Now;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
+                                    }
+                                }
+
+                                break;
+                            case DocumentTypeEnum.NotaDébito:
+                                documentToInsert.IsSynchronizedWithSigefe = true;
+                                documentToInsert.IsSynchronizedWithFEAP = false;
+                                
+                                documentToInsert.StateId = DocumentStateEnum.Devolvido;
+                                documentToInsert.ActionDate = DateTime.Now;
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(documentToInsert, documentToInsertResult.reason));
+
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        //VALIDAÇÃO DE NIF FORNECEDOR
+                        if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422"))
+                            throw new WebserviceException(setDocFaturacaoResponse.messages.Select(x => x.msg).ToArray());
+
+                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                        {
+                            DocumentId = contract.documentId,
+                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                            Date = DateTime.Now,
+                            MessageCode = setDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
+                            MessageContent = setDocFaturacaoResponse.messages.FirstOrDefault()?.msg
+                        });
+                    }
+                }
+
+                unitOfWork.Documents.Add(documentToInsert);
+
+                unitOfWork.RequestLogs.Add(new RequestLog()
+                {
+                    UniqueId = contract.uniqueId,
+                    RequestLogTypeId = RequestLogTypeEnum.SendDocument,
+                    DocumentId = contract.documentId,
+                    SupplierFiscalId = contract.supplierFiscalId,
+                    ReferenceNumber = contract.referenceNumber,
+                    Successful = true,
+                    Date = DateTime.Now
+                });
+
+                var result = await unitOfWork.SaveChangesAsync();
+
+                if (result == 0)
+                {
+                    throw new DatabaseException("Erro ao adicionar Documento na BD.");
+                }
+            }
+        }
+
         public async Task AddDocument(SendDocumentContract contract)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
@@ -352,7 +511,17 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 documentToUpdate.IsSynchronizedWithFEAP = contract.isASuccess;
 
-                if (contract.messages?.Length > 0)
+                if (contract.isASuccess)
+                {
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = contract.documentId,
+                        MessageTypeId = DocumentMessageTypeEnum.FEAP,
+                        Date = DateTime.Now,
+                        MessageContent = "Documento atualizado com sucesso."
+                    });
+                }
+                else
                 {
                     foreach (var message in contract.messages)
                     {
@@ -365,16 +534,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                             MessageContent = message.description
                         });
                     }
-                }
-                else if (contract.isASuccess)
-                {
-                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
-                    {
-                        DocumentId = contract.documentId,
-                        MessageTypeId = DocumentMessageTypeEnum.FEAP,
-                        Date = DateTime.Now,
-                        MessageContent = "Documento atualizado com sucesso."
-                    });
                 }
 
                 unitOfWork.Documents.Update(documentToUpdate);
@@ -439,16 +598,49 @@ namespace EspapMiddleware.ServiceLayer.Services
                         documentId = document.DocumentId,
                     };
 
-                    if (document.StateId == DocumentStateEnum.ValidadoConferido || document.StateId == DocumentStateEnum.Processado)
+                    switch (document.StateId)
                     {
-                        setDocumentRequest.documentNumbersSpecified1Specified = true;
-                        setDocumentRequest.documentNumbersSpecified1 = true;
-                        setDocumentRequest.documentNumbers = new string[] { document.MEId };
-                        setDocumentRequest.stateIdSpecified = true;
-                        setDocumentRequest.stateId = (int)document.StateId;
+                        case DocumentStateEnum.Iniciado:
+                            if (document.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
+                            {
+                                setDocumentRequest.actionIdSpecified = true;
+                                setDocumentRequest.actionId = (int)document.ActionId;
+                                setDocumentRequest.regularizationSpecified = true;
 
-                        if (document.StateId == DocumentStateEnum.Processado)
-                        {
+                                switch (document.TypeId)
+                                {
+                                    case DocumentTypeEnum.Fatura:
+                                        setDocumentRequest.regularization = 2;
+                                        break;
+                                    case DocumentTypeEnum.NotaCrédito:
+                                        setDocumentRequest.regularization = 3;
+                                        break;
+                                    case DocumentTypeEnum.NotaDébito:
+                                        setDocumentRequest.regularization = 2;
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                setDocumentRequest.reason = reason;
+                            }
+                            break;
+                        case DocumentStateEnum.ValidadoConferido:
+                            setDocumentRequest.stateIdSpecified = true;
+                            setDocumentRequest.stateId = (int)document.StateId;
+
+                            setDocumentRequest.documentNumbersSpecified1Specified = true;
+                            setDocumentRequest.documentNumbersSpecified1 = true;
+                            setDocumentRequest.documentNumbers = new string[] { document.MEId };
+                            break;
+                        case DocumentStateEnum.Processado:
+                            setDocumentRequest.stateIdSpecified = true;
+                            setDocumentRequest.stateId = (int)document.StateId;
+
+                            setDocumentRequest.documentNumbersSpecified1Specified = true;
+                            setDocumentRequest.documentNumbersSpecified1 = true;
+                            setDocumentRequest.documentNumbers = new string[] { document.MEId };
+
                             setDocumentRequest.commitmentSpecified1Specified = true;
                             setDocumentRequest.commitmentSpecified1 = true;
                             setDocumentRequest.commitment = !string.IsNullOrEmpty(document.CompromiseNumber) ? document.CompromiseNumber : "N/A";
@@ -457,30 +649,32 @@ namespace EspapMiddleware.ServiceLayer.Services
                             setDocumentRequest.postingDateSpecified1 = true;
                             setDocumentRequest.postingDateSpecified = true;
                             setDocumentRequest.postingDate = DateTime.Now;
-                        }
-                    }
-                    else if (document.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
-                    {
-                        setDocumentRequest.actionIdSpecified = true;
-                        setDocumentRequest.actionId = (int)document.ActionId;
-                        setDocumentRequest.regularizationSpecified = true;
+                            break;
+                        case DocumentStateEnum.EmitidoPagamento:
+                            setDocumentRequest.stateIdSpecified = true;
+                            setDocumentRequest.stateId = (int)document.StateId;
 
-                        switch (document.TypeId)
-                        {
-                            case DocumentTypeEnum.Fatura:
-                                setDocumentRequest.regularization = 2;
-                                break;
-                            case DocumentTypeEnum.NotaCrédito:
-                                setDocumentRequest.regularization = 3;
-                                break;
-                            case DocumentTypeEnum.NotaDébito:
-                                setDocumentRequest.regularization = 2;
-                                break;
-                            default:
-                                break;
-                        }
+                            setDocumentRequest.paymentIssuedReference = document.MEId;
+                            setDocumentRequest.paymentIssuedReferenceSpecified1 = true;
+                            setDocumentRequest.paymentIssuedReferenceSpecified1Specified = true;
 
-                        setDocumentRequest.reason = reason;
+                            setDocumentRequest.paymentIssuedDate = document.IssueDate;
+                            setDocumentRequest.paymentIssuedDateSpecified = true;
+                            setDocumentRequest.paymentIssuedDateSpecified1 = true;
+                            setDocumentRequest.paymentIssuedDateSpecified1Specified = true;
+
+                            setDocumentRequest.paymentReference = document.ReferenceNumber;
+                            setDocumentRequest.paymentReferenceSpecified1 = true;
+                            setDocumentRequest.paymentReferenceSpecified1Specified = true;
+                            break;
+                        case DocumentStateEnum.Devolvido:
+                            setDocumentRequest.stateIdSpecified = true;
+                            setDocumentRequest.stateId = (int)document.StateId;
+
+                            setDocumentRequest.reason = reason;
+                            break;
+                        default:
+                            break;
                     }
 
                     await client.SetDocumentAsync(serviceContextHeader, setDocumentRequest);

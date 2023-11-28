@@ -30,7 +30,8 @@ namespace EspapMiddleware.SVFMonitor.Controllers
 
             var model = new HomepageViewModel
             {
-                SchoolYears = anosLetivos.ToArray()
+                SchoolYears = anosLetivos.ToArray(),
+                CurrentSchoolYear = await _monitorServices.GetCurrentSchoolYear()
             };
 
             return View(model);
@@ -43,36 +44,49 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         [HttpPost]
         public async Task<PartialViewResult> GetGlobalStatus(string anoLetivo)
         {
-            var statistics = await _monitorServices.GetGlobalStatus(anoLetivo);
-
             var model = new HomepageStatusPartialViewModel
             {
-                TotalDocuments = statistics.totalDocuments,
-                TotalDocumentsNotSyncFeap = statistics.totalDocumentsNotSyncFeap,
-                TotalValidDocuments = statistics.totalValidDocuments,
-                TotalValidDocumentsNotSyncFeap = statistics.totalValidDocumentsNotSyncFeap,
-                TotalInvalidDocuments = statistics.totalInvalidDocuments,
-                TotalInvalidDocumentsNotSyncFeap = statistics.totalInvalidDocumentsNotSyncFeap,
-                TotalInvalidDocumentsRectified = statistics.totalInvalidDocumentsRectified,
-                TotalInvalidDocumentsRectifiedNotSyncFeap = statistics.totalInvalidDocumentsRectifiedNotSyncFeap,
-                TotalPaidDocuments = statistics.totalPaidDocuments,
-                TotalPaidDocumentsNotSyncFeap = statistics.totalPaidDocumentsNotSyncFeap
+                Total = await _monitorServices.GetTotalDocument(anoLetivo),
+                TotalNotSyncFeap = await _monitorServices.GetTotalDocument(anoLetivo, false),
+                IsCurrentSchoolYear = await _monitorServices.GetCurrentSchoolYear() == anoLetivo,
+                InvoiceStatus = new HomepageStatusPartialViewModel.InvoiceStatusObject
+                {
+                    Total = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura),
+                    Validated = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.ValidadoConferido),
+                    ValidatedToSync = await _monitorServices.GetTotalPaidDocsToSync(),
+                    Paid = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.EmitidoPagamento),
+                    PendingRegularization = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Iniciado, DocumentActionEnum.SolicitaçãoDocumentoRegularização),
+                    Regularized = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Processado)
+                },
+                CreditNoteStatus = new HomepageStatusPartialViewModel.CreditNoteStatusObject
+                {
+                    Total = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito),
+                    Unprocessed = await _monitorServices.GetTotalCreditNotesToReprocess(),
+                    Processed = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito, DocumentStateEnum.Processado),
+                    Returned = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito, DocumentStateEnum.Devolvido)
+                },
+                DebitNoteStatus = new HomepageStatusPartialViewModel.DebitNoteStatusObject
+                {
+                    Total = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaDébito),
+                    Unprocessed = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaDébito, DocumentStateEnum.Iniciado),
+                    Returned = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaDébito, DocumentStateEnum.Devolvido)
+                }
             };
 
             return PartialView("_homepageStatusPartial", model);
         }
 
         [HttpPost]
-        public async Task<JsonResult> SyncDocuments(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null)
+        public async Task<JsonResult> SyncAllDocumentsFeap(string anoLetivo)
         {
             try
             {
-                await _monitorServices.SyncAllDocumentsFeap(anoLetivo, stateId, actionId);
+                await _monitorServices.SyncAllDocumentsFeap(anoLetivo);
 
                 return Json(new
                 {
                     statusCode = HttpStatusCode.OK,
-                    messages = new string[] { string.Format("Documentos no estado {0} sicronizados com sucesso.", stateId.ToString()) }
+                    messages = new string[] { "Documentos sicronizados com sucesso." }
                 });
             }
             catch (Exception ex)
@@ -83,23 +97,14 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                     messages = new string[] { ex.GetBaseException().Message }
                 });
             }
-            
         }
 
         [HttpPost]
-        public async Task<PartialViewResult> GetPaidDocuments(PaginatedSearchFilter filters)
-        {
-            var model = await _monitorServices.GetPaidDocsToSync(filters);
-
-            return PartialView("_paidDocumentsResultPartial", model);
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> SyncPaidDocuments(string documentId)
+        public async Task<JsonResult> SyncPaidDocuments()
         {
             try
             {
-                await _monitorServices.SyncPaidDocuments(documentId);
+                await _monitorServices.SyncPaidDocuments();
 
                 return Json(new
                 {
@@ -136,6 +141,52 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                 {
                     statusCode = HttpStatusCode.OK,
                     messages = new string[] { "Documentos sicronizados com sucesso." }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError,
+                    messages = new string[] { ex.GetBaseException().Message }
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ReprocessCreditNotes()
+        {
+            try
+            {
+                await _monitorServices.ReprocessCreditNotes();
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Notas de crédito reprocessadas com sucesso." }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError,
+                    messages = new string[] { ex.GetBaseException().Message }
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ReturnDebitNotes()
+        {
+            try
+            {
+                await _monitorServices.ReturnDebitNotes();
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Notas de débito devolvidas com sucesso." }
                 });
             }
             catch (Exception ex)

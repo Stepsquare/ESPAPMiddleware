@@ -1,70 +1,64 @@
 ﻿@model HomepageStatusPartialViewModel
 
-<div class="panel panel-default ig-panel ig-statistics-panel ig-svf-statistics">
-    <div class="panel-body">
-        <div class="row">
-            <div class="col-md-15">
-                <h5 class="ig-dash-title">TOTAL DOCUMENTOS:</h5>
-                <div class="ig-svf-synccont">
-                    <a class="btn ig-btn-round @(Model.TotalDocumentsNotSyncFeap == 0 ? "disabled": "")" title="Sincronizar todos os documentos" href="javascript:void(0);" onclick="syncDocuments()">
-                        <i class="fa fa-refresh"></i>
-                    </a>
-                    <div class="ig-svf-statedocs">
-                        <h4>@Model.TotalDocuments documentos</h4>
-                        <p>@Model.TotalDocumentsNotSyncFeap por sincronizar com FEAP</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-15">
-                <h5 class="ig-dash-title">TOTAL DOCUMENTOS VALIDADOS:</h5>
-                <div class="ig-svf-synccont">
-                    <a class="btn ig-btn-round @(Model.TotalValidDocumentsNotSyncFeap == 0 ? "disabled": "")" title="Sincronizar documentos validados" href="javascript:void(0);" onclick="syncDocuments('@DocumentStateEnum.ValidadoConferido')">
-                        <i class="fa fa-refresh"></i>
-                    </a>
-                    <div class="ig-svf-statedocs">
-                        <h4>@Model.TotalValidDocuments documentos</h4>
-                        <p>@Model.TotalValidDocumentsNotSyncFeap por sincronizar com FEAP</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-15">
-                <h5 class="ig-dash-title">TOTAL PAGOS:</h5>
-                <div class="ig-svf-synccont">
-                    <a class="btn ig-btn-round @(Model.TotalPaidDocumentsNotSyncFeap == 0 ? "disabled": "")" title="Sincronizar documentos pagos" href="javascript:void(0);" onclick="syncDocuments('@DocumentStateEnum.EmitidoPagamento')">
-                        <i class="fa fa-refresh"></i>
-                    </a>
-                    <div class="ig-svf-statedocs">
-                        <h4>@Model.TotalPaidDocuments documentos</h4>
-                        <p>@Model.TotalPaidDocumentsNotSyncFeap por sincronizar com FEAP</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-15">
-                <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS:</h5>
-                <div class="ig-svf-synccont">
-                    <a class="btn ig-btn-round @(Model.TotalInvalidDocumentsNotSyncFeap == 0 ? "disabled": "")" title="Sincronizar documentos invalidados" href="javascript:void(0);" onclick="syncDocuments('@DocumentStateEnum.Iniciado', '@DocumentActionEnum.SolicitaçãoDocumentoRegularização')">
-                        <i class="fa fa-refresh"></i>
-                    </a>
-                    <div class="ig-svf-statedocs">
-                        <h4>@Model.TotalInvalidDocuments documentos</h4>
-                        <p>@Model.TotalInvalidDocumentsNotSyncFeap por sincronizar com FEAP</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-15">
-                <h5 class="ig-dash-title">TOTAL DOCUMENTOS INVALIDADOS REGULARIZADOS:</h5>
-                <div class="ig-svf-synccont">
-                    <a class="btn ig-btn-round @(Model.TotalInvalidDocumentsRectifiedNotSyncFeap == 0 ? "disabled": "")" title="Sincronizar documentos invalidadados regularizados" href="javascript:void(0);" onclick="syncDocuments('@DocumentStateEnum.Processado')">
-                        <i class="fa fa-refresh"></i>
-                    </a>
-                    <div class="ig-svf-statedocs">
-                        <h4>@Model.TotalInvalidDocumentsRectified documentos</h4>
-                        <p>@Model.TotalInvalidDocumentsRectifiedNotSyncFeap por sincronizar com FEAP</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="col-md-3">
+    <div class="ig-svf-statedocs">
+        <h4>@Model.Total documentos</h4>
     </div>
-</div>
 
+    @if (Model.IsCurrentSchoolYear)
+    {
+        <button class="btn ig-btn-blue ig-stats-btn btn-block" onclick="syncAllDocumentsFeap()" @(Model.TotalNotSyncFeap == 0 ? "disabled" : "")>
+            <span class="badge"><i class="fas fa-refresh"></i> @Model.TotalNotSyncFeap</span> Sincronizar com FE-AP
+        </button>
+    }
+</div>
+<div class="col-md-3">
+    <div class="ig-svf-statedocs">
+        <h4>@Model.InvoiceStatus.Total faturas</h4>
+        <p>@Model.InvoiceStatus.PendingRegularization por regularizar</p>
+        <p>@Model.InvoiceStatus.Regularized regularizadas</p>
+        <p>@Model.InvoiceStatus.Validated válidas</p>
+        <p>@Model.InvoiceStatus.Paid pagas</p>
+    </div>
+
+    @if (Model.IsCurrentSchoolYear)
+    {
+        <button class="btn ig-btn-blue ig-stats-btn btn-block" onclick="syncPaidDocuments()" @(Model.InvoiceStatus.ValidatedToSync == 0 ? "disabled" : "")>
+            <span class="badge"><i class="fas fa-refresh"></i> @Model.InvoiceStatus.ValidatedToSync</span> Sincronizar faturas pagas
+        </button>
+    }
+</div>
+<div class="col-md-3">
+    <div class="ig-svf-statedocs">
+        <h4>@Model.CreditNoteStatus.Total notas de crédito</h4>
+        @if (Model.IsCurrentSchoolYear)
+        {
+            <p>@Model.CreditNoteStatus.Unprocessed por processar</p>
+
+        }
+        <p>@Model.CreditNoteStatus.Processed processadas</p>
+        <p>@Model.CreditNoteStatus.Returned devolvidas</p>
+    </div>
+
+    @if (Model.IsCurrentSchoolYear)
+    {
+        <button class="btn ig-btn-blue ig-stats-btn btn-block" onclick="reprocessCreditNotes()" @(Model.CreditNoteStatus.Unprocessed == 0 ? "disabled" : "")>
+            <span class="badge"><i class="fas fa-refresh"></i> @Model.CreditNoteStatus.Unprocessed</span> Reprocessar notas de crédito
+        </button>
+    }
+</div>
+<div class="col-md-3">
+    <div class="ig-svf-statedocs">
+        <h4>@Model.DebitNoteStatus.Total notas de débito</h4>
+        <p>@Model.DebitNoteStatus.Unprocessed por processar</p>
+        <p>@Model.DebitNoteStatus.Returned devolvidas</p>
+    </div>
+
+    @if (Model.IsCurrentSchoolYear)
+    {
+        <button class="btn ig-btn-blue ig-stats-btn btn-block" onclick="returnDebitNotes()" @(Model.DebitNoteStatus.Unprocessed == 0 ? "disabled" : "")>
+            <span class="badge"><i class="fas fa-reply"></i> @Model.DebitNoteStatus.Unprocessed</span> Devolver notas de débito
+        </button>
+    }
+</div>
 

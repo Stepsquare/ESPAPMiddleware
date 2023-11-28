@@ -16,30 +16,38 @@
         </div>
     </div>
 </div>
-<div class="ig-tabs">
-    <ul class="nav nav-tabs" role="tablist">
-        @for (int i = 0; i < Model.SchoolYears.Length; i++)
-        {
-            <li role="presentation" class="@(i == Model.SchoolYears.Length - 1 ? "active" : "")">
-                <a href="#@Model.SchoolYears[i]" aria-controls="@Model.SchoolYears[i]" role="tab" data-toggle="tab">
-                    <span class="ig-axis-tab">@("20" + Model.SchoolYears[i].Insert(2, "/20"))</span>
-                </a>
-            </li>
-        }
-    </ul>
-    <div class="tab-content">
-        @for (int i = 0; i < Model.SchoolYears.Length; i++)
-        {
-            <div role="tabpanel" class="tab-pane @(i == Model.SchoolYears.Length - 1 ? "active" : "")" id="@Model.SchoolYears[i]">
-            </div>
-        }
+
+<div class="form-group">
+    <div class="form-inline">
+        <div class="form-group">
+            <label class="control-label">Ano letivo:</label>
+            <select class="form-control" id="school_year">
+                @foreach (var year in Model.SchoolYears)
+                {
+                    if (year == Model.CurrentSchoolYear)
+                    {
+                        <option value="@year" selected>@("20" + year.Insert(2, "/20"))</option>
+                    }
+                    else
+                    {
+                        <option value="@year">@("20" + year.Insert(2, "/20"))</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default ig-panel ig-statistics-panel ig-svf-statistics">
+    <div class="panel-body">
+        <h5 class="ig-dash-title">TOTAIS DE DOCUMENTOS:</h5>
+        <div class="row" id="global_status_container">
+
+        </div>
     </div>
 </div>
 
 <div class="row">
-    <div id="paid_sync_result_container" class="col-md-12">
-
-    </div>
     <div id="sigefe_sync_result_container" class="col-md-12">
 
     </div>
@@ -49,40 +57,47 @@
     $(document).ready(function () {
         refreshGlobalStatus();
 
-        getPaidDocuments();
-
-        $('.ig-tabs .nav-tabs a').on('shown.bs.tab', function () {
+        $('#school_year').on('change', function () {
             refreshGlobalStatus();
         });
     });
 
     function refreshGlobalStatus() {
+        ShowLoadingModal();
+
         $.ajax({
             url: '@Url.Action("GetGlobalStatus", "Home")',
             type: "POST",
             data: {
-                anoLetivo: $('.tab-content .active').prop('id'),
+                anoLetivo: $('#school_year').val(),
             },
             success: function (data) {
-                $('.tab-content .active').html(data);
+                $('#global_status_container').html(data);
+
+                if ('@Model.CurrentSchoolYear' == $('#school_year').val())
+                    getToSyncSigefeDocuments();
             },
             error: function () {
                 ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                if ('@Model.CurrentSchoolYear' == $('#school_year').val())
+                    getToSyncSigefeDocuments();
+                else
+                    HideLoadingModal();
             }
         });
     }
 
-    function syncDocuments(stateId, actionId) {
+    function syncAllDocumentsFeap() {
         ShowConfirm(function () {
             ShowLoadingModal();
 
             $.ajax({
-                url: '@Url.Action("SyncDocuments", "Home")',
+                url: '@Url.Action("SyncAllDocumentsFeap", "Home")',
                 type: "POST",
                 data: {
-                    stateId: stateId,
-                    actionId: actionId,
-                    anoLetivo: $('.tab-content .active').prop('id'),
+                    anoLetivo: $('#school_year').val()
                 },
                 success: function (data) {
                     if (data.statusCode == 200) {
@@ -102,30 +117,96 @@
                     HideLoadingModal();
                 }
             });
-        }, "Sincronizar Documentos", "Tem a certeza que pretende sincronizar os documentos?")
+        }, "Sincronizar Documentos", "Tem a certeza que pretende sincronizar os documentos com FE-AP?")
     }
 
-    function getPaidDocuments(pageIndex, pageSize) {
-        ShowLoadingModal();
+    function syncPaidDocuments() {
+        ShowConfirm(function () {
+            ShowLoadingModal();
 
-        $.ajax({
-            url: '@Url.Action("GetPaidDocuments", "Home")',
-            type: "POST",
-            data: {
-                pageIndex: pageIndex,
-                pageSize: pageSize
-            },
-            success: function (data) {
-                $('#paid_sync_result_container').html(data);
-                getToSyncSigefeDocuments();
-            },
-            error: function () {
-                ShowErrorModal(["Ocorreu um erro."]);
-            }
-        });
+            $.ajax({
+                url: '@Url.Action("SyncPaidDocuments", "Home")',
+                type: "POST",
+                success: function (data) {
+                    if (data.statusCode == 200) {
+                        ShowSucessModal(data.messages, function () {
+                            location.reload();
+                        });
+                    } else {
+                        ShowErrorModal(data.messages, function () {
+                            location.reload();
+                        });
+                    }
+                },
+                error: function () {
+                    ShowErrorModal(["Ocorreu um erro."]);
+                },
+                complete: function () {
+                    HideLoadingModal();
+                }
+            });
+        }, "Sincronizar Faturas", "Tem a certeza que pretende sincronizar os documentos validados para os quais já foi emitido pagamento?")
+    }
+
+    function reprocessCreditNotes() {
+        ShowConfirm(function () {
+            ShowLoadingModal();
+
+            $.ajax({
+                url: '@Url.Action("ReprocessCreditNotes", "Home")',
+                type: "POST",
+                success: function (data) {
+                    if (data.statusCode == 200) {
+                        ShowSucessModal(data.messages, function () {
+                            location.reload();
+                        });
+                    } else {
+                        ShowErrorModal(data.messages, function () {
+                            location.reload();
+                        });
+                    }
+                },
+                error: function () {
+                    ShowErrorModal(["Ocorreu um erro."]);
+                },
+                complete: function () {
+                    HideLoadingModal();
+                }
+            });
+        }, "Reprocessar Notas de Crédito", "Tem a certeza que pretende reprocessar as notas de crédito?")
+    }
+
+    function returnDebitNotes() {
+        ShowConfirm(function () {
+            ShowLoadingModal();
+
+            $.ajax({
+                url: '@Url.Action("ReturnDebitNotes", "Home")',
+                type: "POST",
+                success: function (data) {
+                    if (data.statusCode == 200) {
+                        ShowSucessModal(data.messages, function () {
+                            location.reload();
+                        });
+                    } else {
+                        ShowErrorModal(data.messages, function () {
+                            location.reload();
+                        });
+                    }
+                },
+                error: function () {
+                    ShowErrorModal(["Ocorreu um erro."]);
+                },
+                complete: function () {
+                    HideLoadingModal();
+                }
+            });
+        }, "Devolver Notas de Débito", "Tem a certeza que pretende devolver as notas de débito?")
     }
 
     function getToSyncSigefeDocuments(pageIndex, pageSize) {
+        ShowLoadingModal();
+
         $.ajax({
             url: '@Url.Action("GetDocsToSyncSigefe", "Home")',
             type: "POST",

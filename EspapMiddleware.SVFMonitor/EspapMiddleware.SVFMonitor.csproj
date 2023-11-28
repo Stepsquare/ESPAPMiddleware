@@ -149,6 +149,7 @@
   <ItemGroup>
     <Content Include="Content\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Content\htmlLayouts\SVF_DetalheDocumento.html" />
+    <Content Include="Content\htmlLayouts\SVF_Home1023.html" />
     <Content Include="Content\htmlLayouts\SVF_ListaDocumentos.html" />
     <Content Include="Content\htmlLayouts\SVF_ListaLogs.html" />
     <Content Include="Content\htmlLayouts\SVF_Sincronizacao.html" />
@@ -242,7 +243,6 @@
     <Content Include="Views\Document\_searchResultPartial.cshtml" />
     <Content Include="Views\Document\_linesResultPartial.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Home\_paidDocumentsResultPartial.cshtml" />
     <Content Include="Views\Home\_homepageStatusPartial.cshtml" />
     <Content Include="Views\Home\_docsToSyncSigefeResultPartial.cshtml" />
   </ItemGroup>

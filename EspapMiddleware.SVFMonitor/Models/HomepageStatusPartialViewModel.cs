@@ -7,16 +7,37 @@ namespace EspapMiddleware.SVFMonitor.Models
 {
     public class HomepageStatusPartialViewModel
     {
-        public string SchoolYear { get; set; }
-        public int TotalDocuments { get; set; }
-        public int TotalDocumentsNotSyncFeap { get; set; }
-        public int TotalValidDocuments { get; set; }
-        public int TotalValidDocumentsNotSyncFeap { get; set; }
-        public int TotalInvalidDocuments { get; set; }
-        public int TotalInvalidDocumentsNotSyncFeap { get; set; }
-        public int TotalInvalidDocumentsRectified { get; set; }
-        public int TotalInvalidDocumentsRectifiedNotSyncFeap { get; set; }
-        public int TotalPaidDocuments { get; set; }
-        public int TotalPaidDocumentsNotSyncFeap { get; set; }
+        public int Total { get; set; }
+        public int TotalNotSyncFeap { get; set; }
+        public bool IsCurrentSchoolYear { get; set; }
+
+        public InvoiceStatusObject InvoiceStatus { get; set; }
+        public CreditNoteStatusObject CreditNoteStatus { get; set; }
+        public DebitNoteStatusObject DebitNoteStatus { get; set; }
+
+        public class InvoiceStatusObject
+        {
+            public int Total { get; set; }
+            public int PendingRegularization { get; set; }
+            public int Regularized { get; set; }
+            public int Validated { get; set; }
+            public int ValidatedToSync { get; set; }
+            public int Paid { get; set; }
+        }
+
+        public class CreditNoteStatusObject
+        {
+            public int Total { get; set; }
+            public int Unprocessed { get; set; }
+            public int Processed { get; set; }
+            public int Returned { get; set; }
+        }
+
+        public class DebitNoteStatusObject
+        {
+            public int Total { get; set; }
+            public int Unprocessed { get; set; }
+            public int Returned { get; set; }
+        }
     }
 }

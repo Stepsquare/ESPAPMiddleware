@@ -17,12 +17,13 @@ namespace EspapMiddleware.Shared.Interfaces.IRepositories
         Task<Document> GetDocumentForDetail(string documentId);
         Task<IEnumerable<Document>> GetFilteredPaginated(DocumentSearchFilters filters);
         Task<IEnumerable<string>> GetSchoolYears();
-        Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null);
-        Task<IEnumerable<string>> GetPaginatedPaidDocsToSync(string[] documentIds, PaginatedSearchFilter filters);
+        Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo);
         Task<IEnumerable<Document>> GetPaidDocsToSync(string[] documentIds);
         Task<int> GetPaidDocsToSyncCount(string[] documentIds);
         Task<IEnumerable<Document>> GetPaginatedDocsToSyncSigefe(string anoLetivo, PaginatedSearchFilter filters);
-        Task<IEnumerable<Document>> GetDocsToSyncSigefe(string anoLetivo);
+        Task<IEnumerable<Document>> GetDocsToSyncSigefe(string anoLetivo, string documentId = null);
         Task<int> GetDocsToSyncSigefeCount(string anoLetivo);
+        Task<IEnumerable<Document>> GetCreditNotesToReprocess(string anoLetivo);
+        Task<int> GetCreditNotesToReprocessCount(string anoLetivo);
     }
 }

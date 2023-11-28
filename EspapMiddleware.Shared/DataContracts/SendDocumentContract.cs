@@ -224,8 +224,13 @@ namespace EspapMiddleware.Shared.DataContracts
 
                     foreach (XmlNode line in document.SelectNodes("//ubl:Invoice/cac:InvoiceLine", nsmgr))
                     {
-                        if (string.IsNullOrWhiteSpace(CompromiseNumber) && line["cbc:AccountingCost"] != null)
-                            CompromiseNumber = line["cbc:AccountingCost"].InnerText;
+                        if (string.IsNullOrWhiteSpace(CompromiseNumber))
+                        {
+                            if (line["cbc:AccountingCost"] != null)
+                                CompromiseNumber = line["cbc:AccountingCost"].InnerText;
+                            else if (line["cbc:Note"] != null)
+                                CompromiseNumber = line["cbc:Note"].InnerText;
+                        }
 
                         InvoiceLines.Add(new InvoiceLineModel()
                         {

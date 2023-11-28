@@ -13,8 +13,11 @@ namespace EspapMiddleware.Shared.WebServiceModels
         public class fatura
         {
             public string num_fatura { get; set; }
+            public string num_doc_rel { get; set; }
             public string id_doc_feap { get; set; }
+            public string id_doc_feap_rel { get; set; }
             public string id_me_fatura { get; set; }
+            public string num_compromisso { get; set; }
             public string cod_msg_fat { get; set; }
             public string msg_fat { get; set; }
             public string state_id { get; set; }

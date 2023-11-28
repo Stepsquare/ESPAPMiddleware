@@ -98,13 +98,13 @@
 
                     @if (Model.RelatedDocumentId != null)
                     {
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label class="control-label">Documento Relacionado:</label>
                             <p><a href="@Url.Action("Detail", "Document", new { id = Model.RelatedDocumentId })"><i class="far fa-file-alt"></i> @Model.RelatedDocumentId</a></p>
                         </div>
                     }
                 </div>
-                <a id="return_doc_btn" class="ig-sec-link" href="javascript:void(0);">
+                <a href="javascript:void(0);" data-toggle="modal" data-target="#modal_return_document" class="ig-sec-link">
                     <i class="fas fa-reply"></i> Devolver
                 </a>
                 <a id="reset_doc_btn" class="ig-sec-link" href="javascript:void(0);">
@@ -300,15 +300,34 @@
     </div>
 </div>
 
+<div class="modal fade ig-modal" id="modal_return_document" tabindex="-1" role="dialog" aria-labelledby="modal_return_document_label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="modal_return_document_label">Devolver Documento</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="control-label">Motivo de devolução:</label>
+                    <textarea class="form-control" id="return_reason" rows="5" ></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn ig-btn-green" onclick="returnDocument()">
+                    <i class="fas fa-save"></i> Guardar dados
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function () {
         getDocumentLines();
-
-        $("#return_doc_btn").on("click", function () {
-            ShowConfirm(function () {
-                returnDocument();
-            }, "Devolver Documento", "Tem a certeza que pretende devolver o documento?")
-        });
 
         $("#reset_doc_btn").on("click", function () {
             ShowConfirm(function () {
@@ -342,33 +361,37 @@
     }
 
     function returnDocument() {
-        ShowLoadingModal();
+        $('#modal_return_document').modal('hide');
 
-        $.ajax({
-            url: '@Url.Action("ReturnDocument", "Document")',
-            type: "POST",
-            data: {
-                id: "@Model.DocumentId",
-                reason: $("#return_reason").val()
-            },
-            success: function (data) {
-                if (data.statusCode == 200) {
-                    ShowSucessModal(data.messages, function () {
-                        location.reload();
-                    });
-                } else {
-                    ShowErrorModal(data.messages, function () {
-                        location.reload();
-                    });
+        ShowConfirm(function () {
+            ShowLoadingModal();
+
+            $.ajax({
+                url: '@Url.Action("ReturnDocument", "Document")',
+                type: "POST",
+                data: {
+                    id: "@Model.DocumentId",
+                    reason: $("#return_reason").val()
+                },
+                success: function (data) {
+                    if (data.statusCode == 200) {
+                        ShowSucessModal(data.messages, function () {
+                            location.reload();
+                        });
+                    } else {
+                        ShowErrorModal(data.messages, function () {
+                            location.reload();
+                        });
+                    }
+                },
+                error: function () {
+                    ShowErrorModal(["Ocorreu um erro."]);
+                },
+                complete: function () {
+                    HideLoadingModal();
                 }
-            },
-            error: function () {
-                ShowErrorModal(["Ocorreu um erro."]);
-            },
-            complete: function () {
-                HideLoadingModal();
-            }
-        });
+            });
+        }, "Devolver Documento", "Tem a certeza que pretende devolver o documento?")
     }
 
     function resetSigefeSync() {

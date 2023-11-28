@@ -86,36 +86,25 @@ namespace EspapMiddleware.DataLayer.Repositories
             return await DbContext.Documents.Where(x => !string.IsNullOrEmpty(x.SchoolYear)).Select(x => x.SchoolYear).Distinct().ToListAsync();
         }
 
-        public async Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo, DocumentStateEnum? stateId, DocumentActionEnum? actionId = null)
+        public async Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo)
         {
             return await DbContext.Documents.Where(x => x.SchoolYear == anoLetivo
-                                                    && !x.IsSynchronizedWithFEAP
-                                                    && (!stateId.HasValue || x.StateId == stateId.Value)
-                                                    && (!actionId.HasValue || x.ActionId == actionId)).ToListAsync();
-        }
-
-        public async Task<IEnumerable<string>> GetPaginatedPaidDocsToSync(string[] documentIds, PaginatedSearchFilter filters)
-        {
-            return await DbContext.Documents
-                                .Where(x => documentIds.Contains(x.DocumentId) && x.StateId != DocumentStateEnum.EmitidoPagamento)
-                                .OrderByDescending(x => x.CreatedOn)
-                                .Skip((filters.PageIndex - 1) * filters.PageSize)
-                                .Take(filters.PageSize)
-                                .Select(x => x.DocumentId)
-                                .ToListAsync();
+                                                    && !x.IsSynchronizedWithFEAP)
+                                                .Include(x => x.DocumentMessages)
+                                                .ToListAsync();
         }
 
         public async Task<IEnumerable<Document>> GetPaidDocsToSync(string[] documentIds)
         {
             return await DbContext.Documents
-                                .Where(x => documentIds.Contains(x.DocumentId) && x.StateId != DocumentStateEnum.EmitidoPagamento)
+                                .Where(x => documentIds.Contains(x.DocumentId) && x.StateId == DocumentStateEnum.ValidadoConferido)
                                 .ToListAsync();
         }
 
         public async Task<int> GetPaidDocsToSyncCount(string[] documentIds)
         {
             return await DbContext.Documents
-                                .Where(x => documentIds.Contains(x.DocumentId) && x.StateId != DocumentStateEnum.EmitidoPagamento)
+                                .Where(x => documentIds.Contains(x.DocumentId) && x.StateId == DocumentStateEnum.ValidadoConferido)
                                 .CountAsync();
         }
 
@@ -135,10 +124,11 @@ namespace EspapMiddleware.DataLayer.Repositories
                                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Document>> GetDocsToSyncSigefe(string anoLetivo)
+        public async Task<IEnumerable<Document>> GetDocsToSyncSigefe(string anoLetivo, string documentId = null)
         {
             return await DbContext.Documents
-                                .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
+                                .Where(x => (string.IsNullOrEmpty(documentId) || x.DocumentId == documentId)
+                                        && (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
                                         && !x.IsSynchronizedWithSigefe
                                         && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
                                                                     && m.MessageCode == "490")
@@ -157,6 +147,33 @@ namespace EspapMiddleware.DataLayer.Repositories
                                                                     && m.MessageCode == "490")
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
                                                                     && (m.MessageCode == "500" || m.MessageCode == "429")))
+                                .CountAsync();
+        }
+
+        public async Task<IEnumerable<Document>> GetCreditNotesToReprocess(string anoLetivo)
+        {
+            return await DbContext.Documents
+                                .Where(x => x.SchoolYear == anoLetivo
+                                        && !x.IsSynchronizedWithSigefe
+                                        && x.TypeId == DocumentTypeEnum.NotaCrédito
+                                        && x.StateId == DocumentStateEnum.Iniciado
+                                        && !x.ActionId.HasValue
+                                        && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE 
+                                                                    && m.MessageCode == "490"))
+                                .Include(x => x.DocumentLines)
+                                .ToArrayAsync();
+        }
+
+        public async Task<int> GetCreditNotesToReprocessCount(string anoLetivo)
+        {
+            return await DbContext.Documents
+                                .Where(x => x.SchoolYear == anoLetivo
+                                        && !x.IsSynchronizedWithSigefe
+                                        && x.TypeId == DocumentTypeEnum.NotaCrédito
+                                        && x.StateId == DocumentStateEnum.Iniciado
+                                        && !x.ActionId.HasValue
+                                        && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
+                                                                    && m.MessageCode == "490"))
                                 .CountAsync();
         }
     }
