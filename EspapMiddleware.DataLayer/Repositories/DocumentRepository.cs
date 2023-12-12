@@ -37,6 +37,7 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                 .Include(x => x.DocumentLines)
+                .Include(x => x.DocumentFiles)
                 .Include(x => x.RelatedDocument)
                 .FirstOrDefaultAsync(x => x.DocumentId == documentId);
         }
@@ -135,6 +136,7 @@ namespace EspapMiddleware.DataLayer.Repositories
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
                                                                     && (m.MessageCode == "500" || m.MessageCode == "429")))
                                 .Include(x => x.DocumentLines)
+                                .Include(x => x.DocumentFiles)
                                 .ToListAsync();
         }
 
@@ -161,6 +163,7 @@ namespace EspapMiddleware.DataLayer.Repositories
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE 
                                                                     && m.MessageCode == "490"))
                                 .Include(x => x.DocumentLines)
+                                .Include(x => x.DocumentFiles)
                                 .ToArrayAsync();
         }
 

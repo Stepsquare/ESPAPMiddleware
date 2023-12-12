@@ -27,10 +27,6 @@ namespace EspapMiddleware.Shared.Entities
         public string CompromiseNumber { get; set; }
         public string TotalAmount { get; set; }
 
-        public byte[] UblFormat { get; set; }
-        public byte[] PdfFormat { get; set; }
-        public byte[] Attachs { get; set; }
-
         public DocumentStateEnum StateId { get; set; }
         public DateTime StateDate { get; set; }
 
@@ -47,6 +43,8 @@ namespace EspapMiddleware.Shared.Entities
         public virtual DocumentState State { get; set; }
         public virtual DocumentAction Action { get; set; }
         public virtual Document RelatedDocument { get; set; }
+
+        public virtual ICollection<DocumentFile> DocumentFiles { get; set; }
         public virtual ICollection<Document> RelatedDocuments { get; set; }
         public ICollection<RequestLog> RequestLogs { get; set; }
         public ICollection<DocumentLine> DocumentLines { get; set; }

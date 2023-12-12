@@ -32,6 +32,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
+                //Faltam os includes dos DocumentFiles!
                 var docsToSync = await unitOfWork.Documents.GetFiltered(x => !x.IsSynchronizedWithSigefe && x.IsSynchronizedWithFEAP);
 
                 foreach (var doc in docsToSync)
@@ -168,7 +169,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 id_me_fatura = docToSync.MEId,
                 num_fatura = docToSync.ReferenceNumber,
                 total_fatura = docToSync.TotalAmount,
-                fatura_base64 = Convert.ToBase64String(docToSync.PdfFormat),
+                fatura_base64 = Convert.ToBase64String(docToSync.DocumentFiles.FirstOrDefault(x => x.DocumentFileTypeId == DocumentFileTypeEnum.Pdf)?.Content),
                 dt_fatura = docToSync.IssueDate.ToString("dd-MM-yyyy"),
                 num_compromisso = docToSync.CompromiseNumber,
             };

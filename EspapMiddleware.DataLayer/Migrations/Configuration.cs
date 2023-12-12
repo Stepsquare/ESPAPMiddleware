@@ -57,6 +57,14 @@
                         Description = e.ToString()
                     }));
 
+            if (!context.DocumentFileTypes.Any())
+                context.DocumentFileTypes.AddRange(Enum.GetValues(typeof(DocumentFileTypeEnum)).Cast<DocumentFileTypeEnum>()
+                    .Select(e => new DocumentFileType()
+                    {
+                        Id = e,
+                        Description = e.ToString()
+                    }));
+
             base.Seed(context);
         }
     }

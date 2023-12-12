@@ -151,29 +151,14 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> DownloadUbl(string id)
+        public async Task<ActionResult> DownloadDocumentFile(string documentId, DocumentFileTypeEnum type)
         {
-            var doc = await _monitorServices.GetDocumentDetail(id);
+            var documentFile = await _monitorServices.GetDocumentFileForDownload(documentId, type);
 
-            if (doc == null)
+            if (documentFile == null)
                 return HttpNotFound();
 
-            byte[] fileBytes = doc.UblFormat;
-
-            return File(fileBytes, "application/xml", doc.DocumentId + ".xml");
-        }
-
-        [HttpGet]
-        public async Task<ActionResult> DownloadPdf(string id)
-        {
-            var doc = await _monitorServices.GetDocumentDetail(id);
-
-            if (doc == null)
-                return HttpNotFound();
-
-            byte[] fileBytes = doc.PdfFormat;
-
-            return File(fileBytes, "application/pdf", doc.DocumentId + ".pdf");
+            return File(documentFile.Content, documentFile.ContentType);
         }
 
         [HttpGet]

@@ -104,6 +104,12 @@ namespace EspapMiddleware.ServiceLayer.Services
                 };
         }
 
+        public async Task<DocumentFile> GetDocumentFileForDownload(string documentId, DocumentFileTypeEnum documentType)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+                return await unitOfWork.DocumentFiles.GetDocumentFileForDownload(documentId, documentType);
+        }
+
         public async Task<IEnumerable<string>> GetSchoolYears()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
@@ -980,7 +986,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 id_me_fatura = document.MEId,
                 num_fatura = document.ReferenceNumber,
                 total_fatura = document.TotalAmount,
-                fatura_base64 = Convert.ToBase64String(document.PdfFormat),
+                fatura_base64 = Convert.ToBase64String(document.DocumentFiles.FirstOrDefault(x => x.DocumentFileTypeId == DocumentFileTypeEnum.Pdf)?.Content),
                 dt_fatura = document.IssueDate.ToString("dd-MM-yyyy"),
                 num_compromisso = document.CompromiseNumber,
             };

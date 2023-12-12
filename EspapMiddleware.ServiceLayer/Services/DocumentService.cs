@@ -724,15 +724,28 @@ namespace EspapMiddleware.ServiceLayer.Services
             obj.CompromiseNumber = contract.CompromiseNumber;
             obj.SchoolYear = contract.SchoolYear;
 
-            obj.UblFormat = Convert.FromBase64String(contract.ublFormat);
-            obj.PdfFormat = Convert.FromBase64String(contract.pdfFormat);
-            if (!string.IsNullOrEmpty(contract.attachs))
-                obj.Attachs = Convert.FromBase64String(contract.attachs);
-
             obj.StateId = contract.stateId ?? contract.stateId.Value;
             obj.StateDate = contract.stateDate ?? contract.stateDate.Value;
 
             obj.IsSynchronizedWithFEAP = true;
+
+            obj.DocumentFiles = new List<DocumentFile>()
+            {
+                new DocumentFile()
+                {
+                    DocumentId = contract.documentId,
+                    DocumentFileTypeId = DocumentFileTypeEnum.Ubl,
+                    Content = Convert.FromBase64String(contract.ublFormat),
+                    ContentType = "application/xml"
+                },
+                new DocumentFile()
+                {
+                    DocumentId = contract.documentId,
+                    DocumentFileTypeId = DocumentFileTypeEnum.Pdf,
+                    Content = Convert.FromBase64String(contract.pdfFormat),
+                    ContentType = "application/pdf"
+                },
+            };
 
             obj.DocumentLines = new List<DocumentLine>();
 
@@ -769,7 +782,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 id_me_fatura = document.MEId,
                 num_fatura = document.ReferenceNumber,
                 total_fatura = document.TotalAmount,
-                fatura_base64 = Convert.ToBase64String(document.PdfFormat),
+                fatura_base64 = Convert.ToBase64String(document.DocumentFiles.FirstOrDefault(x => x.DocumentFileTypeId == DocumentFileTypeEnum.Pdf)?.Content),
                 dt_fatura = document.IssueDate.ToString("dd-MM-yyyy"),
                 num_compromisso = document.CompromiseNumber,
             };

@@ -17,8 +17,8 @@
                         <i class="fas fa-download"></i> Downloads <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
-                        <li><a href="@Url.Action("DownloadUbl", "Document", new { id = Model.DocumentId })">UBL</a></li>
-                        <li><a href="@Url.Action("DownloadPdf", "Document", new { id = Model.DocumentId })">PDF</a></li>
+                        <li><a href="@Url.Action("DownloadDocumentFile", "Document", new { documentId = Model.DocumentId, type = DocumentFileTypeEnum.Ubl })">UBL</a></li>
+                        <li><a href="@Url.Action("DownloadDocumentFile", "Document", new { documentId = Model.DocumentId, type = DocumentFileTypeEnum.Pdf })">PDF</a></li>
                     </ul>
                 </div>
             </div>

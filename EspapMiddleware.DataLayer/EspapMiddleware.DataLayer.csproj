@@ -63,6 +63,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\DocumenMessageRepository.cs" />
+    <Compile Include="Repositories\DocumentFileRepository.cs" />
     <Compile Include="Repositories\DocumentLineRepository.cs" />
     <Compile Include="Repositories\GenericRepository.cs" />
     <Compile Include="Repositories\DocumentRepository.cs" />

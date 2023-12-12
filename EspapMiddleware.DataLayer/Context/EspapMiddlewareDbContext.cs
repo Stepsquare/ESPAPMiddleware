@@ -19,6 +19,8 @@ namespace EspapMiddleware.DataLayer.Context
         public DbSet<DocumentMessageType> DocumentMessagesTypes { get; set; }
         public DbSet<RequestLog> RequestLogs { get; set; }
         public DbSet<RequestLogType> RequestLogTypes { get; set; }
+        public DbSet<DocumentFile> DocumentFiles { get; set; }
+        public DbSet<DocumentFileType> DocumentFileTypes { get; set; }
 
         public EspapMiddlewareDbContext() : base("name=EspapMiddlewareConnectionString")
         {
@@ -36,6 +38,9 @@ namespace EspapMiddleware.DataLayer.Context
 
             modelBuilder.Entity<DocumentLine>().HasKey(x => new { x.DocumentId, x.LineId });
             modelBuilder.Entity<DocumentLine>().HasRequired(x => x.Document).WithMany(x => x.DocumentLines).HasForeignKey(x => x.DocumentId);
+        
+            modelBuilder.Entity<DocumentFile>().HasKey(x => new { x.DocumentId, x.DocumentFileTypeId});
+            modelBuilder.Entity<DocumentFile>().HasRequired(x => x.Document).WithMany(x => x.DocumentFiles).HasForeignKey(x => x.DocumentId);
         }
     }
 }

@@ -23,6 +23,7 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         Task<PaginatedResult<Document>> DocumentSearch(DocumentSearchFilters filters);
         Task<Document> GetDocumentDetail(string documentId);
         Task<PaginatedResult<DocumentLine>> GetDocumentLinesForDetail(DocumentDetailLineFilter filters);
+        Task<DocumentFile> GetDocumentFileForDownload(string documentId, DocumentFileTypeEnum documentType);
         Task<IEnumerable<string>> GetSchoolYears();
         Task SyncSigefe(string documentId);
         Task SyncFeap(string documentId);
