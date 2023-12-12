@@ -60,6 +60,10 @@
     <Compile Include="Migrations\202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.designer.cs">
       <DependentUpon>202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202312121723439_Add_DocumentFiles.cs" />
+    <Compile Include="Migrations\202312121723439_Add_DocumentFiles.designer.cs">
+      <DependentUpon>202312121723439_Add_DocumentFiles.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\DocumenMessageRepository.cs" />
@@ -86,6 +90,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.resx">
       <DependentUpon>202309181538135_RequestLog_Add_SupplierFiscalId_ReferenceNumber.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202312121723439_Add_DocumentFiles.resx">
+      <DependentUpon>202312121723439_Add_DocumentFiles.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
