@@ -27,6 +27,7 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         Task SyncSigefe(string documentId);
         Task SyncFeap(string documentId);
         Task ReturnDocument(string documentId, string reason);
+        Task ResetCompromiseNumber(string documentId);
         Task ResetSigefeSync(string documentId);
 
         #endregion

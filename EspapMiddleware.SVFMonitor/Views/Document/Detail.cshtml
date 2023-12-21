@@ -19,6 +19,7 @@
                     <ul class="dropdown-menu dropdown-menu-right">
                         <li><a href="@Url.Action("DownloadUbl", "Document", new { id = Model.DocumentId })">UBL</a></li>
                         <li><a href="@Url.Action("DownloadPdf", "Document", new { id = Model.DocumentId })">PDF</a></li>
+                        <li><a href="@Url.Action("DownloadAttachs", "Document", new { id = Model.DocumentId })">Attachs</a></li>
                     </ul>
                 </div>
             </div>
@@ -104,12 +105,27 @@
                         </div>
                     }
                 </div>
-                <a href="javascript:void(0);" data-toggle="modal" data-target="#modal_return_document" class="ig-sec-link">
-                    <i class="fas fa-reply"></i> Devolver
-                </a>
-                <a id="reset_doc_btn" class="ig-sec-link" href="javascript:void(0);">
-                    <i class="fas fa-undo"></i> Desvincular SIGEFE
-                </a>
+
+                @if (Model.StateId != DocumentStateEnum.Devolvido && Model.StateId != DocumentStateEnum.EmitidoPagamento)
+                {
+                    <a href="javascript:void(0);" data-toggle="modal" data-target="#modal_return_document" class="ig-sec-link">
+                        <i class="fas fa-reply"></i> Devolver
+                    </a>
+                }
+
+                @if (Model.TypeId == DocumentTypeEnum.Fatura && Model.StateId == DocumentStateEnum.Devolvido)
+                {
+                    <a id="reset_compromise_btn" class="ig-sec-link" href="javascript:void(0);">
+                        <i class="fas fa-undo"></i> Desvincular Compromisso
+                    </a>
+                }
+
+                @if (Model.StateId != DocumentStateEnum.EmitidoPagamento && Model.StateId != DocumentStateEnum.Devolvido)
+                {
+                    <a id="reset_doc_btn" class="ig-sec-link" href="javascript:void(0);">
+                        <i class="fas fa-undo"></i> Desvincular SIGEFE
+                    </a>
+                }
             </div>
         </div>
 
@@ -335,6 +351,11 @@
             }, "Desvincular Documento", "Tem a certeza que pretende desvincular o documento com a plataforma SIGEFE?")
         });
 
+        $("#reset_compromise_btn").on("click", function () {
+            ShowConfirm(function () {
+                ResetCompromiseNumber();
+            }, "Desvincular Número Compromisso", "Tem a certeza que pretende desvincular o número de compromisso da fatura @Model.DocumentId?")
+        });
     });
 
     function getDocumentLines(pageIndex, pageSize) {
@@ -399,6 +420,35 @@
 
         $.ajax({
             url: '@Url.Action("ResetSigefeSync", "Document")',
+            type: "POST",
+            data: {
+                id: "@Model.DocumentId"
+            },
+            success: function (data) {
+                if (data.statusCode == 200) {
+                    ShowSucessModal(data.messages, function () {
+                        location.reload();
+                    });
+                } else {
+                    ShowErrorModal(data.messages, function () {
+                        location.reload();
+                    });
+                }
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+
+    function ResetCompromiseNumber() {
+        ShowLoadingModal();
+
+        $.ajax({
+            url: '@Url.Action("ResetCompromiseNumber", "Document")',
             type: "POST",
             data: {
                 id: "@Model.DocumentId"

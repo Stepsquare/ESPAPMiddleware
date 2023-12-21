@@ -86,6 +86,7 @@
     <Compile Include="WebServiceModels\GetDocFaturacaoResponse.cs" />
     <Compile Include="WebServiceModels\SetDocFaturacao.cs" />
     <Compile Include="WebServiceModels\SetDocFaturacaoResponse.cs" />
+    <Compile Include="WebServiceModels\SetEstadoDocFaturacao.cs" />
     <Compile Include="XmlSerializerModel\SetDocumentResultMCIn.cs" />
   </ItemGroup>
   <ItemGroup />

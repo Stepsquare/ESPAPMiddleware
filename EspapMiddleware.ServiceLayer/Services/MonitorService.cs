@@ -1,6 +1,4 @@
-﻿using EspapMiddleware.DataLayer.UnitOfWork;
-using EspapMiddleware.ServiceLayer.FEAPServices_PP;
-using EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector;
+﻿using EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector;
 using EspapMiddleware.Shared.Entities;
 using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.Exceptions;
@@ -14,12 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
-using static EspapMiddleware.Shared.WebServiceModels.GetDocFaturacaoResponse;
 
 namespace EspapMiddleware.ServiceLayer.Services
 {
@@ -254,7 +248,7 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 if (result == 0)
                 {
-                    throw new DatabaseException("Erro ao inserir Log de comunicação na BD.");
+                    throw new DatabaseException("Erro de comunicação com BD.");
                 }
             }
         }
@@ -281,7 +275,46 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 if (result == 0)
                 {
-                    throw new DatabaseException("Erro ao inserir Log de comunicação na BD.");
+                    throw new DatabaseException("Erro de comunicação com BD.");
+                }
+            }
+        }
+
+        public async Task ResetCompromiseNumber(string documentId)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var docToReset = await unitOfWork.Documents.Find(x => x.DocumentId == documentId);
+
+                var setEstadoDocFaturacaoObj = new SetEstadoDocFaturacao()
+                {
+                    estado_doc = "7",
+                    id_ano_letivo = docToReset.SchoolYear,
+                    id_me_fatura = docToReset.MEId,
+                    nif = docToReset.SupplierFiscalId.Substring(2)
+                };
+
+                var setEstadoDocFaturacaoResponse = await _genericRestRequestManager.Post<GenericPostResponse, SetEstadoDocFaturacao>("setEstadoDocFaturacao", setEstadoDocFaturacaoObj);
+
+                if (setEstadoDocFaturacaoResponse == null)
+                    throw new Exception("Falha de comunicação. Reenviar pedido mais tarde.");
+
+                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                {
+                    DocumentId = docToReset.DocumentId,
+                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                    Date = DateTime.Now,
+                    MessageCode = setEstadoDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
+                    MessageContent = setEstadoDocFaturacaoResponse.messages.FirstOrDefault().msg
+                });
+
+                unitOfWork.Documents.Update(docToReset);
+
+                var result = await unitOfWork.SaveChangesAsync();
+
+                if (result == 0)
+                {
+                    throw new DatabaseException("Erro de comunicação com BD.");
                 }
             }
         }
@@ -303,7 +336,7 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 if (result == 0)
                 {
-                    throw new DatabaseException("Erro ao inserir Log de comunicação na BD.");
+                    throw new DatabaseException("Erro de comunicação com BD.");
                 }
             }
         }

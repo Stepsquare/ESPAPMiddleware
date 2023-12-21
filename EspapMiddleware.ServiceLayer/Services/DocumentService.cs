@@ -469,6 +469,23 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 if (contract.stateId.HasValue)
                 {
+                    if (contract.stateId == DocumentStateEnum.Devolvido
+                        && documentToUpdate.TypeId == DocumentTypeEnum.Fatura
+                        && documentToUpdate.StateId == DocumentStateEnum.Iniciado 
+                        && documentToUpdate.ActionId == DocumentActionEnum.SolicitaçãoDocumentoRegularização)
+                    {
+                        var setEstadoDocFaturacaoResponse = await RequestSetEstadoDocFaturacao(documentToUpdate);
+
+                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                        {
+                            DocumentId = documentToUpdate.DocumentId,
+                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                            Date = DateTime.Now,
+                            MessageCode = setEstadoDocFaturacaoResponse != null ? setEstadoDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg : "500",
+                            MessageContent = setEstadoDocFaturacaoResponse != null ? setEstadoDocFaturacaoResponse.messages.FirstOrDefault().msg : "Falha de comunicação. Reenviar pedido mais tarde."
+                        });
+                    }
+
                     documentToUpdate.StateId = contract.stateId.Value;
                     documentToUpdate.StateDate = contract.stateDate.Value;
                 }
@@ -513,11 +530,28 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 if (contract.isASuccess)
                 {
+                    if (contract.stateId.HasValue
+                        && contract.stateId == (int)DocumentStateEnum.Devolvido
+                        && documentToUpdate.TypeId == DocumentTypeEnum.Fatura)
+                    {
+                        var setEstadoDocFaturacaoResponse = await RequestSetEstadoDocFaturacao(documentToUpdate);
+
+                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                        {
+                            DocumentId = documentToUpdate.DocumentId,
+                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                            Date = DateTime.Now,
+                            MessageCode = setEstadoDocFaturacaoResponse != null ? setEstadoDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg : "500",
+                            MessageContent = setEstadoDocFaturacaoResponse != null ? setEstadoDocFaturacaoResponse.messages.FirstOrDefault().msg : "Falha de comunicação. Reenviar pedido mais tarde."
+                        });
+                    }
+
                     unitOfWork.DocumentMessages.Add(new DocumentMessage()
                     {
                         DocumentId = contract.documentId,
                         MessageTypeId = DocumentMessageTypeEnum.FEAP,
                         Date = DateTime.Now,
+                        MessageCode = "200",
                         MessageContent = "Documento atualizado com sucesso."
                     });
                 }
@@ -569,6 +603,19 @@ namespace EspapMiddleware.ServiceLayer.Services
             var setDocFaturacaoResult = await _genericRestRequestManager.Post<SetDocFaturacaoResponse, SetDocFaturacao>("setDocFaturacao", setDocFaturacaoObj);
 
             return setDocFaturacaoResult;
+        }
+
+        private async Task<GenericPostResponse> RequestSetEstadoDocFaturacao(Document document)
+        {
+            var setEstadoDocFaturacaoObj = new SetEstadoDocFaturacao()
+            {
+                estado_doc = "7",
+                id_ano_letivo = document.SchoolYear,
+                id_me_fatura = document.MEId,
+                nif = document.SupplierFiscalId.Substring(2)
+            };
+
+            return await _genericRestRequestManager.Post<GenericPostResponse, SetEstadoDocFaturacao>("setEstadoDocFaturacao", setEstadoDocFaturacaoObj);
         }
 
         private async Task<RequestLog> RequestSetDocument(Document document, string reason = null)

@@ -150,6 +150,29 @@ namespace EspapMiddleware.SVFMonitor.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<JsonResult> ResetCompromiseNumber(string id)
+        {
+            try
+            {
+                await _monitorServices.ResetCompromiseNumber(id);
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Número de compromisso desvinculado com sucesso." }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError,
+                    messages = new string[] { ex.GetBaseException().Message }
+                });
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult> DownloadUbl(string id)
         {
@@ -160,7 +183,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
 
             byte[] fileBytes = doc.UblFormat;
 
-            return File(fileBytes, "application/xml", doc.DocumentId + ".xml");
+            return File(fileBytes, "application/xml");
         }
 
         [HttpGet]
@@ -173,7 +196,19 @@ namespace EspapMiddleware.SVFMonitor.Controllers
 
             byte[] fileBytes = doc.PdfFormat;
 
-            return File(fileBytes, "application/pdf", doc.DocumentId + ".pdf");
+            return File(fileBytes, "application/pdf");
+        }
+
+        public async Task<ActionResult> DownloadAttachs(string id)
+        {
+            var doc = await _monitorServices.GetDocumentDetail(id);
+
+            if (doc == null || doc.Attachs == null)
+                return HttpNotFound();
+
+            byte[] fileBytes = doc.Attachs;
+
+            return File(fileBytes, "application/zip");
         }
 
         [HttpGet]
