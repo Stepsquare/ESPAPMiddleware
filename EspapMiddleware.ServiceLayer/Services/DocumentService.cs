@@ -747,6 +747,18 @@ namespace EspapMiddleware.ServiceLayer.Services
                 },
             };
 
+            if (contract.attachs != null)
+            {
+                obj.DocumentFiles.Add(
+                    new DocumentFile()
+                    {
+                        DocumentId = contract.documentId,
+                        DocumentFileTypeId = DocumentFileTypeEnum.Attachs,
+                        Content = Convert.FromBase64String(contract.attachs),
+                        ContentType = "application/zip"
+                    });
+            }
+
             obj.DocumentLines = new List<DocumentLine>();
 
             int currentIteration = 0;

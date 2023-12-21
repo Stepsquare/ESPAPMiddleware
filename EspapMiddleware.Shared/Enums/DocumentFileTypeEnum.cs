@@ -9,6 +9,7 @@ namespace EspapMiddleware.Shared.Enums
     public enum DocumentFileTypeEnum
     {
         Ubl = 1,
-        Pdf = 2
+        Pdf = 2,
+        Attachs = 3
     }
 }
