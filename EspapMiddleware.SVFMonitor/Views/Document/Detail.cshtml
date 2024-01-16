@@ -113,7 +113,7 @@
                     </a>
                 }
 
-                @if (Model.TypeId == DocumentTypeEnum.Fatura && Model.StateId == DocumentStateEnum.Devolvido)
+                @if (Model.TypeId == DocumentTypeEnum.Fatura && Model.StateId != DocumentStateEnum.EmitidoPagamento)
                 {
                     <a id="reset_compromise_btn" class="ig-sec-link" href="javascript:void(0);">
                         <i class="fas fa-undo"></i> Desvincular Compromisso

@@ -532,7 +532,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     if (contract.stateId.HasValue
                         && contract.stateId == (int)DocumentStateEnum.Devolvido
-                        && documentToUpdate.TypeId == DocumentTypeEnum.Fatura)
+                        && documentToUpdate.TypeId == DocumentTypeEnum.Fatura
+                        && documentToUpdate.StateId != DocumentStateEnum.Devolvido)
                     {
                         var setEstadoDocFaturacaoResponse = await RequestSetEstadoDocFaturacao(documentToUpdate);
 
@@ -542,7 +543,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                             MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
                             Date = DateTime.Now,
                             MessageCode = setEstadoDocFaturacaoResponse != null ? setEstadoDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg : "500",
-                            MessageContent = setEstadoDocFaturacaoResponse != null ? setEstadoDocFaturacaoResponse.messages.FirstOrDefault().msg : "Falha de comunicação. Reenviar pedido mais tarde."
+                            MessageContent = setEstadoDocFaturacaoResponse != null ? setEstadoDocFaturacaoResponse.messages.FirstOrDefault()?.msg : "Falha de comunicação. Reenviar pedido mais tarde."
                         });
                     }
 

@@ -69,8 +69,8 @@ namespace EspapMiddleware.ServiceLayer.Services
                                         && (!filters.UntilDate.HasValue || x.CreatedOn <= filters.UntilDate)
                                         && (string.IsNullOrEmpty(filters.SupplierFiscalId) || x.SupplierFiscalId.Contains(filters.SupplierFiscalId))
                                         && (string.IsNullOrEmpty(filters.SchoolYear) || x.SchoolYear == filters.SchoolYear)
-                                        && (string.IsNullOrEmpty(filters.CompromiseNumber) || x.CompromiseNumber == filters.CompromiseNumber)
-                                        && (string.IsNullOrEmpty(filters.ReferenceNumber) || x.ReferenceNumber == filters.ReferenceNumber)
+                                        && (string.IsNullOrEmpty(filters.CompromiseNumber) || x.CompromiseNumber.Contains(filters.CompromiseNumber))
+                                        && (string.IsNullOrEmpty(filters.ReferenceNumber) || x.ReferenceNumber.Contains(filters.ReferenceNumber))
                                         && (!filters.State.HasValue || x.StateId == filters.State)
                                         && (!filters.Type.HasValue || x.TypeId == filters.Type)
                                         && (string.IsNullOrEmpty(filters.MeId) || x.MEId == filters.MeId)
@@ -305,7 +305,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
                     Date = DateTime.Now,
                     MessageCode = setEstadoDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
-                    MessageContent = setEstadoDocFaturacaoResponse.messages.FirstOrDefault().msg
+                    MessageContent = setEstadoDocFaturacaoResponse.messages.FirstOrDefault()?.msg
                 });
 
                 unitOfWork.Documents.Update(docToReset);
