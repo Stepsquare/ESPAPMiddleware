@@ -24,7 +24,7 @@ namespace EspapMiddleware.WcfService
                         Dependency.OnValue("environment", (EnvironmentConfig)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/environment")),
                         Dependency.OnValue("webservices", (NameValueCollection)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/webServices"))}
                     ),
-                Component.For<IDocumentService, DocumentService>(),
+                Component.For<IWcfServices, WcfServices>(),
                 Component.For<IService, Service>());
         }
     }

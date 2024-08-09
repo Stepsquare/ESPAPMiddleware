@@ -16,12 +16,12 @@ using System.Threading.Tasks;
 
 namespace EspapMiddleware.ServiceLayer.Services
 {
-    public class SyncronizationService : ISyncronizationService
+    public class SyncronizationServices : ISyncronizationServices
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IGenericRestRequestManager _genericRestRequestManager;
 
-        public SyncronizationService(IUnitOfWorkFactory unitOfWorkFactory, IGenericRestRequestManager genericRestRequestManager)
+        public SyncronizationServices(IUnitOfWorkFactory unitOfWorkFactory, IGenericRestRequestManager genericRestRequestManager)
         {
             _genericRestRequestManager = genericRestRequestManager;
 

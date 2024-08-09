@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace EspapMiddleware.ServiceLayer.Services
 {
-    public class MonitorService : IMonitorService
+    public class MonitorService : IMonitorServices
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IGenericRestRequestManager _genericRestRequestManager;

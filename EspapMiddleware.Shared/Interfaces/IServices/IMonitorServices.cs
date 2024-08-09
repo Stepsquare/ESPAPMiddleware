@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace EspapMiddleware.Shared.Interfaces.IServices
 {
-    public interface IMonitorService
+    public interface IMonitorServices
     {
         #region RequestLogs
         Task<PaginatedResult<RequestLog>> RequestLogSearch(RequestLogSearchFilters filters);

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EspapMiddleware.Shared.Interfaces.IServices
 {
-    public interface IDocumentService
+    public interface IWcfServices
     {
         Task AddFailedRequestLog(RequestLogTypeEnum type, Exception ex, Guid uniqueId, string supplierFiscalId, string referenceNumber, string documentId);
 

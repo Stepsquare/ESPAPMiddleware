@@ -90,9 +90,9 @@
     <Compile Include="Helpers\OutboundMessageInspector\EndpointBehavior.cs" />
     <Compile Include="Helpers\OutboundMessageInspector\MessageInspector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\DocumentService.cs" />
+    <Compile Include="Services\WcfServices.cs" />
     <Compile Include="Services\MonitorService.cs" />
-    <Compile Include="Services\SyncronizationService.cs" />
+    <Compile Include="Services\SyncronizationServices.cs" />
     <Compile Include="UnitOfWorkFactory\UnitOfWorkFactory.cs" />
   </ItemGroup>
   <ItemGroup>

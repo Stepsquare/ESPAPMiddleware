@@ -24,9 +24,9 @@ namespace EspapMiddleware.WcfService
 {
     public class Service : IService
     {
-        private readonly IDocumentService _service;
+        private readonly IWcfServices _service;
 
-        public Service(IDocumentService service)
+        public Service(IWcfServices service)
         {
             _service = service;
         }

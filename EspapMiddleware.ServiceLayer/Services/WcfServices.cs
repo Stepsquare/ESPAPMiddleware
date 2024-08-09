@@ -22,12 +22,12 @@ using System.Web.Hosting;
 
 namespace EspapMiddleware.ServiceLayer.Services
 {
-    public class DocumentService : IDocumentService
+    public class WcfServices : IWcfServices
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IGenericRestRequestManager _genericRestRequestManager;
 
-        public DocumentService(IUnitOfWorkFactory unitOfWorkFactory, IGenericRestRequestManager genericRestRequestManager)
+        public WcfServices(IUnitOfWorkFactory unitOfWorkFactory, IGenericRestRequestManager genericRestRequestManager)
         {
             _genericRestRequestManager = genericRestRequestManager;
 

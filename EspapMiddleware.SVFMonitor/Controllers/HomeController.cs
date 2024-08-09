@@ -15,9 +15,9 @@ namespace EspapMiddleware.SVFMonitor.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IMonitorService _monitorServices;
+        private readonly IMonitorServices _monitorServices;
 
-        public HomeController(IMonitorService monitorServices)
+        public HomeController(IMonitorServices monitorServices)
         {
             _monitorServices = monitorServices;
         }

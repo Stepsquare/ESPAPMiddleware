@@ -28,7 +28,7 @@ namespace EspapMiddleware.SVFMonitor.Ioc
                         Dependency.OnValue("environment", (EnvironmentConfig)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/environment")),
                         Dependency.OnValue("webservices", (NameValueCollection)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/webServices"))}
                     ),
-                Component.For<IMonitorService>().ImplementedBy<MonitorService>());
+                Component.For<IMonitorServices>().ImplementedBy<MonitorService>());
         }
     }
 }

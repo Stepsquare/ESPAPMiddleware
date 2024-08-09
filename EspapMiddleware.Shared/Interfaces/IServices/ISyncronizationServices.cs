@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EspapMiddleware.Shared.Interfaces.IServices
 {
-    public interface ISyncronizationService
+    public interface ISyncronizationServices
     {
         Task SigefeBulkSyncronization();
         Task FeapBulkSyncronization();

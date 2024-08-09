@@ -14,9 +14,9 @@ namespace EspapMiddleware.SVFMonitor.Controllers
 {
     public class DocumentController : Controller
     {
-        private readonly IMonitorService _monitorServices;
+        private readonly IMonitorServices _monitorServices;
 
-        public DocumentController(IMonitorService monitorServices)
+        public DocumentController(IMonitorServices monitorServices)
         {
             _monitorServices = monitorServices;
         }

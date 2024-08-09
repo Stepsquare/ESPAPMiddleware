@@ -15,9 +15,9 @@ namespace EspapMiddleware.SVFMonitor.Controllers
 {
     public class RequestLogController : Controller
     {
-        private readonly IMonitorService _monitorServices;
+        private readonly IMonitorServices _monitorServices;
 
-        public RequestLogController(IMonitorService monitorServices)
+        public RequestLogController(IMonitorServices monitorServices)
         {
             _monitorServices = monitorServices;
         }

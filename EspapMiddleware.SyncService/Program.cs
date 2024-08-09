@@ -32,7 +32,7 @@ namespace EspapMiddleware.SyncService
                     new NamedParameter("environment", (EnvironmentConfig)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/environment")),
                     new NamedParameter("webservices", (NameValueCollection)ConfigurationManager.GetSection("FaturacaoWebServicesConfig/webServices")) 
                 });
-            builder.RegisterType<ServiceLayer.Services.SyncronizationService>().As<ISyncronizationService>();
+            builder.RegisterType<ServiceLayer.Services.SyncronizationServices>().As<ISyncronizationServices>();
             builder.RegisterType<SyncronizationService>();
 
             var container = builder.Build();
