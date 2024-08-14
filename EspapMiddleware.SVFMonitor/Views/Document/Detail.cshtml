@@ -17,9 +17,12 @@
                         <i class="fas fa-download"></i> Downloads <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
-                        <li><a href="@Url.Action("DownloadUbl", "Document", new { id = Model.DocumentId })">UBL</a></li>
-                        <li><a href="@Url.Action("DownloadPdf", "Document", new { id = Model.DocumentId })">PDF</a></li>
-                        <li><a href="@Url.Action("DownloadAttachs", "Document", new { id = Model.DocumentId })">Attachs</a></li>
+                        <li><a href="@Url.Action("DownloadDocumentFile", "Document", new { id = Model.UblFileId })">UBL</a></li>
+                        <li><a href="@Url.Action("DownloadDocumentFile", "Document", new { id = Model.PdfFileId })">PDF</a></li>
+                        @if (Model.AttachsFileId.HasValue)
+                        {
+                            <li><a href="@Url.Action("DownloadDocumentFile", "Document", new { id = Model.AttachsFileId })">Attachs</a></li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -270,7 +273,7 @@
                                         </td>
                                     }
 
-                                    <td><a class="btn ig-btn-round" title="Download XML" href="@Url.Action("Download", "RequestLog", new { uniqueId = log.UniqueId, type = log.RequestLogTypeId })"><i class="fas fa-download"></i></a></td>
+                                    <td><a class="btn ig-btn-round" title="Download XML" href="@Url.Action("DownloadRequestLogFile", "RequestLog", new { id = log.RequestLogFileId })" @(!log.RequestLogFileId.HasValue ? "disabled" : "")><i class="fas fa-download"></i></a></td>
                                 </tr>
 
                                 if (!log.Successful)
@@ -281,9 +284,10 @@
                                                 <div>
                                                     <p><strong>Erro:</strong></p>
                                                     <ul>
-                                                        <li>@log.ExceptionType</li>
-                                                        <li>@log.ExceptionMessage</li>
-                                                        <li>@log.ExceptionStackTrace</li>
+                                                        <li><strong>Tipo:</strong> @log.ExceptionType</li>
+                                                        <li><strong>Mensagem:</strong> @log.ExceptionMessage</li>
+                                                        <li><strong>Linha:</strong> @log.ExceptionAtLine</li>
+                                                        <li><strong>Classe:</strong> @log.ExceptionAtFile</li>
                                                     </ul>
                                                 </div>
                                             </div>

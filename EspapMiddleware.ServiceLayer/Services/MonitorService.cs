@@ -1,4 +1,5 @@
-﻿using EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector;
+﻿using EspapMiddleware.ServiceLayer.Helpers;
+using EspapMiddleware.ServiceLayer.Helpers.OutboundMessageInspector;
 using EspapMiddleware.Shared.Entities;
 using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.Exceptions;
@@ -12,8 +13,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace EspapMiddleware.ServiceLayer.Services
 {
@@ -51,6 +54,12 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
                 return await unitOfWork.RequestLogs.Find(x => x.UniqueId == uniqueId && x.RequestLogTypeId == type);
+        }
+
+        public async Task<RequestLogFile> GetRequestLogFile(int id)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+                return await unitOfWork.RequestLogFiles.Find(x => x.Id == id);
         }
 
         #endregion
@@ -339,6 +348,12 @@ namespace EspapMiddleware.ServiceLayer.Services
                     throw new DatabaseException("Erro de comunicação com BD.");
                 }
             }
+        }
+
+        public async Task<DocumentFile> GetFilesForDownload(int id)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+                return await unitOfWork.DocumentFiles.Find(x => x.Id == id);
         }
 
         #endregion
@@ -856,6 +871,16 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             var uniqueId = Guid.NewGuid();
 
+            var requestLog = new RequestLog
+            {
+                UniqueId = uniqueId,
+                RequestLogTypeId = RequestLogTypeEnum.SetDocument,
+                DocumentId = document.DocumentId,
+                SupplierFiscalId = document.SupplierFiscalId,
+                ReferenceNumber = document.ReferenceNumber,
+                Date = DateTime.Now
+            };
+
             try
             {
                 using (var client = new FEAPServices_PP.FEAPServicesClient())
@@ -870,7 +895,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     var serviceContextHeader = new FEAPServices_PP.ServiceContextHeader()
                     {
                         Application = "FaturacaoEletronica",
-                        ProcessId = document.DocumentId
+                        ProcessId = document.DocumentId,
                     };
 
                     var setDocumentRequest = new FEAPServices_PP.SetDocumentRequest()
@@ -960,34 +985,31 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                     await client.SetDocumentAsync(serviceContextHeader, setDocumentRequest);
 
-                    return new RequestLog()
-                    {
-                        UniqueId = uniqueId,
-                        RequestLogTypeId = RequestLogTypeEnum.SetDocument,
-                        DocumentId = document.DocumentId,
-                        SupplierFiscalId = document.SupplierFiscalId,
-                        ReferenceNumber = document.ReferenceNumber,
-                        Date = DateTime.Now,
-                        Successful = true
-                    };
+                    requestLog.Successful = true;
                 }
             }
             catch (Exception ex)
             {
-                return new RequestLog()
+                var stackTrace = new StackTrace(ex, fNeedFileInfo: true);
+                var firstFrame = stackTrace.FrameCount > 0 ? stackTrace.GetFrame(0) : null;
+
+                requestLog.Successful = false;
+                requestLog.ExceptionType = ex.GetBaseException().GetType().Name;
+                requestLog.ExceptionAtFile = firstFrame?.GetFileName();
+                requestLog.ExceptionAtLine = firstFrame?.GetFileLineNumber();
+                requestLog.ExceptionMessage = ex.GetBaseException().Message;
+            }
+
+            if (FileManager.FileExists(requestLog.RequestLogTypeId.ToString(), uniqueId.ToString()))
+            {
+                requestLog.RequestLogFile = new RequestLogFile
                 {
-                    UniqueId = uniqueId,
-                    RequestLogTypeId = RequestLogTypeEnum.SetDocument,
-                    DocumentId = document.DocumentId,
-                    SupplierFiscalId = document.SupplierFiscalId,
-                    ReferenceNumber = document.ReferenceNumber,
-                    Date = DateTime.Now,
-                    Successful = false,
-                    ExceptionType = ex.GetBaseException().GetType().Name,
-                    ExceptionStackTrace = ex.GetBaseException().StackTrace,
-                    ExceptionMessage = ex.GetBaseException().Message
+                    Content = FileManager.GetFile(requestLog.RequestLogTypeId.ToString(), uniqueId.ToString()),
+                    ContentType = "application/xml"
                 };
             }
+
+            return requestLog;
         }
 
         private async Task<SetDocFaturacaoResponse> RequestSetDocFaturacao(Document document)
@@ -1013,7 +1035,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                 id_me_fatura = document.MEId,
                 num_fatura = document.ReferenceNumber,
                 total_fatura = document.TotalAmount,
-                fatura_base64 = Convert.ToBase64String(document.PdfFormat),
+                fatura_base64 = Convert.ToBase64String(document.PdfFile.Content),
                 dt_fatura = document.IssueDate.ToString("dd-MM-yyyy"),
                 num_compromisso = document.CompromiseNumber,
             };
@@ -1025,10 +1047,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                     break;
                 case DocumentTypeEnum.NotaCrédito:
                     faturaToSend.tp_doc = "NTC";
-                    faturaToSend.num_doc_rel = document.RelatedReferenceNumber;
-                    break;
-                case DocumentTypeEnum.NotaDébito:
-                    faturaToSend.tp_doc = "NTD";
                     faturaToSend.num_doc_rel = document.RelatedReferenceNumber;
                     break;
                 default:

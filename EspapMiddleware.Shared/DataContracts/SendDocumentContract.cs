@@ -93,85 +93,8 @@ namespace EspapMiddleware.Shared.DataContracts
         public string TotalAmount { get; private set; }
         public string CompromiseNumber { get; private set; }
         public string RelatedReferenceNumber { get; private set; }
-        public string SchoolYear { get; set; }
+
         public List<InvoiceLineModel> InvoiceLines { get; private set; }
-
-        [Obsolete("Validate is deprecated, please use webservice validation instead.")]
-        public void Validate()
-        {
-            List<string> errors = new List<string>();
-
-            if (string.IsNullOrEmpty(TotalAmount))
-                errors.Add("Foi impossivel extrair o valor total do documento no ficheiro UBL fornecido.");
-
-            if (documentType == DocumentTypeEnum.Fatura && string.IsNullOrEmpty(CompromiseNumber))
-                errors.Add("Foi impossivel extrair o nº de compromisso do documento no ficheiro UBL fornecido.");
-
-            if (documentType != DocumentTypeEnum.Fatura && string.IsNullOrEmpty(RelatedReferenceNumber))
-                errors.Add("Número de fatura relacionada é obrigatório na submissão de notas de crédito e débito. Foi impossivel extrair o valor do ficheiro UBL fornecido.");
-
-            foreach (var line in InvoiceLines)
-            {
-                if (string.IsNullOrEmpty(line.StandardItemIdentification))
-                    errors.Add($"A linha {line.Id} do documento não tem identificador ISBN válido no ficheiro UBL fornecido.");
-            }
-
-            if (isAnUpdate)
-            {
-                if (stateId.HasValue && actionId.HasValue)
-                {
-                    errors.Add("Alterações de estado e acções sobre documentos são realizadas em pedidos distintos.");
-                }
-                else
-                {
-                    if (stateId.HasValue && !actionId.HasValue)
-                    {
-                        if (!stateDate.HasValue)
-                            errors.Add("Em alterações de estado a data de estado é obrigatória.");
-                    }
-
-                    if (actionId.HasValue && !stateId.HasValue)
-                    {
-                        if (!actionDate.HasValue)
-                            errors.Add("Em acções sobre documentos a data da acção é obrigatória.");
-
-                        if (string.IsNullOrWhiteSpace(feapPortalUser))
-                            errors.Add("Utilizador FE-AP obrigatório ao realizar acções sobre documentos.");
-                    }
-
-                    if (!actionId.HasValue && !stateId.HasValue)
-                    {
-                        if (!actionDate.HasValue)
-                            errors.Add("Atualizaçao de documento sem atualizaçao de estado ou acçaõ válida.");
-                    }
-                }
-            }
-            else
-            {
-                if (!stateId.HasValue || stateId.Value != DocumentStateEnum.Iniciado)
-                {
-                    errors.Add("Estado iniciado é obrigatorio para um novo Documento.");
-
-                    if (!stateDate.HasValue)
-                        errors.Add("Data de Estado é obrigatorio para um novo Documento.");
-                }
-            }
-
-            if (errors.Any())
-                throw new ContractValidationException(errors.ToArray());
-        }
-
-        [Obsolete("ValidateCompromiseNumber is deprecated, please use webservice validation instead.")]
-        public void ValidateCompromiseNumber()
-        {
-            if (string.IsNullOrEmpty(CompromiseNumber))
-                throw new ContractValidationException("Foi impossivel extrair o nº de compromisso do documento no ficheiro UBL fornecido.");
-
-            var megaTypologyList = new List<string> { "_M1", "_M2", "_M3", "_MS" };
-
-            if (!megaTypologyList.Any(s => CompromiseNumber.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) >= 0))
-                throw new ContractValidationException($"O Compromisso '{CompromiseNumber}' não está em conformidade com a tipologia do MEGA. Documento ignorado.");
-        }
 
         private void ExtractFromUblFormat(XmlDocument document)
         {

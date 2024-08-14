@@ -17,10 +17,14 @@ namespace EspapMiddleware.Shared.Entities
         public DateTime Date { get; set; }
         public bool Successful { get; set; }
         public string ExceptionType { get; set; }
-        public string ExceptionStackTrace { get; set; }
+        public string ExceptionAtFile { get; set; }
+        public int? ExceptionAtLine { get; set; }
         public string ExceptionMessage { get; set; }
+        public int? RequestLogFileId { get; set; }
+
 
         public virtual RequestLogType RequestLogType { get; set; }
         public virtual Document Document { get; set; }
+        public virtual RequestLogFile RequestLogFile { get; set; }
     }
 }

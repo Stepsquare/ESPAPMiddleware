@@ -11,11 +11,12 @@ namespace EspapMiddleware.ServiceLayer.Helpers
 {
     public static class FileManager
     {
-        public static void SaveFile(string service,  string content, string uniqueId = null)
+        public static void SaveFile(string service, string content, string uniqueId = null)
         {
             try
             {
                 XmlDocument xdoc = new XmlDocument();
+
                 xdoc.LoadXml(content);
 
                 if (string.IsNullOrEmpty(uniqueId))
@@ -50,6 +51,27 @@ namespace EspapMiddleware.ServiceLayer.Helpers
             catch (Exception)
             {
                 return;
+            }
+        }
+
+        public static bool FileExists(string service, string uniqueId)
+        {
+            string path = ConfigurationManager.AppSettings["LogDirectory"] + $@"\{service}\{uniqueId}.xml";
+
+            return File.Exists(path);
+        }
+
+        public static byte[] GetFile(string service, string uniqueId)
+        {
+            string path = ConfigurationManager.AppSettings["LogDirectory"] + $@"\{service}\{uniqueId}.xml";
+
+            try
+            {
+                return File.ReadAllBytes(path);
+            }
+            finally
+            {
+                File.Delete(path);
             }
         }
     }

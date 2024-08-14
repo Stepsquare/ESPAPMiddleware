@@ -42,24 +42,14 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Download(Guid uniqueId, RequestLogTypeEnum type)
+        public async Task<ActionResult> DownloadRequestLogFile(int id)
         {
-            try
-            {
-                var log = await _monitorServices.GetLogForDownload(uniqueId, type);
+            var file = await _monitorServices.GetRequestLogFile(id);
 
-                var fileName = log.UniqueId.ToString() + ".xml";
-
-                var path = Path.Combine(new string[] { ConfigurationManager.AppSettings["LogDirectory"], log.RequestLogTypeId.ToString(), fileName });
-
-                byte[] fileBytes = System.IO.File.ReadAllBytes(path);
-
-                return File(fileBytes, "application/xml", fileName);
-            }
-            catch (Exception)
-            {
+            if (file == null)
                 return HttpNotFound();
-            }
+
+            return File(file.Content, file.ContentType);
         }
 
         [HttpGet]

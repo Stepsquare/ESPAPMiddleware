@@ -8,6 +8,10 @@ body {
     overflow-x: hidden;
 }
 
+a[disabled], ul.pagination li.disabled a {
+    pointer-events: none;
+}
+
 /* Toggle Styles */
 
 #wrapper {

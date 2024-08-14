@@ -8,7 +8,7 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 {
     public interface ISyncronizationServices
     {
-        Task SigefeBulkSyncronization();
-        Task FeapBulkSyncronization();
+        Task UnprocessedSyncronizationSigefe();
+        Task PaidDocsSyncSyncronizationFeap();
     }
 }

@@ -33,6 +33,8 @@ namespace EspapMiddleware.WcfService
 
         public void SendDocument(SendDocumentRequest request)
         {
+            DateTime receivedOn = DateTime.Now;
+
             try
             {
                 if (request.SendDocumentMCIn.isAnUpdate)
@@ -41,12 +43,35 @@ namespace EspapMiddleware.WcfService
                 }
                 else
                 {
-                    _service.AddDocumentV2(request.SendDocumentMCIn).GetAwaiter().GetResult();
+                    var insertedDocument = _service.AddDocument(request.SendDocumentMCIn).GetAwaiter().GetResult();
+
+                    if (insertedDocument.TypeId == DocumentTypeEnum.Fatura)
+                        _service.ProcessInvoice(insertedDocument).GetAwaiter().GetResult();
+
+                    if (insertedDocument.TypeId == DocumentTypeEnum.NotaCrédito)
+                        _service.ProcessCreditNote(insertedDocument).GetAwaiter().GetResult();
                 }
+
+                _service.AddSuccessRequestLog(
+                    RequestLogTypeEnum.SendDocument,
+                    request.SendDocumentMCIn.uniqueId,
+                    request.SendDocumentMCIn.supplierFiscalId,
+                    request.SendDocumentMCIn.referenceNumber,
+                    request.SendDocumentMCIn.documentId,
+                    receivedOn
+                ).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
-                _service.AddFailedRequestLog(RequestLogTypeEnum.SendDocument, ex, request.SendDocumentMCIn.uniqueId, request.SendDocumentMCIn.supplierFiscalId, request.SendDocumentMCIn.referenceNumber, request.SendDocumentMCIn.documentId);
+                _service.AddFailedRequestLog(
+                    ex,
+                    RequestLogTypeEnum.SendDocument,
+                    request.SendDocumentMCIn.uniqueId,
+                    request.SendDocumentMCIn.supplierFiscalId,
+                    request.SendDocumentMCIn.referenceNumber,
+                    request.SendDocumentMCIn.documentId,
+                    receivedOn
+                ).GetAwaiter().GetResult();
 
                 throw ex;
             }
@@ -54,13 +79,32 @@ namespace EspapMiddleware.WcfService
 
         public void SetDocumentResult(SetDocumentResultRequest request)
         {
+            DateTime receivedOn = DateTime.Now;
+
             try
             {
                 _service.SyncDocument(request.SetDocumentResultMCIn).GetAwaiter().GetResult();
+
+                _service.AddSuccessRequestLog(
+                    RequestLogTypeEnum.SendDocument,
+                    request.SetDocumentResultMCIn.uniqueId,
+                    request.SetDocumentResultMCIn.supplierFiscalId,
+                    request.SetDocumentResultMCIn.referenceNumber,
+                    request.SetDocumentResultMCIn.documentId,
+                    receivedOn
+                ).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
-                _service.AddFailedRequestLog(RequestLogTypeEnum.SetDocumentResult, ex, request.SetDocumentResultMCIn.uniqueId, request.SetDocumentResultMCIn.supplierFiscalId, request.SetDocumentResultMCIn.referenceNumber, request.SetDocumentResultMCIn.documentId);
+                _service.AddFailedRequestLog(
+                    ex,
+                    RequestLogTypeEnum.SetDocumentResult,
+                    request.SetDocumentResultMCIn.uniqueId,
+                    request.SetDocumentResultMCIn.supplierFiscalId,
+                    request.SetDocumentResultMCIn.referenceNumber,
+                    request.SetDocumentResultMCIn.documentId,
+                    receivedOn
+                ).GetAwaiter().GetResult();
 
                 throw ex;
             }

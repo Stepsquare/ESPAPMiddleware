@@ -15,11 +15,10 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         #region RequestLogs
         Task<PaginatedResult<RequestLog>> RequestLogSearch(RequestLogSearchFilters filters);
         Task<RequestLog> GetLogForDownload(Guid uniqueId, RequestLogTypeEnum type);
-
+        Task<RequestLogFile> GetRequestLogFile(int id);
         #endregion
 
         #region Documents
-
         Task<PaginatedResult<Document>> DocumentSearch(DocumentSearchFilters filters);
         Task<Document> GetDocumentDetail(string documentId);
         Task<PaginatedResult<DocumentLine>> GetDocumentLinesForDetail(DocumentDetailLineFilter filters);
@@ -29,11 +28,10 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         Task ReturnDocument(string documentId, string reason);
         Task ResetCompromiseNumber(string documentId);
         Task ResetSigefeSync(string documentId);
-
+        Task<DocumentFile> GetFilesForDownload(int id);
         #endregion
 
         #region Homepage
-
         Task<string> GetCurrentSchoolYear();
         Task<int> GetTotalDocument(string anoLetivo, bool? isSynchronizedWithFEAP = null);
         Task<int> GetTotalDocumentsByType(string anoLetivo, DocumentTypeEnum typeId, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null);
@@ -45,7 +43,6 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         Task<int> GetTotalCreditNotesToReprocess();
         Task ReprocessCreditNotes();
         Task ReturnDebitNotes();
-
         #endregion
     }
 }

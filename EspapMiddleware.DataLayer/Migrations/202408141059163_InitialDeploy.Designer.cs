@@ -7,13 +7,13 @@ namespace EspapMiddleware.DataLayer.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class Initial_Deploy : IMigrationMetadata
+    public sealed partial class InitialDeploy : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(Initial_Deploy));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(InitialDeploy));
         
         string IMigrationMetadata.Id
         {
-            get { return "202309181530474_Initial_Deploy"; }
+            get { return "202408141059163_InitialDeploy"; }
         }
         
         string IMigrationMetadata.Source

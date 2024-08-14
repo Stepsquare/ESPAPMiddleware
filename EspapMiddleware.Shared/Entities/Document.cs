@@ -27,9 +27,9 @@ namespace EspapMiddleware.Shared.Entities
         public string CompromiseNumber { get; set; }
         public string TotalAmount { get; set; }
 
-        public byte[] UblFormat { get; set; }
-        public byte[] PdfFormat { get; set; }
-        public byte[] Attachs { get; set; }
+        public int UblFileId { get; set; }
+        public int PdfFileId { get; set; }
+        public int? AttachsFileId { get; set; }
 
         public DocumentStateEnum StateId { get; set; }
         public DateTime StateDate { get; set; }
@@ -37,6 +37,8 @@ namespace EspapMiddleware.Shared.Entities
         public DocumentActionEnum? ActionId { get; set; }
         public DateTime? ActionDate { get; set; }
 
+        public bool IsMEGA { get; set; }
+        public bool IsProcessed { get; set; }
         public bool IsSynchronizedWithSigefe { get; set; }
         public bool IsSynchronizedWithFEAP { get; set; }
 
@@ -51,5 +53,8 @@ namespace EspapMiddleware.Shared.Entities
         public ICollection<RequestLog> RequestLogs { get; set; }
         public ICollection<DocumentLine> DocumentLines { get; set; }
         public ICollection<DocumentMessage> DocumentMessages { get; set; }
+        public virtual DocumentFile UblFile { get; set; }
+        public virtual DocumentFile PdfFile { get; set; }
+        public virtual DocumentFile AttachsFile { get; set; }
     }
 }

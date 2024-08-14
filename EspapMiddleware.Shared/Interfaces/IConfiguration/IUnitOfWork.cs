@@ -10,9 +10,11 @@ namespace EspapMiddleware.Shared.Interfaces.IConfiguration
     public interface IUnitOfWork : IDisposable
     {
         IDocumentRepository Documents { get; }
-        IRequestLogRepository RequestLogs { get; }
         IDocumentMessageRepository DocumentMessages { get; }
         IDocumentLineRepository DocumentLines { get; }
+        IDocumentFileRepository DocumentFiles { get; }
+        IRequestLogRepository RequestLogs { get; }
+        IRequestLogFileRepository RequestLogFiles { get; }
         Task<int> SaveChangesAsync();
     }
 }
