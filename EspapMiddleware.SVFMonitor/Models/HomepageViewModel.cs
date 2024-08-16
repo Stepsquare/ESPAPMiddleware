@@ -7,7 +7,7 @@ namespace EspapMiddleware.SVFMonitor.Models
 {
     public class HomepageViewModel
     {
-        public string[] SchoolYears { get; set; }
+        public Dictionary<string, string> SchoolYears { get; set; }
         public string CurrentSchoolYear { get; set; }
     }
 }

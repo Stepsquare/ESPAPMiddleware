@@ -26,12 +26,18 @@ namespace EspapMiddleware.SVFMonitor.Controllers
 
         public async Task<ActionResult> Index()
         {
-            var anosLetivos = await _monitorServices.GetSchoolYears();
+            var getFaseResponse = await _monitorServices.GetFase();
+
+            var schoolYears = new Dictionary<string, string>
+            {
+                { getFaseResponse.id_ano_letivo_atual, getFaseResponse.des_id_ano_letivo_atual },
+                { getFaseResponse.id_ano_letivo_anterior, getFaseResponse.des_id_ano_letivo_anterior}
+            };
 
             var model = new HomepageViewModel
             {
-                SchoolYears = anosLetivos.ToArray(),
-                CurrentSchoolYear = await _monitorServices.GetCurrentSchoolYear()
+                SchoolYears = schoolYears,
+                CurrentSchoolYear = getFaseResponse.id_ano_letivo_atual
             };
 
             return View(model);
@@ -44,11 +50,13 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         [HttpPost]
         public async Task<PartialViewResult> GetGlobalStatus(string anoLetivo)
         {
+            var getFaseResponse = await _monitorServices.GetFase();
+
             var model = new HomepageStatusPartialViewModel
             {
                 Total = await _monitorServices.GetTotalDocument(anoLetivo),
                 TotalNotSyncFeap = await _monitorServices.GetTotalDocument(anoLetivo, false),
-                IsCurrentSchoolYear = await _monitorServices.GetCurrentSchoolYear() == anoLetivo,
+                IsCurrentSchoolYear = getFaseResponse.id_ano_letivo_atual == anoLetivo,
                 InvoiceStatus = new HomepageStatusPartialViewModel.InvoiceStatusObject
                 {
                     Total = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura),
@@ -164,29 +172,6 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                 {
                     statusCode = HttpStatusCode.OK,
                     messages = new string[] { "Notas de crédito reprocessadas com sucesso." }
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    statusCode = HttpStatusCode.InternalServerError,
-                    messages = new string[] { ex.GetBaseException().Message }
-                });
-            }
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> ReturnDebitNotes()
-        {
-            try
-            {
-                await _monitorServices.ReturnDebitNotes();
-
-                return Json(new
-                {
-                    statusCode = HttpStatusCode.OK,
-                    messages = new string[] { "Notas de débito devolvidas com sucesso." }
                 });
             }
             catch (Exception ex)

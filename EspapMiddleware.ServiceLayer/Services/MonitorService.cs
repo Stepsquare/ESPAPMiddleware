@@ -31,7 +31,13 @@ namespace EspapMiddleware.ServiceLayer.Services
             _genericRestRequestManager = genericRestRequestManager;
         }
 
+        public async Task<GetFaseResponse> GetFase()
+        {
+            return await _genericRestRequestManager.Get<GetFaseResponse>("getFase"); ;
+        }
+
         #region RequestLogs
+
         public async Task<PaginatedResult<RequestLog>> RequestLogSearch(RequestLogSearchFilters filters)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
@@ -50,12 +56,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                 };
         }
 
-        public async Task<RequestLog> GetLogForDownload(Guid uniqueId, RequestLogTypeEnum type)
-        {
-            using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.RequestLogs.Find(x => x.UniqueId == uniqueId && x.RequestLogTypeId == type);
-        }
-
         public async Task<RequestLogFile> GetRequestLogFile(int id)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
@@ -66,6 +66,7 @@ namespace EspapMiddleware.ServiceLayer.Services
 
 
         #region Documents
+
         public async Task<PaginatedResult<Document>> DocumentSearch(DocumentSearchFilters filters)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
@@ -105,12 +106,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                     TotalCount = await unitOfWork.DocumentLines.Count(x => x.DocumentId == filters.DocumentId),
                     Data = await unitOfWork.DocumentLines.GetFilteredPaginated(filters)
                 };
-        }
-
-        public async Task<IEnumerable<string>> GetSchoolYears()
-        {
-            using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.Documents.GetSchoolYears();
         }
 
         public async Task SyncSigefe(string documentId)
@@ -355,18 +350,11 @@ namespace EspapMiddleware.ServiceLayer.Services
             using (var unitOfWork = _unitOfWorkFactory.Create())
                 return await unitOfWork.DocumentFiles.Find(x => x.Id == id);
         }
-
+        
         #endregion
 
 
         #region Homepage
-
-        public async Task<string> GetCurrentSchoolYear()
-        {
-            var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-
-            return getFaseResponse?.id_ano_letivo_atual;
-        }
 
         public async Task<int> GetTotalDocument(string anoLetivo, bool? isSynchronizedWithFEAP = null)
         {
@@ -788,53 +776,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                     catch (Exception ex)
                     {
                         errors.Add($"{docToReprocess.DocumentId} - {ex.GetBaseException().Message}");
-                    }
-                }
-
-                if (errors.Count != 0)
-                    throw new SyncronizationException(errors.ToArray());
-            }
-        }
-
-        public async Task ReturnDebitNotes()
-        {
-            using (var unitOfWork = _unitOfWorkFactory.Create())
-            {
-                var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-
-                if (getFaseResponse == null)
-                    throw new Exception("Ano letivo não disponível.");
-
-                var debitNotesToReturn = await unitOfWork.Documents.GetFiltered(x => x.SchoolYear == getFaseResponse.id_ano_letivo_atual
-                                                                            && x.StateId == DocumentStateEnum.Iniciado
-                                                                            && x.TypeId == DocumentTypeEnum.NotaDébito);
-                
-                var errors = new List<string>();
-
-                foreach (var debitNoteToReturn in debitNotesToReturn)
-                {
-                    try
-                    {
-                        debitNoteToReturn.StateId = DocumentStateEnum.Devolvido;
-                        debitNoteToReturn.StateDate = DateTime.Now;
-
-                        debitNoteToReturn.IsSynchronizedWithSigefe = true;
-                        debitNoteToReturn.IsSynchronizedWithFEAP = false;
-
-                        var setDocumentRequestLog = await RequestSetDocument(debitNoteToReturn, "Documentos do tipo Nota de Débito não são compativeis com o programa MEGA.");
-                        
-                        unitOfWork.RequestLogs.Add(setDocumentRequestLog);
-
-                        unitOfWork.Documents.Update(debitNoteToReturn);
-
-                        var result = await unitOfWork.SaveChangesAsync();
-
-                        if (!setDocumentRequestLog.Successful)
-                            throw new Exception("Falha de comunicação com FEAP.");
-                    }
-                    catch (Exception ex)
-                    {
-                        errors.Add($"{debitNoteToReturn.DocumentId} - {ex.GetBaseException().Message}");
                     }
                 }
 

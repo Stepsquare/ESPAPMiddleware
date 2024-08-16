@@ -24,13 +24,13 @@
             <select class="form-control" id="school_year">
                 @foreach (var year in Model.SchoolYears)
                 {
-                    if (year == Model.CurrentSchoolYear)
+                    if (year.Key == Model.CurrentSchoolYear)
                     {
-                        <option value="@year" selected>@("20" + year.Insert(2, "/20"))</option>
+                        <option value="@year.Key" selected>@year.Key</option>
                     }
                     else
                     {
-                        <option value="@year">@("20" + year.Insert(2, "/20"))</option>
+                        <option value="@year.Key">@year.Key</option>
                     }
                 }
             </select>
@@ -174,34 +174,6 @@
                 }
             });
         }, "Reprocessar Notas de Crédito", "Tem a certeza que pretende reprocessar as notas de crédito?")
-    }
-
-    function returnDebitNotes() {
-        ShowConfirm(function () {
-            ShowLoadingModal();
-
-            $.ajax({
-                url: '@Url.Action("ReturnDebitNotes", "Home")',
-                type: "POST",
-                success: function (data) {
-                    if (data.statusCode == 200) {
-                        ShowSucessModal(data.messages, function () {
-                            location.reload();
-                        });
-                    } else {
-                        ShowErrorModal(data.messages, function () {
-                            location.reload();
-                        });
-                    }
-                },
-                error: function () {
-                    ShowErrorModal(["Ocorreu um erro."]);
-                },
-                complete: function () {
-                    HideLoadingModal();
-                }
-            });
-        }, "Devolver Notas de Débito", "Tem a certeza que pretende devolver as notas de débito?")
     }
 
     function getToSyncSigefeDocuments(pageIndex, pageSize) {

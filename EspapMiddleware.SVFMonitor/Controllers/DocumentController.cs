@@ -1,6 +1,7 @@
 ﻿using EspapMiddleware.Shared.Enums;
 using EspapMiddleware.Shared.Interfaces.IServices;
 using EspapMiddleware.Shared.MonitorServiceModels;
+using EspapMiddleware.Shared.WebServiceModels;
 using EspapMiddleware.SVFMonitor.Models;
 using System;
 using System.Collections.Generic;
@@ -187,12 +188,18 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         [HttpGet]
         public async Task<JsonResult> GetSchoolYears()
         {
-            var schoolYears = await _monitorServices.GetSchoolYears();
+            var getFaseResponse = await _monitorServices.GetFase();
 
-            return Json(schoolYears.Select(e => new ComboBoxViewModel()
+            var schoolYears = new Dictionary<string, string>
             {
-                Id = e,
-                Description = "20" + e.Insert(2, "/20")
+                { getFaseResponse.id_ano_letivo_atual, getFaseResponse.des_id_ano_letivo_atual },
+                { getFaseResponse.id_ano_letivo_anterior, getFaseResponse.des_id_ano_letivo_anterior}
+            };
+
+            return Json(schoolYears.Select(year => new ComboBoxViewModel()
+            {
+                Id = year.Key,
+                Description = year.Value
             }), JsonRequestBehavior.AllowGet);
         }
 
