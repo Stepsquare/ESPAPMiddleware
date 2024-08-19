@@ -186,7 +186,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                     if (!string.IsNullOrEmpty(documentResult.num_compromisso))
                         document.CompromiseNumber = documentResult.num_compromisso;
 
-                    document.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(documentResult.id_me_fatura);
                     document.IsSynchronizedWithFEAP = false;
 
                     //Caso 2.1 - Fatura Válida (id 35)
@@ -295,7 +294,6 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                     document.MEId = documentResult.id_me_fatura;
 
-                    document.IsSynchronizedWithSigefe = !string.IsNullOrEmpty(documentResult.id_me_fatura);
                     document.IsSynchronizedWithFEAP = false;
 
                     document.RelatedReferenceNumber = documentResult.num_doc_rel;
@@ -357,7 +355,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                     document.IsProcessed = true;
                 }
 
-                // 3.2 - Não foi encontrada fatura correspondente (status code 490)
+                // 3.3 - Não foi encontrada fatura correspondente (status code 490)
                 if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "490"))
                 {
                     document.IsMEGA = true;

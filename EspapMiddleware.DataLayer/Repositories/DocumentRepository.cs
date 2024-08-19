@@ -74,7 +74,7 @@ namespace EspapMiddleware.DataLayer.Repositories
                                         && (!filters.State.HasValue || x.StateId == filters.State)
                                         && (!filters.Type.HasValue || x.TypeId == filters.Type)
                                         && (string.IsNullOrEmpty(filters.MeId) || x.MEId == filters.MeId)
-                                        && (!filters.SigefeSyncronized.HasValue || x.IsSynchronizedWithSigefe == filters.SigefeSyncronized)
+                                        //&& (!filters.SigefeSyncronized.HasValue || x.IsSynchronizedWithSigefe == filters.SigefeSyncronized)
                                         && (!filters.FeapSyncronized.HasValue || x.IsSynchronizedWithFEAP == filters.FeapSyncronized))
                                 .OrderByDescending(x => x.CreatedOn)
                                 .Skip((filters.PageIndex - 1) * filters.PageSize).Take(filters.PageSize)
@@ -112,7 +112,7 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
-                                        && !x.IsSynchronizedWithSigefe
+                                        //&& !x.IsSynchronizedWithSigefe
                                         && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
                                                                     && m.MessageCode == "490")
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE 
@@ -129,7 +129,7 @@ namespace EspapMiddleware.DataLayer.Repositories
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(documentId) || x.DocumentId == documentId)
                                         && (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
-                                        && !x.IsSynchronizedWithSigefe
+                                        //&& !x.IsSynchronizedWithSigefe
                                         && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
                                                                     && m.MessageCode == "490")
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
@@ -142,7 +142,7 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
-                                        && !x.IsSynchronizedWithSigefe
+                                        //&& !x.IsSynchronizedWithSigefe
                                         && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
                                                                     && m.MessageCode == "490")
                                         && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
@@ -154,7 +154,7 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => x.SchoolYear == anoLetivo
-                                        && !x.IsSynchronizedWithSigefe
+                                        //&& !x.IsSynchronizedWithSigefe
                                         && x.TypeId == DocumentTypeEnum.NotaCrédito
                                         && x.StateId == DocumentStateEnum.Iniciado
                                         && !x.ActionId.HasValue
@@ -168,7 +168,7 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => x.SchoolYear == anoLetivo
-                                        && !x.IsSynchronizedWithSigefe
+                                        //&& !x.IsSynchronizedWithSigefe
                                         && x.TypeId == DocumentTypeEnum.NotaCrédito
                                         && x.StateId == DocumentStateEnum.Iniciado
                                         && !x.ActionId.HasValue

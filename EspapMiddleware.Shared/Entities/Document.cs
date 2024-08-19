@@ -39,7 +39,6 @@ namespace EspapMiddleware.Shared.Entities
 
         public bool IsMEGA { get; set; }
         public bool IsProcessed { get; set; }
-        public bool IsSynchronizedWithSigefe { get; set; }
         public bool IsSynchronizedWithFEAP { get; set; }
 
         public DateTime CreatedOn { get; set; }
