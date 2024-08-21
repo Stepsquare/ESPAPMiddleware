@@ -57,10 +57,17 @@
                         </select>
                     </div>
                     <div class="col-md-2 form-group">
-                        <label class="control-label">Sincronizado SIGeFE:</label>
-                        <select id="sigefe_syncronized_search" class="form-control">
+                        <label class="control-label">Processado:</label>
+                        <select id="is_processed_search" class="form-control">
                             <option value="">Todos</option>
                             <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Processado:</label>
+                        <select id="is_MEGA_search" class="form-control">
+                            <option value="true" selected>Sim</option>
                             <option value="false">Não</option>
                         </select>
                     </div>
@@ -166,7 +173,8 @@
                 state: $("#doc_state_search").data("kendoComboBox").value(),
                 meId: $("#me_id_search").val(),
                 feapSyncronized: $("#feap_syncronized_search").val(),
-                sigefeSyncronized: $("#sigefe_syncronized_search").val(),
+                isProcessed: $("#is_processed_search").val(),
+                isMEGA: $("#is_MEGA_search").val(),
                 pageIndex: pageIndex,
                 pageSize: pageSize
             },

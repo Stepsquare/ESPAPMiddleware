@@ -4283,11 +4283,6 @@ tr:hover span.ig-react-axislabel {
     -webkit-transition: all 0.2s ease;
 }
 
-span.badge.ig-reactbadge-alert, span.badge.ig-reactbadge-success {
-    display: table;
-    margin-top: 2px;
-}
-
 span.badge.ig-reactbadge-alert {
     background: #f8971d;
 }

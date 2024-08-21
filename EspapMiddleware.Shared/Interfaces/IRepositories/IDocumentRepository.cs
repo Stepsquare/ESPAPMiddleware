@@ -13,11 +13,10 @@ namespace EspapMiddleware.Shared.Interfaces.IRepositories
     public interface IDocumentRepository : IGenericRepository<Document>
     {
         Task<Document> GetDocumentForSyncSigefe(string documentId);
-        Task<Document> GetRelatedDocument(string referenceNumber, string supplierFiscalId, string schoolYear, DocumentTypeEnum type);
         Task<Document> GetDocumentForDetail(string documentId);
         Task<IEnumerable<Document>> GetFilteredPaginated(DocumentSearchFilters filters);
-        Task<IEnumerable<string>> GetSchoolYears();
         Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo);
+        Task<int> GetDocumentsToSyncFeapCount(string anoLetivo);
         Task<IEnumerable<Document>> GetPaidDocsToSync(string[] documentIds);
         Task<int> GetPaidDocsToSyncCount(string[] documentIds);
         Task<IEnumerable<Document>> GetPaginatedDocsToSyncSigefe(string anoLetivo, PaginatedSearchFilter filters);

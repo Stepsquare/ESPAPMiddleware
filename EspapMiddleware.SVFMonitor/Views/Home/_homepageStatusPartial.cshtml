@@ -1,8 +1,11 @@
 ﻿@model HomepageStatusPartialViewModel
 
-<div class="col-md-3">
+<div class="col-md-4">
     <div class="ig-svf-statedocs">
         <h4>@Model.Total documentos</h4>
+        <p>@Model.TotalUnprocessed</p>
+        <p>@Model.TotalMEGA</p>
+        <p>@Model.TotalNotMEGA</p>
     </div>
 
     @if (Model.IsCurrentSchoolYear)
@@ -12,7 +15,7 @@
         </button>
     }
 </div>
-<div class="col-md-3">
+<div class="col-md-4">
     <div class="ig-svf-statedocs">
         <h4>@Model.InvoiceStatus.Total faturas</h4>
         <p>@Model.InvoiceStatus.PendingRegularization por regularizar</p>
@@ -28,7 +31,7 @@
         </button>
     }
 </div>
-<div class="col-md-3">
+<div class="col-md-4">
     <div class="ig-svf-statedocs">
         <h4>@Model.CreditNoteStatus.Total notas de crédito</h4>
         @if (Model.IsCurrentSchoolYear)
@@ -47,18 +50,3 @@
         </button>
     }
 </div>
-<div class="col-md-3">
-    <div class="ig-svf-statedocs">
-        <h4>@Model.DebitNoteStatus.Total notas de débito</h4>
-        <p>@Model.DebitNoteStatus.Unprocessed por processar</p>
-        <p>@Model.DebitNoteStatus.Returned devolvidas</p>
-    </div>
-
-    @if (Model.IsCurrentSchoolYear)
-    {
-        <button class="btn ig-btn-blue ig-stats-btn btn-block" onclick="returnDebitNotes()" @(Model.DebitNoteStatus.Unprocessed == 0 ? "disabled" : "")>
-            <span class="badge"><i class="fas fa-reply"></i> @Model.DebitNoteStatus.Unprocessed</span> Devolver notas de débito
-        </button>
-    }
-</div>
-

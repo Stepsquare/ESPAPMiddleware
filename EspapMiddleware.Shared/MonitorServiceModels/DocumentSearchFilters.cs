@@ -21,6 +21,7 @@ namespace EspapMiddleware.Shared.MonitorServiceModels
         public DocumentStateEnum? State { get; set; }
         public string MeId { get; set; }
         public bool? FeapSyncronized { get; set; }
-        public bool? SigefeSyncronized { get; set; }
+        public bool? IsProcessed { get; set; }
+        public bool IsMEGA { get; set; } = true;
     }
 }

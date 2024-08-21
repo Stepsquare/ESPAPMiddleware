@@ -6,6 +6,7 @@
         <table style="width:100%">
             <tbody>
                 <tr class="k-grid-header">
+                    <th class="k-header">MEGA</th>
                     <th class="k-header">ID Documento</th>
                     <th class="k-header">ID ME</th>
                     <th class="k-header">N.º Fatura</th>
@@ -13,6 +14,7 @@
                     <th class="k-header">NIF Fornecedor</th>
                     <th class="k-header">N.º Compromisso</th>
                     <th class="k-header">Ano letivo</th>
+                    <th class="k-header">Processado</th>
                     <th class="k-header">Estado</th>
                     <th class="k-header">Montante</th>
                     <th class="k-header ig-xml-col">Detalhe</th>
@@ -22,6 +24,12 @@
                     foreach (var doc in Model.Data)
                     {
                         <tr>
+                            <td>
+                                @if (doc.IsMEGA)
+                                {
+                                    <span class="ig-state-success"><i class="fas fa-book-open"></i></span>
+                                }
+                            </td>
                             <td>@doc.DocumentId</td>
                             <td>@doc.MEId</td>
                             <td>@doc.ReferenceNumber</td>
@@ -29,6 +37,16 @@
                             <td>@doc.SupplierFiscalId</td>
                             <td>@doc.CompromiseNumber</td>
                             <td>@doc.SchoolYear</td>
+                            <td>
+                                @if (doc.IsProcessed)
+                                {
+                                    <span class="ig-state-success"><i class="fas fa-check"></i></span>
+                                }
+                                else
+                                {
+                                    <span class="ig-state-warning"><i class="fas fa-exclamation-triangle"></i></span>
+                                }
+                            </td>
 
                             @switch (doc.StateId)
                             {

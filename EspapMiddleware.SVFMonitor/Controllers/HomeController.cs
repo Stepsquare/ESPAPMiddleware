@@ -55,29 +55,26 @@ namespace EspapMiddleware.SVFMonitor.Controllers
             var model = new HomepageStatusPartialViewModel
             {
                 Total = await _monitorServices.GetTotalDocument(anoLetivo),
-                TotalNotSyncFeap = await _monitorServices.GetTotalDocument(anoLetivo, false),
+                TotalUnprocessed = await _monitorServices.GetTotalUnprocessedDocument(anoLetivo),
+                TotalMEGA = await _monitorServices.GetTotalMEGADocument(anoLetivo),
+                TotalNotMEGA = await _monitorServices.GetTotalNotMEGADocument(anoLetivo),
+                TotalNotSyncFeap = await _monitorServices.GetTotalDocumentsToSyncFeap(anoLetivo),
                 IsCurrentSchoolYear = getFaseResponse.id_ano_letivo_atual == anoLetivo,
                 InvoiceStatus = new HomepageStatusPartialViewModel.InvoiceStatusObject
                 {
-                    Total = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura),
-                    Validated = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.ValidadoConferido),
+                    Total = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura),
+                    Validated = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.ValidadoConferido),
                     ValidatedToSync = await _monitorServices.GetTotalPaidDocsToSync(),
-                    Paid = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.EmitidoPagamento),
-                    PendingRegularization = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Iniciado, DocumentActionEnum.SolicitaçãoDocumentoRegularização),
-                    Regularized = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Processado)
+                    Paid = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.EmitidoPagamento),
+                    PendingRegularization = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Iniciado, DocumentActionEnum.SolicitaçãoDocumentoRegularização),
+                    Regularized = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Processado)
                 },
                 CreditNoteStatus = new HomepageStatusPartialViewModel.CreditNoteStatusObject
                 {
-                    Total = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito),
+                    Total = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito),
                     Unprocessed = await _monitorServices.GetTotalCreditNotesToReprocess(),
-                    Processed = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito, DocumentStateEnum.Processado),
-                    Returned = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito, DocumentStateEnum.Devolvido)
-                },
-                DebitNoteStatus = new HomepageStatusPartialViewModel.DebitNoteStatusObject
-                {
-                    Total = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaDébito),
-                    Unprocessed = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaDébito, DocumentStateEnum.Iniciado),
-                    Returned = await _monitorServices.GetTotalDocumentsByType(anoLetivo, DocumentTypeEnum.NotaDébito, DocumentStateEnum.Devolvido)
+                    Processed = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito, DocumentStateEnum.Processado),
+                    Returned = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito, DocumentStateEnum.Devolvido)
                 }
             };
 

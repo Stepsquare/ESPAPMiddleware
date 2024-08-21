@@ -8,12 +8,14 @@ namespace EspapMiddleware.SVFMonitor.Models
     public class HomepageStatusPartialViewModel
     {
         public int Total { get; set; }
+        public int TotalUnprocessed { get; set; }
+        public int TotalMEGA { get; set; }
+        public int TotalNotMEGA { get; set; }
         public int TotalNotSyncFeap { get; set; }
         public bool IsCurrentSchoolYear { get; set; }
 
         public InvoiceStatusObject InvoiceStatus { get; set; }
         public CreditNoteStatusObject CreditNoteStatus { get; set; }
-        public DebitNoteStatusObject DebitNoteStatus { get; set; }
 
         public class InvoiceStatusObject
         {
@@ -30,13 +32,6 @@ namespace EspapMiddleware.SVFMonitor.Models
             public int Total { get; set; }
             public int Unprocessed { get; set; }
             public int Processed { get; set; }
-            public int Returned { get; set; }
-        }
-
-        public class DebitNoteStatusObject
-        {
-            public int Total { get; set; }
-            public int Unprocessed { get; set; }
             public int Returned { get; set; }
         }
     }

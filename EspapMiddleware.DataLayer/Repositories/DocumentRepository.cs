@@ -41,18 +41,6 @@ namespace EspapMiddleware.DataLayer.Repositories
                 .FirstOrDefaultAsync(x => x.DocumentId == documentId);
         }
 
-        public async Task<Document> GetRelatedDocument(string referenceNumber, string supplierFiscalId, string schoolYear, DocumentTypeEnum type)
-        {
-            return await DbContext.Documents
-                                .Where(x => x.SupplierFiscalId == supplierFiscalId
-                                        && x.SchoolYear == schoolYear
-                                        && ((type == DocumentTypeEnum.Fatura && x.TypeId == DocumentTypeEnum.NotaCrédito && x.RelatedReferenceNumber == referenceNumber)
-                                            || (type == DocumentTypeEnum.NotaCrédito && x.TypeId == DocumentTypeEnum.Fatura && x.ReferenceNumber == referenceNumber)
-                                            || (type == DocumentTypeEnum.NotaDébito && x.TypeId == DocumentTypeEnum.NotaCrédito && x.ReferenceNumber == referenceNumber)))
-                                .Include(x => x.DocumentLines)
-                                .FirstOrDefaultAsync();
-        }
-
         public async Task<Document> GetDocumentForDetail(string documentId)
         {
             return await DbContext.Documents
@@ -74,24 +62,31 @@ namespace EspapMiddleware.DataLayer.Repositories
                                         && (!filters.State.HasValue || x.StateId == filters.State)
                                         && (!filters.Type.HasValue || x.TypeId == filters.Type)
                                         && (string.IsNullOrEmpty(filters.MeId) || x.MEId == filters.MeId)
-                                        //&& (!filters.SigefeSyncronized.HasValue || x.IsSynchronizedWithSigefe == filters.SigefeSyncronized)
+                                        && (!filters.IsProcessed.HasValue || x.IsProcessed == filters.IsProcessed)
+                                        && (!filters.IsMEGA == filters.IsMEGA)
                                         && (!filters.FeapSyncronized.HasValue || x.IsSynchronizedWithFEAP == filters.FeapSyncronized))
                                 .OrderByDescending(x => x.CreatedOn)
                                 .Skip((filters.PageIndex - 1) * filters.PageSize).Take(filters.PageSize)
                                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<string>> GetSchoolYears()
-        {
-            return await DbContext.Documents.Where(x => !string.IsNullOrEmpty(x.SchoolYear)).Select(x => x.SchoolYear).Distinct().ToListAsync();
-        }
-
         public async Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo)
         {
             return await DbContext.Documents.Where(x => x.SchoolYear == anoLetivo
+                                                    && x.IsMEGA
+                                                    && x.IsProcessed
                                                     && !x.IsSynchronizedWithFEAP)
                                                 .Include(x => x.DocumentMessages)
                                                 .ToListAsync();
+        }
+
+        public async Task<int> GetDocumentsToSyncFeapCount(string anoLetivo)
+        {
+            return await DbContext.Documents.Where(x => x.SchoolYear == anoLetivo
+                                                    && x.IsMEGA
+                                                    && x.IsProcessed
+                                                    && !x.IsSynchronizedWithFEAP)
+                                                .CountAsync();
         }
 
         public async Task<IEnumerable<Document>> GetPaidDocsToSync(string[] documentIds)
@@ -112,11 +107,8 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
-                                        //&& !x.IsSynchronizedWithSigefe
-                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
-                                                                    && m.MessageCode == "490")
-                                        && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE 
-                                                                    && (m.MessageCode == "500" || m.MessageCode == "429")))
+                                        && !x.IsMEGA
+                                        && !x.IsProcessed)
                                 .OrderByDescending(x => x.CreatedOn)
                                 .Include(x => x.DocumentMessages)
                                 .Skip((filters.PageIndex - 1) * filters.PageSize)
@@ -129,11 +121,8 @@ namespace EspapMiddleware.DataLayer.Repositories
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(documentId) || x.DocumentId == documentId)
                                         && (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
-                                        //&& !x.IsSynchronizedWithSigefe
-                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
-                                                                    && m.MessageCode == "490")
-                                        && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
-                                                                    && (m.MessageCode == "500" || m.MessageCode == "429")))
+                                        && !x.IsMEGA
+                                        && !x.IsProcessed)
                                 .Include(x => x.DocumentLines)
                                 .ToListAsync();
         }
@@ -142,11 +131,8 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => (string.IsNullOrEmpty(x.SchoolYear) || x.SchoolYear == anoLetivo)
-                                        //&& !x.IsSynchronizedWithSigefe
-                                        && !x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
-                                                                    && m.MessageCode == "490")
-                                        && x.DocumentMessages.Any(m => m.MessageTypeId == DocumentMessageTypeEnum.SIGeFE
-                                                                    && (m.MessageCode == "500" || m.MessageCode == "429")))
+                                        && !x.IsMEGA
+                                        && !x.IsProcessed)
                                 .CountAsync();
         }
 
@@ -154,7 +140,8 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => x.SchoolYear == anoLetivo
-                                        //&& !x.IsSynchronizedWithSigefe
+                                        && x.IsMEGA
+                                        && !x.IsProcessed
                                         && x.TypeId == DocumentTypeEnum.NotaCrédito
                                         && x.StateId == DocumentStateEnum.Iniciado
                                         && !x.ActionId.HasValue
@@ -168,7 +155,8 @@ namespace EspapMiddleware.DataLayer.Repositories
         {
             return await DbContext.Documents
                                 .Where(x => x.SchoolYear == anoLetivo
-                                        //&& !x.IsSynchronizedWithSigefe
+                                        && x.IsMEGA
+                                        && !x.IsProcessed
                                         && x.TypeId == DocumentTypeEnum.NotaCrédito
                                         && x.StateId == DocumentStateEnum.Iniciado
                                         && !x.ActionId.HasValue

@@ -151,29 +151,6 @@ namespace EspapMiddleware.SVFMonitor.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<JsonResult> ResetCompromiseNumber(string id)
-        {
-            try
-            {
-                await _monitorServices.ResetCompromiseNumber(id);
-
-                return Json(new
-                {
-                    statusCode = HttpStatusCode.OK,
-                    messages = new string[] { "Número de compromisso desvinculado com sucesso." }
-                });
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    statusCode = HttpStatusCode.InternalServerError,
-                    messages = new string[] { ex.GetBaseException().Message }
-                });
-            }
-        }
-
         [HttpGet]
         public async Task<ActionResult> DownloadDocumentFile(int id)
         {

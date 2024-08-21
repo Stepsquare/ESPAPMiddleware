@@ -118,6 +118,13 @@ namespace EspapMiddleware.ServiceLayer.Services
                 //Preencher documento com dados do contrato...
                 FillWithContract(in contract, ref documentToAdd);
 
+                //Notas de debito são ignoradas e marcadas como processadas...
+                if (contract.documentType == DocumentTypeEnum.NotaDébito)
+                    documentToAdd.IsProcessed = true;
+
+                //Chamar getFase para ir buscar o ano letivo atual para update ao campo school year do documento inserido...
+                documentToAdd.SchoolYear = _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
+
                 //Adicionar documento na BD e fazer commit transação...
                 unitOfWork.Documents.Add(documentToAdd);
 
@@ -134,10 +141,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                //Chamar getFase para ir buscar o ano letivo atual para update ao campo school year do documento inserido...
-                document.SchoolYear = _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
-
-                //Verificar resposta getFase (se falhar chamada interrompe o processo e deixa o documento por processar)...
+                //Verificar se ano letivo foi preenchido (se não estiver interrompe o processo e deixa o documento por processar)...
                 if (string.IsNullOrEmpty(document.SchoolYear))
                     throw new WebserviceException("Erro na chamada ao webservice getFase. Ano létivo não preenchido.");
 
@@ -242,10 +246,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                //Chamar getFase para ir buscar o ano letivo atual para update ao campo school year do documento inserido...
-                document.SchoolYear = _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
-
-                //Verificar resposta getFase (se falhar chamada interrompe o processo e deixa o documento por processar)...
+                //Verificar se ano letivo foi preenchido (se não estiver interrompe o processo e deixa o documento por processar)...
                 if (string.IsNullOrEmpty(document.SchoolYear))
                     throw new WebserviceException("Erro na chamada ao webservice getFase. Ano létivo não preenchido.");
 

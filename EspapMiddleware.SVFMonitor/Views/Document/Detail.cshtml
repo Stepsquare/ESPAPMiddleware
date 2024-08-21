@@ -10,10 +10,43 @@
             <div class="row">
                 <div class="col-md-8">
                     <h2>@ViewBag.Title</h2>
+                    <p class="ig-newsdetails">
+                        @if (Model.IsMEGA)
+                        {
+                            <span class="badge"><i class="fas fa-book-open"></i> MEGA</span>
+                        }
+                        @if (Model.IsProcessed)
+                        {
+                            <span class="badge ig-reactbadge-success"><i class="fas fa-check"></i> Processado</span>
+                        }
+                        else
+                        {
+                            <span class="badge ig-reactbadge-alert"><i class="fas fa-exclamation-triangle"></i> Não processado</span>
+                        }
+                        @if (Model.IsSynchronizedWithFEAP)
+                        {
+                            <span class="badge ig-reactbadge-success"><i class="fas fa-check"></i> Sincronizado FE-AP</span>
+                        }
+                        else
+                        {
+                            <span class="badge ig-reactbadge-alert"><i class="fas fa-exclamation-triangle"></i> Não sincronizado FE-AP</span>
+                        }
+                    </p>
                 </div>
                 <div class="col-md-4 text-right">
-                    <button type="button" class="btn ig-btn-blue dropdown-toggle" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false">
+                    @if (!Model.IsProcessed)
+                    {
+                        <button type="button" class="btn ig-btn-green" onclick="syncSigefe()">
+                            <i class="fas fa-cog"></i> Processar Documento
+                        </button>
+                    }
+                    @if (!Model.IsSynchronizedWithFEAP)
+                    {
+                        <button type="button" class="btn ig-btn-green" onclick="syncFeap()">
+                            <i class="fa fa-refresh"></i> Sincronizar FE-AP
+                        </button>
+                    }
+                    <button type="button" class="btn ig-btn-blue dropdown-toggle" >
                         <i class="fas fa-download"></i> Downloads <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right">
@@ -49,12 +82,12 @@
                         <p>@Model.ReferenceNumber</p>
                     </div>
                     <div class="col-md-2">
-                        <label class="control-label">Data:</label>
-                        <p>@Model.IssueDate.ToString("dd/MM/yyyy HH:mm:ss")</p>
-                    </div>
-                    <div class="col-md-2">
                         <label class="control-label">NIF Fornecedor:</label>
                         <p>@Model.SupplierFiscalId</p>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="control-label">Data:</label>
+                        <p>@Model.IssueDate.ToString("dd/MM/yyyy")</p>
                     </div>
                     <div class="col-md-2">
                         <label class="control-label">Ano Letivo:</label>
@@ -116,79 +149,12 @@
                     </a>
                 }
 
-                @if (Model.TypeId == DocumentTypeEnum.Fatura && Model.StateId != DocumentStateEnum.EmitidoPagamento)
-                {
-                    <a id="reset_compromise_btn" class="ig-sec-link" href="javascript:void(0);">
-                        <i class="fas fa-undo"></i> Desvincular Compromisso
-                    </a>
-                }
-
                 @if (Model.StateId != DocumentStateEnum.EmitidoPagamento && Model.StateId != DocumentStateEnum.Devolvido)
                 {
                     <a id="reset_doc_btn" class="ig-sec-link" href="javascript:void(0);">
                         <i class="fas fa-undo"></i> Desvincular SIGEFE
                     </a>
                 }
-            </div>
-        </div>
-
-        <h4 class="ig-small-title">SINCRONIZAÇÂO:</h4>
-        <div class="ig-grid ig-budgetpropgrid">
-            <div class="k-grid k-widget k-display-block k-editable">
-                <table style="width:100%">
-                    <tbody>
-                        <tr class="k-grid-header">
-                            <th class="k-header">Organismo</th>
-                            <th class="k-header">Estado</th>
-                            <th class="k-header ig-xml-col"></th>
-                        </tr>
-                        <tr>
-                            <td>FEAP</td>
-                            @if (Model.IsSynchronizedWithFEAP)
-                            {
-                                <td>
-                                    <span class="ig-state-success"><i class="fas fa-check"></i>Sincronizado</span>
-                                </td>
-                            }
-                            else
-                            {
-                                <td>
-                                    <span class="ig-state-warning">
-                                        <i class="fas fa-exclamation-triangle"></i> Não Sincronizado
-                                    </span>
-                                </td>
-                            }
-                            <td>
-                                <a onclick="syncFeap()" class="btn ig-btn-round @(Model.IsSynchronizedWithFEAP ? "disabled" : "")" title="Sincronizar FE-AP" href="javascript:void(0);">
-                                    <i class="fa fa-refresh"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>SIGeFE</td>
-                            @if (Model.IsSynchronizedWithSigefe)
-                            {
-                                <td>
-                                    <span class="ig-state-success"><i class="fas fa-check"></i>Sincronizado</span>
-                                </td>
-
-                            }
-                            else
-                            {
-                                <td>
-                                    <span class="ig-state-warning">
-                                        <i class="fas fa-exclamation-triangle"></i> Não Sincronizado
-                                    </span>
-                                </td>
-                            }
-                            <td>
-                                <a onclick="syncSigefe()" class="btn ig-btn-round @(Model.IsSynchronizedWithSigefe ? "disabled" : "")" title="Sincronizar SIGeFE" href="javascript:void(0);">
-                                    <i class="fa fa-refresh"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -332,7 +298,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label class="control-label">Motivo de devolução:</label>
-                    <textarea class="form-control" id="return_reason" rows="5" ></textarea>
+                    <textarea class="form-control" id="return_reason" rows="5"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -353,12 +319,6 @@
             ShowConfirm(function () {
                 resetSigefeSync();
             }, "Desvincular Documento", "Tem a certeza que pretende desvincular o documento com a plataforma SIGEFE?")
-        });
-
-        $("#reset_compromise_btn").on("click", function () {
-            ShowConfirm(function () {
-                ResetCompromiseNumber();
-            }, "Desvincular Número Compromisso", "Tem a certeza que pretende desvincular o número de compromisso da fatura @Model.DocumentId?")
         });
     });
 
@@ -424,35 +384,6 @@
 
         $.ajax({
             url: '@Url.Action("ResetSigefeSync", "Document")',
-            type: "POST",
-            data: {
-                id: "@Model.DocumentId"
-            },
-            success: function (data) {
-                if (data.statusCode == 200) {
-                    ShowSucessModal(data.messages, function () {
-                        location.reload();
-                    });
-                } else {
-                    ShowErrorModal(data.messages, function () {
-                        location.reload();
-                    });
-                }
-            },
-            error: function () {
-                ShowErrorModal(["Ocorreu um erro."]);
-            },
-            complete: function () {
-                HideLoadingModal();
-            }
-        });
-    }
-
-    function ResetCompromiseNumber() {
-        ShowLoadingModal();
-
-        $.ajax({
-            url: '@Url.Action("ResetCompromiseNumber", "Document")',
             type: "POST",
             data: {
                 id: "@Model.DocumentId"

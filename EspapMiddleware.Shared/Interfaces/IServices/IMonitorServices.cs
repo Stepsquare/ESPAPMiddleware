@@ -30,7 +30,6 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         Task SyncSigefe(string documentId);
         Task SyncFeap(string documentId);
         Task ReturnDocument(string documentId, string reason);
-        Task ResetCompromiseNumber(string documentId);
         Task ResetSigefeSync(string documentId);
         Task<DocumentFile> GetFilesForDownload(int id);
 
@@ -38,8 +37,12 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 
         #region Homepage
 
-        Task<int> GetTotalDocument(string anoLetivo, bool? isSynchronizedWithFEAP = null);
-        Task<int> GetTotalDocumentsByType(string anoLetivo, DocumentTypeEnum typeId, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null);
+        Task<int> GetTotalDocument(string anoLetivo);
+        Task<int> GetTotalDocumentsToSyncFeap(string anoLetivo);
+        Task<int> GetTotalUnprocessedDocument(string anoLetivo);
+        Task<int> GetTotalMEGADocument(string anoLetivo);
+        Task<int> GetTotalNotMEGADocument(string anoLetivo);
+        Task<int> GetTotalMEGADocumentsByType(string anoLetivo, DocumentTypeEnum typeId, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null);
         Task SyncAllDocumentsFeap(string anoLetivo);
         Task<PaginatedResult<Document>> GetDocsToSyncSigefe(PaginatedSearchFilter filters);
         Task SyncDocumentsSigefe(string documentId = null);
