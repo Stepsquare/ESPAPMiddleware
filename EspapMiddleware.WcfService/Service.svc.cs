@@ -86,7 +86,7 @@ namespace EspapMiddleware.WcfService
                 _service.SyncDocument(request.SetDocumentResultMCIn).GetAwaiter().GetResult();
 
                 _service.AddSuccessRequestLog(
-                    RequestLogTypeEnum.SendDocument,
+                    RequestLogTypeEnum.SetDocumentResult,
                     request.SetDocumentResultMCIn.uniqueId,
                     request.SetDocumentResultMCIn.supplierFiscalId,
                     request.SetDocumentResultMCIn.referenceNumber,

@@ -429,7 +429,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                         DocumentId = contract.documentId,
                         MessageTypeId = DocumentMessageTypeEnum.FEAP,
                         Date = DateTime.Now,
-                        MessageCode = "MWG6667",
                         MessageContent = "Atualizado com sucesso."
                     });
                 }

@@ -30,8 +30,17 @@
                                     <td>@document.TypeId.ToString()</td>
                                     @{
                                         var lastSigefeMessage = document.DocumentMessages.OrderByDescending(x => x.Date).FirstOrDefault(x => x.MessageTypeId == DocumentMessageTypeEnum.SIGeFE);
-                                        <td>@lastSigefeMessage.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                                        <td>@lastSigefeMessage.MessageCode - @lastSigefeMessage.MessageContent</td>
+
+                                        if (lastSigefeMessage != null)
+                                        {
+                                            <td>@lastSigefeMessage.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                            <td>@lastSigefeMessage.MessageCode - @lastSigefeMessage.MessageContent</td>
+                                        }
+                                        else
+                                        {
+                                            <td></td>
+                                            <td></td>
+                                        }
                                     }
                                     <td>
                                         <a onclick="syncDocumentsSigefe('@document.DocumentId')" class="btn ig-btn-round" title="Sincronizar" href="javascript:void(0);">

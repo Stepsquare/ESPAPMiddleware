@@ -22,6 +22,6 @@ namespace EspapMiddleware.Shared.MonitorServiceModels
         public string MeId { get; set; }
         public bool? FeapSyncronized { get; set; }
         public bool? IsProcessed { get; set; }
-        public bool IsMEGA { get; set; } = true;
+        public bool? IsMEGA { get; set; }
     }
 }

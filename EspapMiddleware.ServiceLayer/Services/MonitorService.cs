@@ -84,7 +84,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                                         && (!filters.State.HasValue || x.StateId == filters.State)
                                         && (!filters.Type.HasValue || x.TypeId == filters.Type)
                                         && (string.IsNullOrEmpty(filters.MeId) || x.MEId == filters.MeId)
-                                        && x.IsMEGA == filters.IsMEGA
+                                        && (!filters.IsMEGA.HasValue || x.IsMEGA == filters.IsMEGA)
                                         && (!filters.IsProcessed.HasValue || x.IsProcessed == filters.IsProcessed)
                                         && (!filters.FeapSyncronized.HasValue || x.IsSynchronizedWithFEAP == filters.FeapSyncronized)),
                     Data = await unitOfWork.Documents.GetFilteredPaginated(filters)
