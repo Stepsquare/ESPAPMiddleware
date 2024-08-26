@@ -8,6 +8,7 @@
                 <tr class="k-grid-header">
                     <th class="k-header">MEGA</th>
                     <th class="k-header">ID Documento</th>
+                    <th class="k-header">Tipo</th>
                     <th class="k-header">ID ME</th>
                     <th class="k-header">N.º Fatura</th>
                     <th class="k-header">Data de Criação</th>
@@ -31,6 +32,7 @@
                                 }
                             </td>
                             <td>@doc.DocumentId</td>
+                            <td>@doc.TypeId.ToString()</td>
                             <td>@doc.MEId</td>
                             <td>@doc.ReferenceNumber</td>
                             <td>@doc.CreatedOn.ToString("dd/MM/yyyy HH:mm:ss")</td>
@@ -84,7 +86,7 @@
                 else
                 {
                     <tr>
-                        <td colspan=10>
+                        <td colspan=13>
                             <div class="row ig-noresults">
                                 <i class="fas fa-search"></i>
                                 <h3>Sem Resultados</h3>

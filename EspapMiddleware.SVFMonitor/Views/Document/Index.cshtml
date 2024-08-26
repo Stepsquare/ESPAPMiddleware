@@ -19,7 +19,7 @@
         <div class="panel panel-default ig-panel">
             <div class="panel-body">
                 <div class="row">
-                    <div class="col-md-2 form-group">
+                    <div class="col-md-4 form-group">
                         <label class="control-label">ID Documento:</label>
                         <input id="document_id_search" type="text" class="form-control" />
                     </div>
@@ -39,15 +39,9 @@
                         <label class="control-label">ID ME:</label>
                         <input id="me_id_search" type="text" class="form-control">
                     </div>
-                    <div class="col-md-2 form-group">
-                        <label class="control-label">Ano letivo:</label>
-                        <input type="text" id="school_year_search" class="form-control" />
-                    </div>
-                    <div class="col-md-4 form-group ig-k-datepicker">
-                        <label class="control-label">Data de criação entre:</label>
-                        <div id="date_range_search">
-                        </div>
-                    </div>
+                    
+                </div>
+                <div class="row">
                     <div class="col-md-2 form-group">
                         <label class="control-label">Sincronizado FE-AP:</label>
                         <select id="feap_syncronized_search" class="form-control">
@@ -65,7 +59,7 @@
                         </select>
                     </div>
                     <div class="col-md-2 form-group">
-                        <label class="control-label">Processado:</label>
+                        <label class="control-label">Programa MEGA:</label>
                         <select id="is_MEGA_search" class="form-control">
                             <option value="true" selected>Sim</option>
                             <option value="false">Não</option>
@@ -78,6 +72,17 @@
                     <div class="col-md-2 form-group">
                         <label class="control-label">Estado:</label>
                         <input type="text" id="doc_state_search" class="form-control" />
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label class="control-label">Ano letivo:</label>
+                        <input type="text" id="school_year_search" class="form-control" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 form-group ig-k-datepicker">
+                        <label class="control-label">Data de criação entre:</label>
+                        <div id="date_range_search">
+                        </div>
                     </div>
                 </div>
                 <div class="row">
