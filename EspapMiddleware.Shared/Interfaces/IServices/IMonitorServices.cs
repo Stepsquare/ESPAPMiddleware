@@ -29,8 +29,9 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
         Task<PaginatedResult<DocumentLine>> GetDocumentLinesForDetail(DocumentDetailLineFilter filters);
         Task SyncSigefe(string documentId);
         Task SyncFeap(string documentId);
-        Task ReturnDocument(string documentId, string reason);
         Task ResetSigefeSync(string documentId);
+        Task ReturnDocument(string documentId, string reason);
+        Task DeleteDocument(string documentId);
         Task<DocumentFile> GetFilesForDownload(int id);
 
         #endregion

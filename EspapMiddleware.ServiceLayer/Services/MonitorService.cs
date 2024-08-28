@@ -283,6 +283,29 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
+        public async Task ResetSigefeSync(string documentId)
+        {
+            using (var unitOfWork = _unitOfWorkFactory.Create())
+            {
+                var docToReset = await unitOfWork.Documents.Find(x => x.DocumentId == documentId);
+
+                docToReset.IsProcessed = false;
+                docToReset.IsMEGA = false;
+                docToReset.MEId = null;
+                docToReset.StateId = DocumentStateEnum.Iniciado;
+                docToReset.ActionId = null;
+
+                unitOfWork.Documents.Update(docToReset);
+
+                var result = await unitOfWork.SaveChangesAsync();
+
+                if (result == 0)
+                {
+                    throw new DatabaseException("Erro de comunicação com BD.");
+                }
+            }
+        }
+
         public async Task ReturnDocument(string documentId, string reason)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
@@ -310,26 +333,38 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
-        public async Task ResetSigefeSync(string documentId)
+        public async Task DeleteDocument(string documentId)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var docToReset = await unitOfWork.Documents.Find(x => x.DocumentId == documentId);
+                var docToDelete = await unitOfWork.Documents.GetDocumentForDelete(documentId);
 
-                docToReset.IsProcessed = false;
-                docToReset.IsMEGA = false;
-                docToReset.MEId = null;
-                docToReset.StateId = DocumentStateEnum.Iniciado;
-                docToReset.ActionId = null;
+                unitOfWork.DocumentLines.DeleteRange(docToDelete.DocumentLines);
 
-                unitOfWork.Documents.Update(docToReset);
+                unitOfWork.DocumentMessages.DeleteRange(docToDelete.DocumentMessages);
 
-                var result = await unitOfWork.SaveChangesAsync();
-
-                if (result == 0)
+                foreach (var requestLog in docToDelete.RequestLogs)
                 {
-                    throw new DatabaseException("Erro de comunicação com BD.");
+                    if (requestLog.RequestLogFileId.HasValue)
+                    {
+                        var requestLogFile = await unitOfWork.RequestLogFiles.Find(x => x.Id == requestLog.RequestLogFileId);
+                        unitOfWork.RequestLogFiles.Delete(requestLogFile);
+                    }
+                        
                 }
+
+                unitOfWork.RequestLogs.DeleteRange(docToDelete.RequestLogs);
+
+                unitOfWork.DocumentFiles.Delete(docToDelete.PdfFile);
+
+                unitOfWork.DocumentFiles.Delete(docToDelete.UblFile);
+
+                if (docToDelete.AttachsFileId.HasValue)
+                    unitOfWork.DocumentFiles.Delete(docToDelete.AttachsFile);
+
+                unitOfWork.Documents.Delete(docToDelete);
+
+                await unitOfWork.SaveChangesAsync();
             }
         }
 

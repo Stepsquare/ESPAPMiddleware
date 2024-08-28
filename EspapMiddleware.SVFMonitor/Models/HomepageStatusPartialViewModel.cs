@@ -25,6 +25,7 @@ namespace EspapMiddleware.SVFMonitor.Models
             public int Validated { get; set; }
             public int ValidatedToSync { get; set; }
             public int Paid { get; set; }
+            public int Returned { get; set; }
         }
 
         public class CreditNoteStatusObject

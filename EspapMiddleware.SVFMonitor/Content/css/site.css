@@ -1794,13 +1794,13 @@ p.ig-newsdetails, p.ig-titledet {
     font-size: 12px;
 }
 
-    p.ig-newsdetails span {
-        margin-right: 10px;
-    }
+p.ig-newsdetails span {
+    margin-right: 0;
+}
 
-        p.ig-newsdetails span:last-child {
-            margin-right: 0;
-        }
+p.ig-newsdetails span:last-child {
+    margin-right: 0;
+}
 
 .ig-newstitle {
     margin-bottom: 20px;
@@ -1907,6 +1907,10 @@ a.ig-newsimglink:hover .ig-newstitle.ig-newstitle-img.ig-newstitle-dashboard:bef
 
 .ig-relnews .badge, .ig-newstitle .badge, p.ig-newsdetails .badge {
     background: #2f3e53;
+}
+
+td.ig-multidata p.ig-newsdetails .badge {
+    font-size: 10px;
 }
 
 .ig-news-searchlist .thumbnail {
@@ -2814,7 +2818,9 @@ label.ig-check-label.k-checkbox-label {
     width: 14px;
     height: 14px;
 }
-
+td.ig-multidata p {
+    margin-bottom: 0;
+}
 .ig-radio.k-radio:checked + .ig-radio-label.k-radio-label:before, .ig-radio.k-radio:checked + .ig-radio-label.k-radio-label:hover:before {
     border-color: #007236
 }
@@ -4425,7 +4431,7 @@ th.k-header.ig-xml-col {
     }
 .ig-svf-statedocs {
     display: flex;
-    min-height:105px;
+    min-height:125px;
     flex-direction: column;
 }
 .ig-stats-btn{

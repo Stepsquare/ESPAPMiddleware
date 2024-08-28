@@ -67,7 +67,8 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                     ValidatedToSync = await _monitorServices.GetTotalPaidDocsToSync(),
                     Paid = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.EmitidoPagamento),
                     PendingRegularization = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Iniciado, DocumentActionEnum.SolicitaçãoDocumentoRegularização),
-                    Regularized = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Processado)
+                    Regularized = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Processado),
+                    Returned = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Devolvido)
                 },
                 CreditNoteStatus = new HomepageStatusPartialViewModel.CreditNoteStatusObject
                 {
@@ -91,7 +92,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                 return Json(new
                 {
                     statusCode = HttpStatusCode.OK,
-                    messages = new string[] { "Documentos sicronizados com sucesso." }
+                    messages = new string[] { "Documentos sincronizados com sucesso." }
                 });
             }
             catch (Exception ex)
@@ -114,7 +115,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                 return Json(new
                 {
                     statusCode = HttpStatusCode.OK,
-                    messages = new string[] { "Documentos pagos sicronizado com sucesso." }
+                    messages = new string[] { "Documentos pagos sincronizados com sucesso." }
                 });
             }
             catch (Exception ex)
@@ -145,7 +146,7 @@ namespace EspapMiddleware.SVFMonitor.Controllers
                 return Json(new
                 {
                     statusCode = HttpStatusCode.OK,
-                    messages = new string[] { "Documentos sicronizados com sucesso." }
+                    messages = new string[] { "Documentos sincronizados com sucesso." }
                 });
             }
             catch (Exception ex)

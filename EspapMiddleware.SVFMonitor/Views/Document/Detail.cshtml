@@ -17,7 +17,7 @@
                         }
                         @if (Model.IsProcessed)
                         {
-                            <span class="badge ig-reactbadge-success"><i class="fas fa-check"></i> Processado</span>
+                            <span class="badge ig-reactbadge-success"><i class="fas fa-cog"></i> Processado</span>
                         }
                         else
                         {
@@ -150,10 +150,17 @@
                     </a>
                 }
 
-                @if (Model.StateId != DocumentStateEnum.EmitidoPagamento && Model.StateId != DocumentStateEnum.Devolvido)
+                @if (Model.StateId == DocumentStateEnum.Iniciado && Model.IsMEGA)
                 {
                     <a id="reset_doc_btn" class="ig-sec-link" href="javascript:void(0);">
                         <i class="fas fa-undo"></i> Desvincular SIGEFE
+                    </a>
+                }
+
+                @if (Model.StateId == DocumentStateEnum.Iniciado)
+                {
+                    <a id="delete_doc_btn" class="ig-sec-link" href="javascript:void(0);">
+                        <i class="fas fa-trash-alt"></i> Apagar documento
                     </a>
                 }
             </div>
@@ -321,6 +328,12 @@
                 resetSigefeSync();
             }, "Desvincular Documento", "Tem a certeza que pretende desvincular o documento com a plataforma SIGEFE?")
         });
+
+        $("#delete_doc_btn").on("click", function () {
+            ShowConfirm(function () {
+                deleteDocument();
+            }, "Apagar Documento", "Tem a certeza que pretende apagar o documento? Não será possível recuperar.")
+        });
     });
 
     function getDocumentLines(pageIndex, pageSize) {
@@ -451,6 +464,31 @@
                 if (data.statusCode == 200) {
                     ShowSucessModal(data.messages, function () {
                         location.reload();
+                    });
+                } else {
+                    ShowErrorModal(data.messages);
+                }
+            },
+            error: function () {
+                ShowErrorModal(["Ocorreu um erro."]);
+            },
+            complete: function () {
+                HideLoadingModal();
+            }
+        });
+    }
+
+    function deleteDocument() {
+        $.ajax({
+            url: '@Url.Action("DeleteDocument", "Document")',
+            type: "POST",
+            data: {
+                id: "@Model.DocumentId",
+            },
+            success: function (data) {
+                if (data.statusCode == 200) {
+                    ShowSucessModal(data.messages, function () {
+                        window.location.href = '@Url.Action("Index", "Document")';
                     });
                 } else {
                     ShowErrorModal(data.messages);

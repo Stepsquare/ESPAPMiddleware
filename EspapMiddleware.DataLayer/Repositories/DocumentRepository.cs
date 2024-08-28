@@ -41,6 +41,18 @@ namespace EspapMiddleware.DataLayer.Repositories
                 .FirstOrDefaultAsync(x => x.DocumentId == documentId);
         }
 
+        public async Task<Document> GetDocumentForDelete(string documentId)
+        {
+            return await DbContext.Documents
+                .Include(x => x.DocumentLines)
+                .Include(x => x.DocumentMessages)
+                .Include(x => x.RequestLogs)
+                .Include(x => x.PdfFile)
+                .Include(x => x.UblFile)
+                .Include(x => x.AttachsFile)
+                .FirstOrDefaultAsync(x => x.DocumentId == documentId);
+        }
+
         public async Task<Document> GetDocumentForDetail(string documentId)
         {
             return await DbContext.Documents

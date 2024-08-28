@@ -151,6 +151,28 @@ namespace EspapMiddleware.SVFMonitor.Controllers
             }
         }
 
+        public async Task<JsonResult> DeleteDocument(string id)
+        {
+            try
+            {
+                await _monitorServices.DeleteDocument(id);
+
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    messages = new string[] { "Documento Apagado com sucesso." }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    statusCode = HttpStatusCode.InternalServerError,
+                    messages = new string[] { ex.GetBaseException().Message }
+                });
+            }
+        }
+
         [HttpGet]
         public async Task<ActionResult> DownloadDocumentFile(int id)
         {

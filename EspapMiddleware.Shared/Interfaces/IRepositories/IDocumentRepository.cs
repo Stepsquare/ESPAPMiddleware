@@ -13,6 +13,7 @@ namespace EspapMiddleware.Shared.Interfaces.IRepositories
     public interface IDocumentRepository : IGenericRepository<Document>
     {
         Task<Document> GetDocumentForSyncSigefe(string documentId);
+        Task<Document> GetDocumentForDelete(string documentId);
         Task<Document> GetDocumentForDetail(string documentId);
         Task<IEnumerable<Document>> GetFilteredPaginated(DocumentSearchFilters filters);
         Task<IEnumerable<Document>> GetDocumentsToSyncFeap(string anoLetivo);

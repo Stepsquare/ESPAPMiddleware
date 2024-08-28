@@ -298,7 +298,10 @@ namespace EspapMiddleware.ServiceLayer.Services
                     document.IsSynchronizedWithFEAP = false;
 
                     document.RelatedReferenceNumber = documentResult.num_doc_rel;
-                    document.RelatedDocumentId = documentResult.id_doc_feap_rel;
+
+                    //salvaguarda para excepçoes de foreign key (o documento relacionado não existir)...
+                    if(await unitOfWork.Documents.Any(x => x.DocumentId == documentResult.id_doc_feap_rel))
+                        document.RelatedDocumentId = documentResult.id_doc_feap_rel;
 
                     //Caso 2.1 - Nota de Crédito Válida (id 35)
                     if (documentResult.state_id == "35")
@@ -584,14 +587,16 @@ namespace EspapMiddleware.ServiceLayer.Services
                 requestLog.ExceptionAtLine = firstFrame?.GetFileLineNumber();
                 requestLog.ExceptionMessage = ex.GetBaseException().Message;
             }
-
-            if (FileManager.FileExists(requestLog.RequestLogTypeId.ToString(), uniqueId.ToString()))
+            finally
             {
-                requestLog.RequestLogFile = new RequestLogFile
+                if (FileManager.FileExists(requestLog.RequestLogTypeId.ToString(), uniqueId.ToString()))
                 {
-                    Content = FileManager.GetFile(requestLog.RequestLogTypeId.ToString(), uniqueId.ToString()),
-                    ContentType = "application/xml"
-                };
+                    requestLog.RequestLogFile = new RequestLogFile
+                    {
+                        Content = FileManager.GetFile(requestLog.RequestLogTypeId.ToString(), uniqueId.ToString()),
+                        ContentType = "application/xml"
+                    };
+                }
             }
 
             return requestLog;
