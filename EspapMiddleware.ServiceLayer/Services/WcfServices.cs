@@ -287,51 +287,60 @@ namespace EspapMiddleware.ServiceLayer.Services
                         MessageContent = documentResult.msg_fat
                     });
 
-                    document.IsMEGA = true;
-                    document.IsProcessed = true;
-
-                    if (!string.IsNullOrEmpty(documentResult.num_compromisso))
-                        document.CompromiseNumber = documentResult.num_compromisso;
-
-                    document.MEId = documentResult.id_me_fatura;
-
-                    document.IsSynchronizedWithFEAP = false;
-
-                    document.RelatedReferenceNumber = documentResult.num_doc_rel;
-
-                    //salvaguarda para excepçoes de foreign key (o documento relacionado não existir)...
-                    if(await unitOfWork.Documents.Any(x => x.DocumentId == documentResult.id_doc_feap_rel))
-                        document.RelatedDocumentId = documentResult.id_doc_feap_rel;
-
-                    //Caso 2.1 - Nota de Crédito Válida (id 35)
-                    if (documentResult.state_id == "35")
+                    //Verificar se não foi encontrada fatura correspondente (status code 490)
+                    if (documentResult.cod_msg_fat == "490")
                     {
-                        document.StateId = DocumentStateEnum.Processado;
-                        document.StateDate = DateTime.Now;
-
-                        unitOfWork.RequestLogs.Add(await RequestSetDocument(document));
-
-                        var relatedDocument = await unitOfWork.Documents.Find(x => x.DocumentId == document.RelatedDocumentId);
-
-                        if (relatedDocument != null)
-                        {
-                            relatedDocument.StateId = DocumentStateEnum.Processado;
-                            relatedDocument.StateDate = DateTime.Now;
-                            relatedDocument.IsSynchronizedWithFEAP = false;
-
-                            unitOfWork.Documents.Update(relatedDocument);
-
-                            unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
-                        }
+                        document.IsMEGA = true;
+                        document.IsProcessed = false;
                     }
-
-                    //Caso 2.2 - Nota de Crédito Inválida (id 22)
-                    if (documentResult.state_id == "22")
+                    else
                     {
-                        document.StateId = DocumentStateEnum.Devolvido;
-                        document.StateDate = DateTime.Now;
+                        document.IsMEGA = true;
+                        document.IsProcessed = true;
 
-                        unitOfWork.RequestLogs.Add(await RequestSetDocument(document, documentResult.reason));
+                        if (!string.IsNullOrEmpty(documentResult.num_compromisso))
+                            document.CompromiseNumber = documentResult.num_compromisso;
+
+                        document.MEId = documentResult.id_me_fatura;
+
+                        document.IsSynchronizedWithFEAP = false;
+
+                        document.RelatedReferenceNumber = documentResult.num_doc_rel;
+
+                        //salvaguarda para excepçoes de foreign key (o documento relacionado não existir)...
+                        if (await unitOfWork.Documents.Any(x => x.DocumentId == documentResult.id_doc_feap_rel))
+                            document.RelatedDocumentId = documentResult.id_doc_feap_rel;
+
+                        //Caso 2.1 - Nota de Crédito Válida (id 35)
+                        if (documentResult.state_id == "35")
+                        {
+                            document.StateId = DocumentStateEnum.Processado;
+                            document.StateDate = DateTime.Now;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(document));
+
+                            var relatedDocument = await unitOfWork.Documents.Find(x => x.DocumentId == document.RelatedDocumentId);
+
+                            if (relatedDocument != null)
+                            {
+                                relatedDocument.StateId = DocumentStateEnum.Processado;
+                                relatedDocument.StateDate = DateTime.Now;
+                                relatedDocument.IsSynchronizedWithFEAP = false;
+
+                                unitOfWork.Documents.Update(relatedDocument);
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
+                            }
+                        }
+
+                        //Caso 2.2 - Nota de Crédito Inválida (id 22)
+                        if (documentResult.state_id == "22")
+                        {
+                            document.StateId = DocumentStateEnum.Devolvido;
+                            document.StateDate = DateTime.Now;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(document, documentResult.reason));
+                        }
                     }
 
                     unitOfWork.Documents.Update(document);
@@ -357,13 +366,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     document.IsMEGA = false;
                     document.IsProcessed = true;
-                }
-
-                // 3.3 - Não foi encontrada fatura correspondente (status code 490)
-                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "490"))
-                {
-                    document.IsMEGA = true;
-                    document.IsProcessed = false;
                 }
 
                 unitOfWork.Documents.Update(document);

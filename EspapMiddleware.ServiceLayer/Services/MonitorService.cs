@@ -144,19 +144,19 @@ namespace EspapMiddleware.ServiceLayer.Services
                         MessageContent = docToSyncResult.msg_fat
                     });
 
-                    docToSync.IsMEGA = true;
-                    docToSync.IsProcessed = true;
-
-                    docToSync.MEId = docToSyncResult.id_me_fatura;
-
-                    if (!string.IsNullOrEmpty(docToSyncResult.num_compromisso))
-                        docToSync.CompromiseNumber = docToSyncResult.num_compromisso;
-
-                    docToSync.IsSynchronizedWithFEAP = false;
-
                     //2.1 - Processamento de faturas...
                     if (docToSync.TypeId == DocumentTypeEnum.Fatura)
                     {
+                        docToSync.IsMEGA = true;
+                        docToSync.IsProcessed = true;
+
+                        docToSync.MEId = docToSyncResult.id_me_fatura;
+
+                        if (!string.IsNullOrEmpty(docToSyncResult.num_compromisso))
+                            docToSync.CompromiseNumber = docToSyncResult.num_compromisso;
+
+                        docToSync.IsSynchronizedWithFEAP = false;
+
                         //Caso 2.1.1 - Fatura Válida (id 35)
                         if (docToSyncResult.state_id == "35")
                         {
@@ -183,39 +183,58 @@ namespace EspapMiddleware.ServiceLayer.Services
                     //2.2 - Processamento de nota de crédito...
                     if (docToSync.TypeId == DocumentTypeEnum.NotaCrédito)
                     {
-                        //Atualizar campos de referencia à fatura...
-                        docToSync.RelatedReferenceNumber = docToSyncResult.num_doc_rel;
-                        docToSync.RelatedDocumentId = docToSyncResult.id_doc_feap_rel;
-
-                        //Caso 2.2.1 - Nota de Crédito válida (id 35)
-                        if (docToSyncResult.state_id == "35")
+                        //Verificar se não foi encontrada fatura correspondente (status code 490)
+                        if (docToSyncResult.cod_msg_fat == "490")
                         {
-                            docToSync.StateId = DocumentStateEnum.Processado;
-                            docToSync.StateDate = DateTime.Now;
-
-                            unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
-
-                            var relatedDocument = await unitOfWork.Documents.Find(x => x.DocumentId == docToSync.RelatedDocumentId);
-
-                            if (relatedDocument != null)
-                            {
-                                relatedDocument.StateId = DocumentStateEnum.Processado;
-                                relatedDocument.StateDate = DateTime.Now;
-                                relatedDocument.IsSynchronizedWithFEAP = false;
-
-                                unitOfWork.Documents.Update(relatedDocument);
-
-                                unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
-                            }
+                            docToSync.IsMEGA = true;
+                            docToSync.IsProcessed = false;
                         }
-
-                        //Caso 2.2.2 - Nota de Crédito Inválida (id 22)
-                        if (docToSyncResult.state_id == "22")
+                        else
                         {
-                            docToSync.StateId = DocumentStateEnum.Devolvido;
-                            docToSync.StateDate = DateTime.Now;
+                            docToSync.IsMEGA = true;
+                            docToSync.IsProcessed = true;
 
-                            unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.reason));
+                            docToSync.MEId = docToSyncResult.id_me_fatura;
+
+                            if (!string.IsNullOrEmpty(docToSyncResult.num_compromisso))
+                                docToSync.CompromiseNumber = docToSyncResult.num_compromisso;
+
+                            docToSync.IsSynchronizedWithFEAP = false;
+
+                            //Atualizar campos de referencia à fatura...
+                            docToSync.RelatedReferenceNumber = docToSyncResult.num_doc_rel;
+                            docToSync.RelatedDocumentId = docToSyncResult.id_doc_feap_rel;
+
+                            //Caso 2.2.1 - Nota de Crédito válida (id 35)
+                            if (docToSyncResult.state_id == "35")
+                            {
+                                docToSync.StateId = DocumentStateEnum.Processado;
+                                docToSync.StateDate = DateTime.Now;
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
+
+                                var relatedDocument = await unitOfWork.Documents.Find(x => x.DocumentId == docToSync.RelatedDocumentId);
+
+                                if (relatedDocument != null)
+                                {
+                                    relatedDocument.StateId = DocumentStateEnum.Processado;
+                                    relatedDocument.StateDate = DateTime.Now;
+                                    relatedDocument.IsSynchronizedWithFEAP = false;
+
+                                    unitOfWork.Documents.Update(relatedDocument);
+
+                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
+                                }
+                            }
+
+                            //Caso 2.2.2 - Nota de Crédito Inválida (id 22)
+                            if (docToSyncResult.state_id == "22")
+                            {
+                                docToSync.StateId = DocumentStateEnum.Devolvido;
+                                docToSync.StateDate = DateTime.Now;
+
+                                unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.reason));
+                            }
                         }
 
                         unitOfWork.Documents.Update(docToSync);
@@ -242,13 +261,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     docToSync.IsMEGA = false;
                     docToSync.IsProcessed = true;
-                }
-
-                // 3.2 - Não foi encontrada fatura correspondente (status code 490)
-                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "490"))
-                {
-                    docToSync.IsMEGA = true;
-                    docToSync.IsProcessed = false;
                 }
 
                 unitOfWork.Documents.Update(docToSync);
@@ -350,7 +362,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                         var requestLogFile = await unitOfWork.RequestLogFiles.Find(x => x.Id == requestLog.RequestLogFileId);
                         unitOfWork.RequestLogFiles.Delete(requestLogFile);
                     }
-                        
+
                 }
 
                 unitOfWork.RequestLogs.DeleteRange(docToDelete.RequestLogs);
@@ -515,19 +527,19 @@ namespace EspapMiddleware.ServiceLayer.Services
                                 MessageContent = docToSyncResult.msg_fat
                             });
 
-                            docToSync.IsMEGA = true;
-                            docToSync.IsProcessed = true;
-
-                            docToSync.MEId = docToSyncResult.id_me_fatura;
-
-                            if (!string.IsNullOrEmpty(docToSyncResult.num_compromisso))
-                                docToSync.CompromiseNumber = docToSyncResult.num_compromisso;
-
-                            docToSync.IsSynchronizedWithFEAP = false;
-
                             //2.1 - Processamento de faturas...
                             if (docToSync.TypeId == DocumentTypeEnum.Fatura)
                             {
+                                docToSync.IsMEGA = true;
+                                docToSync.IsProcessed = true;
+
+                                docToSync.MEId = docToSyncResult.id_me_fatura;
+
+                                if (!string.IsNullOrEmpty(docToSyncResult.num_compromisso))
+                                    docToSync.CompromiseNumber = docToSyncResult.num_compromisso;
+
+                                docToSync.IsSynchronizedWithFEAP = false;
+
                                 //Caso 2.1.1 - Fatura Válida (id 35)
                                 if (docToSyncResult.state_id == "35")
                                 {
@@ -554,39 +566,58 @@ namespace EspapMiddleware.ServiceLayer.Services
                             //2.2 - Processamento de nota de crédito...
                             if (docToSync.TypeId == DocumentTypeEnum.NotaCrédito)
                             {
-                                //Atualizar campos de referencia à fatura...
-                                docToSync.RelatedReferenceNumber = docToSyncResult.num_doc_rel;
-                                docToSync.RelatedDocumentId = docToSyncResult.id_doc_feap_rel;
-
-                                //Caso 2.2.1 - Nota de Crédito válida (id 35)
-                                if (docToSyncResult.state_id == "35")
+                                //Verificar se não foi encontrada fatura correspondente(status code 490)
+                                if (docToSyncResult.cod_msg_fat == "490")
                                 {
-                                    docToSync.StateId = DocumentStateEnum.Processado;
-                                    docToSync.StateDate = DateTime.Now;
-
-                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
-
-                                    var relatedDocument = await unitOfWork.Documents.Find(x => x.DocumentId == docToSync.RelatedDocumentId);
-
-                                    if (relatedDocument != null)
-                                    {
-                                        relatedDocument.StateId = DocumentStateEnum.Processado;
-                                        relatedDocument.StateDate = DateTime.Now;
-                                        relatedDocument.IsSynchronizedWithFEAP = false;
-
-                                        unitOfWork.Documents.Update(relatedDocument);
-
-                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
-                                    }
+                                    docToSync.IsMEGA = true;
+                                    docToSync.IsProcessed = false;
                                 }
-
-                                //Caso 2.2.2 - Nota de Crédito Inválida (id 22)
-                                if (docToSyncResult.state_id == "22")
+                                else
                                 {
-                                    docToSync.StateId = DocumentStateEnum.Devolvido;
-                                    docToSync.StateDate = DateTime.Now;
+                                    docToSync.IsMEGA = true;
+                                    docToSync.IsProcessed = true;
 
-                                    unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.reason));
+                                    docToSync.MEId = docToSyncResult.id_me_fatura;
+
+                                    if (!string.IsNullOrEmpty(docToSyncResult.num_compromisso))
+                                        docToSync.CompromiseNumber = docToSyncResult.num_compromisso;
+
+                                    docToSync.IsSynchronizedWithFEAP = false;
+
+                                    //Atualizar campos de referencia à fatura...
+                                    docToSync.RelatedReferenceNumber = docToSyncResult.num_doc_rel;
+                                    docToSync.RelatedDocumentId = docToSyncResult.id_doc_feap_rel;
+
+                                    //Caso 2.2.1 - Nota de Crédito válida (id 35)
+                                    if (docToSyncResult.state_id == "35")
+                                    {
+                                        docToSync.StateId = DocumentStateEnum.Processado;
+                                        docToSync.StateDate = DateTime.Now;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync));
+
+                                        var relatedDocument = await unitOfWork.Documents.Find(x => x.DocumentId == docToSync.RelatedDocumentId);
+
+                                        if (relatedDocument != null)
+                                        {
+                                            relatedDocument.StateId = DocumentStateEnum.Processado;
+                                            relatedDocument.StateDate = DateTime.Now;
+                                            relatedDocument.IsSynchronizedWithFEAP = false;
+
+                                            unitOfWork.Documents.Update(relatedDocument);
+
+                                            unitOfWork.RequestLogs.Add(await RequestSetDocument(relatedDocument));
+                                        }
+                                    }
+
+                                    //Caso 2.2.2 - Nota de Crédito Inválida (id 22)
+                                    if (docToSyncResult.state_id == "22")
+                                    {
+                                        docToSync.StateId = DocumentStateEnum.Devolvido;
+                                        docToSync.StateDate = DateTime.Now;
+
+                                        unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, docToSyncResult.reason));
+                                    }
                                 }
 
                                 unitOfWork.Documents.Update(docToSync);
@@ -613,13 +644,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             docToSync.IsMEGA = false;
                             docToSync.IsProcessed = true;
-                        }
-
-                        // 3.2 - Não foi encontrada fatura correspondente (status code 490)
-                        if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "490"))
-                        {
-                            docToSync.IsMEGA = true;
-                            docToSync.IsProcessed = false;
                         }
 
                         unitOfWork.Documents.Update(docToSync);
@@ -789,7 +813,7 @@ namespace EspapMiddleware.ServiceLayer.Services
                             }
 
                             //Nota de Crédito Inválida (id 22)
-                            if (docToReprocessResult.state_id == "22")
+                            if (docToReprocessResult.state_id == "22" || docToReprocessResult.cod_msg_fat == "490")
                             {
                                 docToReprocess.StateId = DocumentStateEnum.Devolvido;
                                 docToReprocess.StateDate = DateTime.Now;
