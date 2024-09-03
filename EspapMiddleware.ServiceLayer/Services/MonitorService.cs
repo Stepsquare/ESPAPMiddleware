@@ -263,6 +263,16 @@ namespace EspapMiddleware.ServiceLayer.Services
                     docToSync.IsProcessed = true;
                 }
 
+                // 3.2 - Fatura ano letivo anterior (status code 410)
+                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
+                {
+                    docToSync.IsMEGA = false;
+                    docToSync.IsProcessed = true;
+
+                    docToSync.StateId = DocumentStateEnum.Devolvido;
+                    docToSync.StateDate = DateTime.Now;
+                }
+
                 unitOfWork.Documents.Update(docToSync);
 
                 await unitOfWork.SaveChangesAsync();
@@ -644,6 +654,18 @@ namespace EspapMiddleware.ServiceLayer.Services
                         {
                             docToSync.IsMEGA = false;
                             docToSync.IsProcessed = true;
+                        }
+
+                        // 3.2 - Fatura ano letivo anterior (status code 410)
+                        if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
+                        {
+                            docToSync.IsMEGA = false;
+                            docToSync.IsProcessed = true;
+
+                            docToSync.StateId = DocumentStateEnum.Devolvido;
+                            docToSync.StateDate = DateTime.Now;
+
+                            unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, setDocFaturacaoResponse.messages.FirstOrDefault(x => x.cod_msg == "410")?.msg));
                         }
 
                         unitOfWork.Documents.Update(docToSync);

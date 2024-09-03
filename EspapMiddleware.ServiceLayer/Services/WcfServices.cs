@@ -236,6 +236,18 @@ namespace EspapMiddleware.ServiceLayer.Services
                     document.IsProcessed = true;
                 }
 
+                // 3.2 - Fatura ano letivo anterior (status code 410)
+                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
+                {
+                    document.IsMEGA = false;
+                    document.IsProcessed = true;
+
+                    document.StateId = DocumentStateEnum.Devolvido;
+                    document.StateDate = DateTime.Now;
+
+                    unitOfWork.RequestLogs.Add(await RequestSetDocument(document, setDocFaturacaoResponse.messages.FirstOrDefault(x => x.cod_msg == "410")?.msg));
+                }
+
                 unitOfWork.Documents.Update(document);
 
                 await unitOfWork.SaveChangesAsync();
