@@ -123,6 +123,7 @@ namespace EspapMiddleware.DataLayer.Repositories
                                         && !x.IsProcessed)
                                 .OrderByDescending(x => x.CreatedOn)
                                 .Include(x => x.DocumentMessages)
+                                .Include(x => x.RequestLogs)
                                 .Skip((filters.PageIndex - 1) * filters.PageSize)
                                 .Take(filters.PageSize)
                                 .ToListAsync();

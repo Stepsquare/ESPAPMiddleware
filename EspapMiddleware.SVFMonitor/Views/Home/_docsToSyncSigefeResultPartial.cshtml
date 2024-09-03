@@ -29,7 +29,9 @@
                                     <td><a href="@Url.Action("Detail","Document", new { id = document.DocumentId } )"><i class="far fa-file-alt"></i> @document.DocumentId</a></td>
                                     <td>@document.TypeId.ToString()</td>
                                     @{
-                                        var lastSigefeMessage = document.DocumentMessages.OrderByDescending(x => x.Date).FirstOrDefault(x => x.MessageTypeId == DocumentMessageTypeEnum.SIGeFE);
+                                        var lastSigefeMessage = document.DocumentMessages
+                                                                .OrderByDescending(x => x.Date)
+                                                                .FirstOrDefault(x => x.MessageTypeId == DocumentMessageTypeEnum.SIGeFE);
 
                                         if (lastSigefeMessage != null)
                                         {
@@ -38,8 +40,20 @@
                                         }
                                         else
                                         {
-                                            <td></td>
-                                            <td></td>
+                                            var documentErrorLog = document.RequestLogs
+                                                                    .Where(x => x.RequestLogTypeId == RequestLogTypeEnum.SendDocument && !x.Successful)
+                                                                    .FirstOrDefault();
+
+                                            if (documentErrorLog != null)
+                                            {
+                                                <td>@documentErrorLog.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                                <td>@documentErrorLog.ExceptionType - @documentErrorLog.ExceptionMessage</td>
+                                            }
+                                            else
+                                            {
+                                                <td></td>
+                                                <td></td>
+                                            }
                                         }
                                     }
                                     <td>
