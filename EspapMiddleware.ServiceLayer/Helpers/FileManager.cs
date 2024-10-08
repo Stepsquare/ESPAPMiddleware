@@ -74,5 +74,12 @@ namespace EspapMiddleware.ServiceLayer.Helpers
                 File.Delete(path);
             }
         }
+
+        public static void DeleteFile(string service, string uniqueId)
+        {
+            string path = ConfigurationManager.AppSettings["LogDirectory"] + $@"\{service}\{uniqueId}.xml";
+
+            File.Delete(path);
+        }
     }
 }

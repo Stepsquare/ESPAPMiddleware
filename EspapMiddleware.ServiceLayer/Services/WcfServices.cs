@@ -52,13 +52,25 @@ namespace EspapMiddleware.ServiceLayer.Services
                     Successful = true,
                 };
 
+                
+
                 if (FileManager.FileExists(type.ToString(), uniqueId.ToString()))
                 {
-                    requestLog.RequestLogFile = new RequestLogFile
+                    Boolean.TryParse(ConfigurationManager.AppSettings["SaveSendDocumentRequestFile"], out bool saveSendDocumentFile);
+
+                    if (type != RequestLogTypeEnum.SendDocument
+                        || (type == RequestLogTypeEnum.SendDocument && saveSendDocumentFile))
                     {
-                        Content = FileManager.GetFile(type.ToString(), uniqueId.ToString()),
-                        ContentType = "application/xml"
-                    };
+                        requestLog.RequestLogFile = new RequestLogFile
+                        {
+                            Content = FileManager.GetFile(type.ToString(), uniqueId.ToString()),
+                            ContentType = "application/xml"
+                        };
+                    }
+                    else
+                    {
+                        FileManager.DeleteFile(type.ToString(), uniqueId.ToString());
+                    }
                 }
 
                 unitOfWork.RequestLogs.Add(requestLog);
