@@ -687,7 +687,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var GetDocFaturacaoResponse = await GetDocFaturacao("4");
+                var GetDocFaturacaoResponse = await GetDocFaturacao("5");
 
                 if (GetDocFaturacaoResponse == null)
                     throw new WebserviceException("Erro na chamada ao serviço de Faturação do SIGeFE.");
@@ -702,7 +702,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var GetDocFaturacaoResponse = await GetDocFaturacao("4");
+                var GetDocFaturacaoResponse = await GetDocFaturacao("5");
 
                 if (GetDocFaturacaoResponse == null)
                     throw new WebserviceException("Erro na chamada ao serviço de Faturação do SIGeFE.");
