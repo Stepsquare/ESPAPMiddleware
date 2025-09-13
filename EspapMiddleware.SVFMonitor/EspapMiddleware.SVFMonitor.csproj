@@ -142,7 +142,6 @@
     <Compile Include="Ioc\WindsorControllerFactory.cs" />
     <Compile Include="Models\ComboBoxViewModel.cs" />
     <Compile Include="Models\HomepageStatusPartialViewModel.cs" />
-    <Compile Include="Models\HomepageViewModel.cs" />
     <Compile Include="Models\PaginationPartialViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

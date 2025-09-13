@@ -45,7 +45,10 @@ namespace EspapMiddleware.WcfService
                 {
                     var insertedDocument = _service.AddDocument(request.SendDocumentMCIn).GetAwaiter().GetResult();
 
-                    if (insertedDocument.TypeId == DocumentTypeEnum.Fatura)
+                    if (insertedDocument.TypeId == DocumentTypeEnum.Fatura 
+                        || insertedDocument.TypeId == DocumentTypeEnum.FaturaSimplificada
+                        || insertedDocument.TypeId == DocumentTypeEnum.FaturaRecibo
+                        || insertedDocument.TypeId == DocumentTypeEnum.FaturaAdiantamento)
                         _service.ProcessInvoice(insertedDocument).GetAwaiter().GetResult();
 
                     if (insertedDocument.TypeId == DocumentTypeEnum.NotaCrédito)

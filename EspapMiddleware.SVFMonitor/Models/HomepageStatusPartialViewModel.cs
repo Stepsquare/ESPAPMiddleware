@@ -12,7 +12,6 @@ namespace EspapMiddleware.SVFMonitor.Models
         public int TotalMEGA { get; set; }
         public int TotalNotMEGA { get; set; }
         public int TotalNotSyncFeap { get; set; }
-        public bool IsCurrentSchoolYear { get; set; }
 
         public InvoiceStatusObject InvoiceStatus { get; set; }
         public CreditNoteStatusObject CreditNoteStatus { get; set; }

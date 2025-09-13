@@ -5,6 +5,7 @@ using EspapMiddleware.Shared.MonitorServiceModels.PaginationModels;
 using EspapMiddleware.SVFMonitor.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -16,31 +17,50 @@ namespace EspapMiddleware.SVFMonitor.Controllers
     public class HomeController : Controller
     {
         private readonly IMonitorServices _monitorServices;
+        private readonly string _anoLetivoAtual;
 
         public HomeController(IMonitorServices monitorServices)
         {
             _monitorServices = monitorServices;
+            _anoLetivoAtual = ConfigurationManager.AppSettings["AnoLetivoAtual"];
         }
 
         #region Views
 
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
-            var getFaseResponse = await _monitorServices.GetFase();
+            return View();
+        }
 
-            var schoolYears = new Dictionary<string, string>
+        public async Task<PartialViewResult> GetGlobalStatus()
+        {
+            var model = new HomepageStatusPartialViewModel
             {
-                { getFaseResponse.id_ano_letivo_atual, getFaseResponse.des_id_ano_letivo_atual },
-                { getFaseResponse.id_ano_letivo_anterior, getFaseResponse.des_id_ano_letivo_anterior}
+                Total = await _monitorServices.GetTotalDocument(),
+                TotalUnprocessed = await _monitorServices.GetTotalUnprocessedDocument(),
+                TotalMEGA = await _monitorServices.GetTotalMEGADocument(),
+                TotalNotMEGA = await _monitorServices.GetTotalNotMEGADocument(),
+                TotalNotSyncFeap = await _monitorServices.GetTotalDocumentsToSyncFeap(),
+                InvoiceStatus = new HomepageStatusPartialViewModel.InvoiceStatusObject
+                {
+                    Total = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.Fatura, DocumentTypeEnum.FaturaSimplificada, DocumentTypeEnum.FaturaRecibo, DocumentTypeEnum.FaturaAdiantamento }),
+                    Validated = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.Fatura, DocumentTypeEnum.FaturaSimplificada, DocumentTypeEnum.FaturaRecibo, DocumentTypeEnum.FaturaAdiantamento }, DocumentStateEnum.ValidadoConferido),
+                    ValidatedToSync = await _monitorServices.GetTotalPaidDocsToSync(),
+                    Paid = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.Fatura, DocumentTypeEnum.FaturaSimplificada, DocumentTypeEnum.FaturaRecibo, DocumentTypeEnum.FaturaAdiantamento }, DocumentStateEnum.EmitidoPagamento),
+                    PendingRegularization = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.Fatura, DocumentTypeEnum.FaturaSimplificada, DocumentTypeEnum.FaturaRecibo, DocumentTypeEnum.FaturaAdiantamento }, DocumentStateEnum.Iniciado, DocumentActionEnum.SolicitaçãoDocumentoRegularização),
+                    Regularized = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.Fatura, DocumentTypeEnum.FaturaSimplificada, DocumentTypeEnum.FaturaRecibo, DocumentTypeEnum.FaturaAdiantamento }, DocumentStateEnum.Processado),
+                    Returned = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.Fatura, DocumentTypeEnum.FaturaSimplificada, DocumentTypeEnum.FaturaRecibo, DocumentTypeEnum.FaturaAdiantamento }, DocumentStateEnum.Devolvido)
+                },
+                CreditNoteStatus = new HomepageStatusPartialViewModel.CreditNoteStatusObject
+                {
+                    Total = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.NotaCrédito }),
+                    Unprocessed = await _monitorServices.GetTotalCreditNotesToReprocess(),
+                    Processed = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.NotaCrédito }, DocumentStateEnum.Processado),
+                    Returned = await _monitorServices.GetTotalMEGADocumentsByType(new[] { DocumentTypeEnum.NotaCrédito }, DocumentStateEnum.Devolvido)
+                }
             };
 
-            var model = new HomepageViewModel
-            {
-                SchoolYears = schoolYears,
-                CurrentSchoolYear = getFaseResponse.id_ano_letivo_atual
-            };
-
-            return View(model);
+            return PartialView("_homepageStatusPartial", model);
         }
 
         #endregion
@@ -48,46 +68,11 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         #region Requests
 
         [HttpPost]
-        public async Task<PartialViewResult> GetGlobalStatus(string anoLetivo)
-        {
-            var getFaseResponse = await _monitorServices.GetFase();
-
-            var model = new HomepageStatusPartialViewModel
-            {
-                Total = await _monitorServices.GetTotalDocument(anoLetivo),
-                TotalUnprocessed = await _monitorServices.GetTotalUnprocessedDocument(anoLetivo),
-                TotalMEGA = await _monitorServices.GetTotalMEGADocument(anoLetivo),
-                TotalNotMEGA = await _monitorServices.GetTotalNotMEGADocument(anoLetivo),
-                TotalNotSyncFeap = await _monitorServices.GetTotalDocumentsToSyncFeap(anoLetivo),
-                IsCurrentSchoolYear = getFaseResponse.id_ano_letivo_atual == anoLetivo,
-                InvoiceStatus = new HomepageStatusPartialViewModel.InvoiceStatusObject
-                {
-                    Total = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura),
-                    Validated = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.ValidadoConferido),
-                    ValidatedToSync = await _monitorServices.GetTotalPaidDocsToSync(),
-                    Paid = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.EmitidoPagamento),
-                    PendingRegularization = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Iniciado, DocumentActionEnum.SolicitaçãoDocumentoRegularização),
-                    Regularized = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Processado),
-                    Returned = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.Fatura, DocumentStateEnum.Devolvido)
-                },
-                CreditNoteStatus = new HomepageStatusPartialViewModel.CreditNoteStatusObject
-                {
-                    Total = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito),
-                    Unprocessed = await _monitorServices.GetTotalCreditNotesToReprocess(),
-                    Processed = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito, DocumentStateEnum.Processado),
-                    Returned = await _monitorServices.GetTotalMEGADocumentsByType(anoLetivo, DocumentTypeEnum.NotaCrédito, DocumentStateEnum.Devolvido)
-                }
-            };
-
-            return PartialView("_homepageStatusPartial", model);
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> SyncAllDocumentsFeap(string anoLetivo)
+        public async Task<JsonResult> SyncAllDocumentsFeap()
         {
             try
             {
-                await _monitorServices.SyncAllDocumentsFeap(anoLetivo);
+                await _monitorServices.SyncAllDocumentsFeap();
 
                 return Json(new
                 {

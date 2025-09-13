@@ -5,6 +5,7 @@ using EspapMiddleware.Shared.WebServiceModels;
 using EspapMiddleware.SVFMonitor.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -185,14 +186,11 @@ namespace EspapMiddleware.SVFMonitor.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetSchoolYears()
+        public JsonResult GetSchoolYears()
         {
-            var getFaseResponse = await _monitorServices.GetFase();
-
             var schoolYears = new Dictionary<string, string>
             {
-                { getFaseResponse.id_ano_letivo_atual, getFaseResponse.des_id_ano_letivo_atual },
-                { getFaseResponse.id_ano_letivo_anterior, getFaseResponse.des_id_ano_letivo_anterior}
+                { ConfigurationManager.AppSettings["AnoLetivoAtual"], string.Concat("20", ConfigurationManager.AppSettings["AnoLetivoAtual"].Insert(2, "/20")) }
             };
 
             return Json(schoolYears.Select(year => new ComboBoxViewModel()

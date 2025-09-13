@@ -38,13 +38,13 @@ namespace EspapMiddleware.Shared.Interfaces.IServices
 
         #region Homepage
 
-        Task<int> GetTotalDocument(string anoLetivo);
-        Task<int> GetTotalDocumentsToSyncFeap(string anoLetivo);
-        Task<int> GetTotalUnprocessedDocument(string anoLetivo);
-        Task<int> GetTotalMEGADocument(string anoLetivo);
-        Task<int> GetTotalNotMEGADocument(string anoLetivo);
-        Task<int> GetTotalMEGADocumentsByType(string anoLetivo, DocumentTypeEnum typeId, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null);
-        Task SyncAllDocumentsFeap(string anoLetivo);
+        Task<int> GetTotalDocument();
+        Task<int> GetTotalDocumentsToSyncFeap();
+        Task<int> GetTotalUnprocessedDocument();
+        Task<int> GetTotalMEGADocument();
+        Task<int> GetTotalNotMEGADocument();
+        Task<int> GetTotalMEGADocumentsByType(DocumentTypeEnum[] types, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null);
+        Task SyncAllDocumentsFeap();
         Task<PaginatedResult<Document>> GetDocsToSyncSigefe(PaginatedSearchFilter filters);
         Task SyncDocumentsSigefe(string documentId = null);
         Task<int> GetTotalPaidDocsToSync();

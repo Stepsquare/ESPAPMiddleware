@@ -15,6 +15,12 @@ namespace EspapMiddleware.Shared.Enums
         [EnumMember(Value = "2")]
         NotaCrédito = 2,
         [EnumMember(Value = "3")]
-        NotaDébito = 3
+        NotaDébito = 3,
+        [EnumMember(Value = "4")]
+        FaturaAdiantamento = 4,
+        [EnumMember(Value = "5")]
+        FaturaSimplificada = 5,
+        [EnumMember(Value = "6")]
+        FaturaRecibo = 6
     }
 }

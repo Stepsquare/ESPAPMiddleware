@@ -1,9 +1,10 @@
-﻿@model HomepageViewModel
+﻿@using System.Configuration
 
-@{
-    ViewBag.Title = "Página Inicial";
+@{ 
+    string _anoLetivoAtual = string.Concat("20", ConfigurationManager.AppSettings["AnoLetivoAtual"].Insert(2, "/20"));
+
+    ViewBag.Title = $"Página Inicial - {_anoLetivoAtual}";
 }
-
 
 <div class="row">
     <div class="col-md-12">
@@ -13,27 +14,6 @@
                     <h2>@ViewBag.Title</h2>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="form-group">
-    <div class="form-inline">
-        <div class="form-group">
-            <label class="control-label">Ano letivo:</label>
-            <select class="form-control" id="school_year">
-                @foreach (var year in Model.SchoolYears)
-                {
-                    if (year.Key == Model.CurrentSchoolYear)
-                    {
-                        <option value="@year.Key" selected>@year.Value</option>
-                    }
-                    else
-                    {
-                        <option value="@year.Key">@year.Value</option>
-                    }
-                }
-            </select>
         </div>
     </div>
 </div>
@@ -56,10 +36,6 @@
 <script>
     $(document).ready(function () {
         refreshGlobalStatus();
-
-        $('#school_year').on('change', function () {
-            refreshGlobalStatus();
-        });
     });
 
     function refreshGlobalStatus() {
@@ -67,24 +43,17 @@
 
         $.ajax({
             url: '@Url.Action("GetGlobalStatus", "Home")',
-            type: "POST",
-            data: {
-                anoLetivo: $('#school_year').val(),
-            },
+            type: "GET",
             success: function (data) {
                 $('#global_status_container').html(data);
 
-                if ('@Model.CurrentSchoolYear' == $('#school_year').val())
-                    getToSyncSigefeDocuments();
+                getToSyncSigefeDocuments();
             },
             error: function () {
                 ShowErrorModal(["Ocorreu um erro."]);
             },
             complete: function () {
-                if ('@Model.CurrentSchoolYear' == $('#school_year').val())
-                    getToSyncSigefeDocuments();
-                else
-                    HideLoadingModal();
+                getToSyncSigefeDocuments();
             }
         });
     }
@@ -96,9 +65,6 @@
             $.ajax({
                 url: '@Url.Action("SyncAllDocumentsFeap", "Home")',
                 type: "POST",
-                data: {
-                    anoLetivo: $('#school_year').val()
-                },
                 success: function (data) {
                     if (data.statusCode == 200) {
                         ShowSucessModal(data.messages, function () {

@@ -52,8 +52,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                     Successful = true,
                 };
 
-                
-
                 if (FileManager.FileExists(type.ToString(), uniqueId.ToString()))
                 {
                     Boolean.TryParse(ConfigurationManager.AppSettings["SaveSendDocumentRequestFile"], out bool saveSendDocumentFile);
@@ -130,12 +128,13 @@ namespace EspapMiddleware.ServiceLayer.Services
                 //Preencher documento com dados do contrato...
                 FillWithContract(in contract, ref documentToAdd);
 
-                //Notas de debito são ignoradas e marcadas como processadas...
-                if (contract.documentType == DocumentTypeEnum.NotaDébito)
+                //Todos os documentos que não são fatura e Nota de Crédito são marcados como processados e ignorados...
+                if (contract.documentType != DocumentTypeEnum.Fatura
+                    && contract.documentType != DocumentTypeEnum.FaturaSimplificada
+                    && contract.documentType != DocumentTypeEnum.FaturaRecibo
+                    && contract.documentType != DocumentTypeEnum.FaturaAdiantamento
+                    && contract.documentType != DocumentTypeEnum.NotaCrédito)
                     documentToAdd.IsProcessed = true;
-
-                //Chamar getFase para ir buscar o ano letivo atual para update ao campo school year do documento inserido...
-                documentToAdd.SchoolYear = _genericRestRequestManager.Get<GetFaseResponse>("getFase").Result?.id_ano_letivo_atual;
 
                 //Adicionar documento na BD e fazer commit transação...
                 unitOfWork.Documents.Add(documentToAdd);
@@ -153,10 +152,6 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                //Verificar se ano letivo foi preenchido (se não estiver interrompe o processo e deixa o documento por processar)...
-                if (string.IsNullOrEmpty(document.SchoolYear))
-                    throw new WebserviceException("Erro na chamada ao webservice getFase. Ano létivo não preenchido.");
-
                 //Chamar setDocFaturacao
                 var setDocFaturacaoResponse = await RequestSetDocFaturacao(document);
 
@@ -231,33 +226,25 @@ namespace EspapMiddleware.ServiceLayer.Services
                 }
 
                 //Caso 3 - Restantes respostas...
-                //Adicionar message com a resposta...
-                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                //Adicionar menssagens de resposta do serviço setDocFaturacao...
+                foreach (var message in setDocFaturacaoResponse.messages)
                 {
-                    DocumentId = document.DocumentId,
-                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                    Date = DateTime.Now,
-                    MessageCode = setDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
-                    MessageContent = setDocFaturacaoResponse.messages.FirstOrDefault()?.msg
-                });
-
-                // 3.1 - Nif inválido (não é fornecedor MEGA,  status code 422)
-                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422"))
-                {
-                    document.IsMEGA = false;
-                    document.IsProcessed = true;
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = document.DocumentId,
+                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                        Date = DateTime.Now,
+                        MessageCode = message.cod_msg,
+                        MessageContent = message.msg
+                    });
                 }
 
-                // 3.2 - Fatura ano letivo anterior (status code 410)
-                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
+                // 3.1 - Nif inválido (statusCode 422); Fatura ano letivo anterior (statusCode 410)
+                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422")
+                    || setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
                 {
                     document.IsMEGA = false;
                     document.IsProcessed = true;
-
-                    document.StateId = DocumentStateEnum.Devolvido;
-                    document.StateDate = DateTime.Now;
-
-                    unitOfWork.RequestLogs.Add(await RequestSetDocument(document, setDocFaturacaoResponse.messages.FirstOrDefault(x => x.cod_msg == "410")?.msg));
                 }
 
                 unitOfWork.Documents.Update(document);
@@ -270,10 +257,6 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                //Verificar se ano letivo foi preenchido (se não estiver interrompe o processo e deixa o documento por processar)...
-                if (string.IsNullOrEmpty(document.SchoolYear))
-                    throw new WebserviceException("Erro na chamada ao webservice getFase. Ano létivo não preenchido.");
-
                 //Chamar setDocFaturacao 
                 var setDocFaturacaoResponse = await RequestSetDocFaturacao(document);
 
@@ -375,18 +358,23 @@ namespace EspapMiddleware.ServiceLayer.Services
                 }
 
                 //Caso 3 - Restantes respostas...
-                //Adicionar message com a resposta...
-                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                //Adicionar menssagens de resposta do serviço setDocFaturacao...
+                foreach (var message in setDocFaturacaoResponse.messages)
                 {
-                    DocumentId = document.DocumentId,
-                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                    Date = DateTime.Now,
-                    MessageCode = setDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
-                    MessageContent = setDocFaturacaoResponse.messages.FirstOrDefault()?.msg
-                });
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = document.DocumentId,
+                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                        Date = DateTime.Now,
+                        MessageCode = message.cod_msg,
+                        MessageContent = message.msg
+                    });
+                }
 
-                // 3.1 - Nif inválido (não é fornecedor MEGA,  status code 422)
-                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422"))
+
+                // 3.1 - Nif inválido (statusCode 422); Fatura ano letivo anterior (statusCode 410)
+                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422")
+                    || setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
                 {
                     document.IsMEGA = false;
                     document.IsProcessed = true;
@@ -530,6 +518,9 @@ namespace EspapMiddleware.ServiceLayer.Services
                                 switch (document.TypeId)
                                 {
                                     case DocumentTypeEnum.Fatura:
+                                    case DocumentTypeEnum.FaturaAdiantamento:
+                                    case DocumentTypeEnum.FaturaSimplificada:
+                                    case DocumentTypeEnum.FaturaRecibo:
                                         setDocumentRequest.regularization = 2;
                                         break;
                                     case DocumentTypeEnum.NotaCrédito:
@@ -631,6 +622,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         private static void FillWithContract(in SendDocumentContract contract, ref Document obj)
         {
             obj.DocumentId = contract.documentId;
+            obj.SchoolYear = ConfigurationManager.AppSettings["AnoLetivoAtual"];
             obj.ReferenceNumber = contract.referenceNumber;
             obj.RelatedReferenceNumber = contract.RelatedReferenceNumber;
             obj.TypeId = contract.documentType;
@@ -689,7 +681,7 @@ namespace EspapMiddleware.ServiceLayer.Services
             }
         }
 
-        private void FillWithDocument(in Document document, ref SetDocFaturacao obj)
+        private static void FillWithDocument(in Document document, ref SetDocFaturacao obj)
         {
             obj.id_ano_letivo = document.SchoolYear;
 
@@ -709,6 +701,9 @@ namespace EspapMiddleware.ServiceLayer.Services
             switch (document.TypeId)
             {
                 case DocumentTypeEnum.Fatura:
+                case DocumentTypeEnum.FaturaSimplificada:
+                case DocumentTypeEnum.FaturaRecibo:
+                case DocumentTypeEnum.FaturaAdiantamento:
                     faturaToSend.tp_doc = "FAT";
                     break;
                 case DocumentTypeEnum.NotaCrédito:

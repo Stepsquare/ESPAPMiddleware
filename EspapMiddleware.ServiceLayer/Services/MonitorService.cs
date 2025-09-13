@@ -24,11 +24,13 @@ namespace EspapMiddleware.ServiceLayer.Services
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly IGenericRestRequestManager _genericRestRequestManager;
+        private readonly string _anoLetivoAtual;
 
         public MonitorService(IUnitOfWorkFactory unitOfWorkFactory, IGenericRestRequestManager genericRestRequestManager)
         {
             _unitOfWorkFactory = unitOfWorkFactory;
             _genericRestRequestManager = genericRestRequestManager;
+            _anoLetivoAtual = ConfigurationManager.AppSettings["AnoLetivoAtual"];
         }
 
         public async Task<GetFaseResponse> GetFase()
@@ -118,12 +120,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                 if (docToSync.IsProcessed)
                     throw new Exception("Documento já se encontra processado.");
 
-                if (string.IsNullOrEmpty(docToSync.SchoolYear))
-                {
-                    var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-                    docToSync.SchoolYear = getFaseResponse?.id_ano_letivo_atual;
-                }
-
                 var setDocFaturacaoResponse = await RequestSetDocFaturacao(docToSync);
 
                 //Caso 1 - Indisponibilidade do serviço
@@ -145,7 +141,10 @@ namespace EspapMiddleware.ServiceLayer.Services
                     });
 
                     //2.1 - Processamento de faturas...
-                    if (docToSync.TypeId == DocumentTypeEnum.Fatura)
+                    if (docToSync.TypeId == DocumentTypeEnum.Fatura 
+                        || docToSync.TypeId == DocumentTypeEnum.FaturaSimplificada 
+                        || docToSync.TypeId == DocumentTypeEnum.FaturaRecibo 
+                        || docToSync.TypeId == DocumentTypeEnum.FaturaAdiantamento)
                     {
                         docToSync.IsMEGA = true;
                         docToSync.IsProcessed = true;
@@ -247,30 +246,23 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                 //Caso 3 - Restantes respostas...
                 //Adicionar message com a resposta...
-                unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                foreach (var message in setDocFaturacaoResponse.messages)
                 {
-                    DocumentId = docToSync.DocumentId,
-                    MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                    Date = DateTime.Now,
-                    MessageCode = setDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
-                    MessageContent = setDocFaturacaoResponse.messages.FirstOrDefault()?.msg
-                });
-
-                // 3.1 - Nif inválido (não é fornecedor MEGA,  status code 422)
-                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422"))
-                {
-                    docToSync.IsMEGA = false;
-                    docToSync.IsProcessed = true;
+                    unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                    {
+                        DocumentId = docToSync.DocumentId,
+                        MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                        Date = DateTime.Now,
+                        MessageCode = message.cod_msg,
+                        MessageContent = message.msg
+                    });
                 }
 
-                // 3.2 - Fatura ano letivo anterior (status code 410)
-                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
+                // 3.1 - Nif inválido (não é fornecedor MEGA,  status code 422) ou fatura ano letivo anterior (status code 410)
+                if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422") || setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
                 {
                     docToSync.IsMEGA = false;
                     docToSync.IsProcessed = true;
-
-                    docToSync.StateId = DocumentStateEnum.Devolvido;
-                    docToSync.StateDate = DateTime.Now;
                 }
 
                 unitOfWork.Documents.Update(docToSync);
@@ -401,53 +393,53 @@ namespace EspapMiddleware.ServiceLayer.Services
 
         #region Homepage
 
-        public async Task<int> GetTotalDocument(string anoLetivo)
+        public async Task<int> GetTotalDocument()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo);
+                return await unitOfWork.Documents.Count(x => x.SchoolYear == _anoLetivoAtual);
         }
 
-        public async Task<int> GetTotalDocumentsToSyncFeap(string anoLetivo)
+        public async Task<int> GetTotalDocumentsToSyncFeap()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.Documents.GetDocumentsToSyncFeapCount(anoLetivo);
+                return await unitOfWork.Documents.GetDocumentsToSyncFeapCount(_anoLetivoAtual);
         }
 
-        public async Task<int> GetTotalUnprocessedDocument(string anoLetivo)
+        public async Task<int> GetTotalUnprocessedDocument()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.Documents.Count(x => !x.IsMEGA && !x.IsProcessed && x.SchoolYear == anoLetivo);
+                return await unitOfWork.Documents.Count(x => !x.IsMEGA && !x.IsProcessed && x.SchoolYear == _anoLetivoAtual);
         }
 
-        public async Task<int> GetTotalMEGADocument(string anoLetivo)
+        public async Task<int> GetTotalMEGADocument()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo && x.IsMEGA);
+                return await unitOfWork.Documents.Count(x => x.SchoolYear == _anoLetivoAtual && x.IsMEGA);
         }
 
-        public async Task<int> GetTotalNotMEGADocument(string anoLetivo)
+        public async Task<int> GetTotalNotMEGADocument()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo && !x.IsMEGA && x.IsProcessed);
+                return await unitOfWork.Documents.Count(x => x.SchoolYear == _anoLetivoAtual && !x.IsMEGA && x.IsProcessed);
         }
 
-        public async Task<int> GetTotalMEGADocumentsByType(string anoLetivo, DocumentTypeEnum typeId, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null)
+        public async Task<int> GetTotalMEGADocumentsByType(DocumentTypeEnum[] types, DocumentStateEnum? stateId = null, DocumentActionEnum? actionId = null)
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
-                return await unitOfWork.Documents.Count(x => x.SchoolYear == anoLetivo
+                return await unitOfWork.Documents.Count(x => x.SchoolYear == _anoLetivoAtual
                                                         && x.IsMEGA
-                                                        && x.TypeId == typeId
+                                                        && types.Contains(x.TypeId)
                                                         && (!actionId.HasValue || x.ActionId == actionId.Value)
                                                         && (!stateId.HasValue || x.StateId == stateId.Value));
         }
 
-        public async Task SyncAllDocumentsFeap(string anoLetivo)
+        public async Task SyncAllDocumentsFeap()
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
                 var errors = new List<string>();
 
-                var docsToSync = await unitOfWork.Documents.GetDocumentsToSyncFeap(anoLetivo);
+                var docsToSync = await unitOfWork.Documents.GetDocumentsToSyncFeap(_anoLetivoAtual);
 
                 foreach (var doc in docsToSync)
                 {
@@ -482,17 +474,12 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-
-                if (getFaseResponse == null)
-                    throw new Exception("Ano letivo não disponível.");
-
                 return new PaginatedResult<Document>()
                 {
                     PageIndex = filters.PageIndex,
                     PageSize = filters.PageSize,
-                    TotalCount = await unitOfWork.Documents.GetDocsToSyncSigefeCount(getFaseResponse.id_ano_letivo_atual),
-                    Data = await unitOfWork.Documents.GetPaginatedDocsToSyncSigefe(getFaseResponse.id_ano_letivo_atual, filters),
+                    TotalCount = await unitOfWork.Documents.GetDocsToSyncSigefeCount(_anoLetivoAtual),
+                    Data = await unitOfWork.Documents.GetPaginatedDocsToSyncSigefe(_anoLetivoAtual, filters),
                 };
             }
         }
@@ -501,12 +488,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-
-                if (getFaseResponse == null)
-                    throw new Exception("Ano letivo não disponível.");
-
-                var docsToSyncSigefe = await unitOfWork.Documents.GetDocsToSyncSigefe(getFaseResponse.id_ano_letivo_atual, documentId);
+                var docsToSyncSigefe = await unitOfWork.Documents.GetDocsToSyncSigefe(_anoLetivoAtual, documentId);
 
                 var errors = new List<string>();
 
@@ -514,9 +496,6 @@ namespace EspapMiddleware.ServiceLayer.Services
                 {
                     try
                     {
-                        if (string.IsNullOrEmpty(docToSync.SchoolYear))
-                            docToSync.SchoolYear = getFaseResponse?.id_ano_letivo_atual;
-
                         var setDocFaturacaoResponse = await RequestSetDocFaturacao(docToSync);
 
                         //Caso 1 - Indisponibilidade do serviço
@@ -538,7 +517,10 @@ namespace EspapMiddleware.ServiceLayer.Services
                             });
 
                             //2.1 - Processamento de faturas...
-                            if (docToSync.TypeId == DocumentTypeEnum.Fatura)
+                            if (docToSync.TypeId == DocumentTypeEnum.Fatura 
+                                || docToSync.TypeId == DocumentTypeEnum.FaturaSimplificada 
+                                || docToSync.TypeId == DocumentTypeEnum.FaturaRecibo 
+                                || docToSync.TypeId == DocumentTypeEnum.FaturaAdiantamento)
                             {
                                 docToSync.IsMEGA = true;
                                 docToSync.IsProcessed = true;
@@ -640,32 +622,24 @@ namespace EspapMiddleware.ServiceLayer.Services
 
                         //Caso 3 - Restantes respostas...
                         //Adicionar message com a resposta...
-                        unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                        foreach (var message in setDocFaturacaoResponse.messages)
                         {
-                            DocumentId = docToSync.DocumentId,
-                            MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
-                            Date = DateTime.Now,
-                            MessageCode = setDocFaturacaoResponse.messages.FirstOrDefault()?.cod_msg,
-                            MessageContent = setDocFaturacaoResponse.messages.FirstOrDefault()?.msg
-                        });
-
-                        // 3.1 - Nif inválido (não é fornecedor MEGA,  status code 422)
-                        if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422"))
-                        {
-                            docToSync.IsMEGA = false;
-                            docToSync.IsProcessed = true;
+                            unitOfWork.DocumentMessages.Add(new DocumentMessage()
+                            {
+                                DocumentId = docToSync.DocumentId,
+                                MessageTypeId = DocumentMessageTypeEnum.SIGeFE,
+                                Date = DateTime.Now,
+                                MessageCode = message.cod_msg,
+                                MessageContent = message.msg
+                            });
                         }
 
-                        // 3.2 - Fatura ano letivo anterior (status code 410)
-                        if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
+
+                        // 3.1 - Nif inválido (não é fornecedor MEGA,  status code 422) ou fatura ano letivo anterior (status code 410)
+                        if (setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "422") || setDocFaturacaoResponse.messages.Any(x => x.cod_msg == "410"))
                         {
                             docToSync.IsMEGA = false;
                             docToSync.IsProcessed = true;
-
-                            docToSync.StateId = DocumentStateEnum.Devolvido;
-                            docToSync.StateDate = DateTime.Now;
-
-                            unitOfWork.RequestLogs.Add(await RequestSetDocument(docToSync, setDocFaturacaoResponse.messages.FirstOrDefault(x => x.cod_msg == "410")?.msg));
                         }
 
                         unitOfWork.Documents.Update(docToSync);
@@ -749,9 +723,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-
-                return await unitOfWork.Documents.GetCreditNotesToReprocessCount(getFaseResponse.id_ano_letivo_atual);
+                return await unitOfWork.Documents.GetCreditNotesToReprocessCount(_anoLetivoAtual);
             }
         }
 
@@ -759,12 +731,7 @@ namespace EspapMiddleware.ServiceLayer.Services
         {
             using (var unitOfWork = _unitOfWorkFactory.Create())
             {
-                var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-
-                if (getFaseResponse == null)
-                    throw new Exception("Ano letivo não disponível.");
-
-                var docsToReprocess = await unitOfWork.Documents.GetCreditNotesToReprocess(getFaseResponse.id_ano_letivo_atual);
+                var docsToReprocess = await unitOfWork.Documents.GetCreditNotesToReprocess(_anoLetivoAtual);
 
                 var errors = new List<string>();
 
@@ -866,13 +833,11 @@ namespace EspapMiddleware.ServiceLayer.Services
 
         private async Task<GetDocFaturacaoResponse> GetDocFaturacao(string estado_doc, string nif = null, string id_doc_feap = null)
         {
-            var headers = new Dictionary<string, string>();
-
-            var getFaseResponse = await _genericRestRequestManager.Get<GetFaseResponse>("getFase");
-
-            headers.Add("id_ano_letivo", getFaseResponse?.id_ano_letivo_atual);
-
-            headers.Add("estado_doc", estado_doc);
+            var headers = new Dictionary<string, string>
+            {
+                { "id_ano_letivo", _anoLetivoAtual },
+                { "estado_doc", estado_doc }
+            };
 
             if (!string.IsNullOrEmpty(nif))
                 headers.Add("nif", nif);
@@ -932,6 +897,9 @@ namespace EspapMiddleware.ServiceLayer.Services
                                 switch (document.TypeId)
                                 {
                                     case DocumentTypeEnum.Fatura:
+                                    case DocumentTypeEnum.FaturaAdiantamento:
+                                    case DocumentTypeEnum.FaturaSimplificada:
+                                    case DocumentTypeEnum.FaturaRecibo:
                                         setDocumentRequest.regularization = 2;
                                         break;
                                     case DocumentTypeEnum.NotaCrédito:
@@ -1059,6 +1027,9 @@ namespace EspapMiddleware.ServiceLayer.Services
             switch (document.TypeId)
             {
                 case DocumentTypeEnum.Fatura:
+                case DocumentTypeEnum.FaturaSimplificada:
+                case DocumentTypeEnum.FaturaRecibo:
+                case DocumentTypeEnum.FaturaAdiantamento:
                     faturaToSend.tp_doc = "FAT";
                     break;
                 case DocumentTypeEnum.NotaCrédito:
